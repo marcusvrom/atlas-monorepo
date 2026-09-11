@@ -1,3 +1,4 @@
+import { formatWeight } from '../../lib/format-weight';
 import { useId, useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import Svg, { Circle, Defs, LinearGradient, Line, Path, Stop } from 'react-native-svg';
@@ -27,6 +28,10 @@ export function MetricChart({ series, label }: { series: MetricSeries; label: st
   const uid = useId().replace(/:/g, '');
   const areaId = 'metric-area-' + uid;
   const { box } = geometry;
+  const display = (value: number | null | undefined) =>
+    series.unit === 'kg'
+      ? formatWeight(value)
+      : (value?.toLocaleString('pt-BR', { maximumFractionDigits: 2 }) ?? '—');
 
   return (
     <View
@@ -36,7 +41,7 @@ export function MetricChart({ series, label }: { series: MetricSeries; label: st
       accessibilityLabel={
         label +
         ': ' +
-        (latest?.smoothed ?? latest?.raw ?? 0).toLocaleString('pt-BR') +
+        display(latest?.smoothed ?? latest?.raw) +
         ' ' +
         series.unit +
         '. ' +
@@ -45,7 +50,7 @@ export function MetricChart({ series, label }: { series: MetricSeries; label: st
     >
       <Text weight="bold">{label}</Text>
       <Text variant="display" weight="bold">
-        {(latest?.smoothed ?? latest?.raw)?.toLocaleString('pt-BR') ?? '—'} {series.unit}
+        {display(latest?.smoothed ?? latest?.raw)} {series.unit}
       </Text>
       <Svg
         viewBox={`0 0 ${box.width} ${box.height}`}
@@ -128,11 +133,7 @@ export function MetricChart({ series, label }: { series: MetricSeries; label: st
       </View>
       <Text variant="subhead" tone="secondary">
         {t('dashboardTrend')}:{' '}
-        {series.trendPerWeek === null
-          ? '—'
-          : series.trendPerWeek.toLocaleString('pt-BR', { maximumFractionDigits: 2 }) +
-            ' ' +
-            series.unit}
+        {series.trendPerWeek === null ? '—' : display(series.trendPerWeek) + ' ' + series.unit}
       </Text>
       <Text variant="footnote" tone="secondary">
         {t('chartLegend')}

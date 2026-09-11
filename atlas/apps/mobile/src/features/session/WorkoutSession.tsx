@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Alert, ScrollView, StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { useRouter, useNavigation } from 'expo-router';
 import { usePreventRemove } from 'expo-router/react-navigation';
 import { useKeepAwake } from 'expo-keep-awake';
@@ -14,6 +14,7 @@ import {
   ErrorState,
   LoadingState,
   Screen,
+  Sheet,
   SectionHeader,
   Text,
 } from '../../design/components';
@@ -48,7 +49,8 @@ import { recordSetIds } from './session-summary';
  * virtualizar isso custava mais em complexidade de layout do que rendia.
  */
 export function WorkoutSession({ session }: { session: TrainingSession }) {
-  useKeepAwake();
+  // ATL-UI-012 — web can deny the optional screen lock; cleanup must not interrupt navigation.
+  useKeepAwake(undefined, { suppressDeactivateWarnings: true });
   const router = useRouter(),
     navigation = useNavigation(),
     insets = useSafeAreaInsets();
@@ -59,6 +61,9 @@ export function WorkoutSession({ session }: { session: TrainingSession }) {
   const [index, setIndex] = useState(0);
   const { deadline, set: setDeadline } = useRestDeadline(session.id);
   const [allowExit, setAllowExit] = useState(false);
+  const [exitAction, setExitAction] = useState<Parameters<typeof navigation.dispatch>[0] | null>(
+    null,
+  );
 
   const day = plan.data?.days.find((item) => item.label === session.dayLabel);
   const exercises = day?.exercises ?? [];
@@ -71,17 +76,11 @@ export function WorkoutSession({ session }: { session: TrainingSession }) {
   const restSeconds =
     exercise?.sets[Math.min(performed.length, exercise.sets.length - 1)]?.restSeconds ?? 60;
 
-  usePreventRemove(!allowExit && session.status === 'inProgress', ({ data }) =>
-    Alert.alert(t('sessionExitTitle'), t('sessionExitDescription'), [
-      { text: t('stay'), style: 'cancel' },
-      {
-        text: t('sessionExit'),
-        onPress: () => {
-          setAllowExit(true);
-          navigation.dispatch(data.action);
-        },
-      },
-    ]),
+  usePreventRemove(
+    !allowExit && session.status === 'inProgress' && exercise !== undefined,
+    ({ data }) => {
+      setExitAction(() => data.action);
+    },
   );
 
   const move = (offset: number) =>
@@ -136,7 +135,7 @@ export function WorkoutSession({ session }: { session: TrainingSession }) {
           title={t('sessionNoPrescription')}
           description={t('sessionChoosePlan')}
           actionLabel={t('sessionExit')}
-          onAction={() => router.back()}
+          onAction={() => (router.canGoBack() ? router.back() : router.replace('/'))}
         />
       </Screen>
     );
@@ -158,7 +157,7 @@ export function WorkoutSession({ session }: { session: TrainingSession }) {
             setCount={exercise.sets.length}
             restDeadline={deadline}
             restSeconds={restSeconds}
-            onBack={() => router.back()}
+            onBack={() => (router.canGoBack() ? router.back() : router.replace('/'))}
             onGuide={() =>
               router.push({
                 pathname: '/exercise/[id]',
@@ -168,7 +167,7 @@ export function WorkoutSession({ session }: { session: TrainingSession }) {
           />
 
           <SetRecorder
-            key={exercise.exerciseId + '-' + index + '-' + session.sets.length}
+            key={exercise.exerciseId + '-' + index}
             session={session}
             exercise={exercise}
             previous={last.data ?? null}
@@ -238,6 +237,23 @@ export function WorkoutSession({ session }: { session: TrainingSession }) {
           </View>
         </ScrollView>
       </GestureDetector>
+      <Sheet
+        visible={exitAction !== null}
+        title={t('sessionExitTitle')}
+        onClose={() => setExitAction(null)}
+      >
+        <Text>{t('sessionExitDescription')}</Text>
+        <Button label={t('stay')} variant="ghost" onPress={() => setExitAction(null)} />
+        <Button
+          label={t('sessionExit')}
+          onPress={() => {
+            if (!exitAction) return;
+            setAllowExit(true);
+            setExitAction(null);
+            navigation.dispatch(exitAction);
+          }}
+        />
+      </Sheet>
     </Screen>
   );
 }

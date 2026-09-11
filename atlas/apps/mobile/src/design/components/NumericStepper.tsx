@@ -1,5 +1,6 @@
+import { formatWeight } from '../../lib/format-weight';
 import { useMemo } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Platform, Pressable, StyleSheet, View } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { layout, opacity, radius, spacing } from '@atlas/design-tokens';
 import { useTheme } from '../theme-provider';
@@ -8,27 +9,10 @@ import { Icon } from './Icon';
 import { Text } from './Text';
 import { nextStep } from './numeric-step';
 
-/**
- * ATL-SES-005 — stepper como par de botões redondos.
- *
- * A versão anterior usava dois botões de texto ("Diminuir" / "Aumentar") de
- * largura livre. Funcionava, mas custava ~140 pt de altura por campo: na tela
- * de sessão, três campos ocupavam mais de metade do viewport só para ajustar
- * três números. Pior, a palavra "Diminuir" não é mais legível que um `−` — ela
- * é apenas maior.
- *
- * Agora: rótulo à esquerda, cluster de controle à direita, 44 pt de alvo de
- * toque em cada botão. A altura por campo cai para ~56 pt e a coluna inteira
- * de campos passa a caber acima da dobra.
- *
- * **Acessibilidade não regrediu.** O `accessible` fica na raiz com
- * `accessibilityRole="adjustable"` — um único alvo de foco que responde a
- * incremento/decremento, que é exatamente o contrato que VoiceOver e TalkBack
- * esperam de um stepper. Os `Pressable` internos deixam de ser focáveis
- * individualmente (comportamento correto aqui), mas seguem tocáveis.
- */
+/** ATL-UI-012 — native adjustable control; individually labelled buttons on web. */
 export function NumericStepper({
   label,
+  testID,
   value,
   onChange,
   min = 0,
@@ -38,6 +22,7 @@ export function NumericStepper({
   disabled = false,
 }: {
   label: string;
+  testID?: string;
   value: number;
   onChange: (value: number) => void;
   min?: number;
@@ -68,6 +53,7 @@ export function NumericStepper({
       StyleSheet.create({
         root: {
           flexDirection: 'row',
+          flexWrap: 'wrap',
           alignItems: 'center',
           justifyContent: 'space-between',
           gap: spacing.md,
@@ -85,7 +71,7 @@ export function NumericStepper({
         pressed: { opacity: opacity.pressed },
         // Largura fixa: ver nota em `layout.stepperValue`.
         value: {
-          width: layout.stepperValue,
+          minWidth: layout.stepperValue,
           flexDirection: 'row',
           alignItems: 'baseline',
           justifyContent: 'center',
@@ -98,10 +84,16 @@ export function NumericStepper({
   return (
     <View
       style={styles.root}
-      accessible
-      accessibilityRole="adjustable"
+      accessible={Platform.OS !== 'web'}
+      accessibilityRole={Platform.OS === 'web' ? undefined : 'adjustable'}
       accessibilityLabel={unit ? label + ', ' + unit : label}
-      accessibilityValue={{ min, max, now: value }}
+      accessibilityValue={{
+        min,
+        max,
+        now: value,
+        text:
+          (unit === t('unitKg') ? formatWeight(value) : String(value)) + (unit ? ' ' + unit : ''),
+      }}
       accessibilityState={{ disabled }}
       accessibilityActions={[
         { name: 'increment', label: t('increase') },
@@ -119,7 +111,10 @@ export function NumericStepper({
       <View style={styles.controls}>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={t('decrease')}
+          accessible={Platform.OS === 'web'}
+          testID={testID ? testID + '-decrease' : undefined}
+          accessibilityLabel={t('decrease') + ' ' + label}
+          accessibilityState={{ disabled: atMin }}
           disabled={atMin}
           onPress={decrease}
           style={({ pressed }) => [styles.button, pressed && styles.pressed]}
@@ -128,7 +123,7 @@ export function NumericStepper({
         </Pressable>
         <View style={styles.value}>
           <Text variant="title2" weight="bold">
-            {value.toLocaleString('pt-BR')}
+            {unit === t('unitKg') ? formatWeight(value) : value.toLocaleString('pt-BR')}
           </Text>
           {unit ? (
             <Text variant="footnote" tone="tertiary">
@@ -138,7 +133,10 @@ export function NumericStepper({
         </View>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={t('increase')}
+          accessible={Platform.OS === 'web'}
+          testID={testID ? testID + '-increase' : undefined}
+          accessibilityLabel={t('increase') + ' ' + label}
+          accessibilityState={{ disabled: atMax }}
           disabled={atMax}
           onPress={increase}
           style={({ pressed }) => [styles.button, pressed && styles.pressed]}

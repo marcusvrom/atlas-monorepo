@@ -1,3 +1,5 @@
+import { DailyCheckInCard } from '../check-in/DailyCheckInCard';
+import { formatWeight } from '../../lib/format-weight';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { layout, spacing, opacity } from '@atlas/design-tokens';
@@ -130,11 +132,7 @@ export function TodayScreen() {
                     <MetaChip
                       onCover
                       icon="bolt"
-                      label={
-                        today.data.estimatedVolumeKg.toLocaleString('pt-BR') +
-                        ' ' +
-                        t('kilogramsShort')
-                      }
+                      label={formatWeight(today.data.estimatedVolumeKg) + ' ' + t('kilogramsShort')}
                     />
                   </MetaChipRow>
                 }
@@ -148,6 +146,10 @@ export function TodayScreen() {
               {start.isError ? <ErrorState message={t('startWorkoutError')} /> : null}
             </View>
           )}
+        </View>
+
+        <View style={styles.page}>
+          <DailyCheckInCard />
         </View>
 
         {today.data ? <TodayExercises workout={today.data} /> : null}

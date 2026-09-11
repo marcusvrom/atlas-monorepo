@@ -19,12 +19,14 @@ const TRACK_HEIGHT = spacing.huge * 2;
  */
 export function ActivityBar({
   value,
+  valueLabel,
   max,
   label,
   selected,
   onPress,
 }: {
   value: number;
+  valueLabel: string;
   max: number;
   label: string;
   selected: boolean;
@@ -67,7 +69,7 @@ export function ActivityBar({
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={label + ': ' + value.toLocaleString('pt-BR')}
+      accessibilityLabel={label + ': ' + valueLabel}
       accessibilityState={{ selected }}
       onPress={onPress}
       style={({ pressed }) => [styles.root, pressed && styles.pressed]}

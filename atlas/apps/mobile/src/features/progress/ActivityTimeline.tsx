@@ -1,3 +1,4 @@
+import { formatWeight } from '../../lib/format-weight';
 import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
@@ -49,7 +50,7 @@ export function ActivityTimeline({
         onChange={(v) => setMetric(v === 'minutes' ? 'minutes' : v === 'sets' ? 'sets' : 'volume')}
       />
       <Text variant="display" weight="bold">
-        {bucket[metric].toLocaleString('pt-BR')}
+        {metric === 'volume' ? formatWeight(bucket.volume) : bucket[metric].toLocaleString('pt-BR')}
       </Text>
       <Text tone="secondary">
         {t(
@@ -65,6 +66,17 @@ export function ActivityTimeline({
           <ActivityBar
             key={i}
             value={b[metric]}
+            valueLabel={
+              (metric === 'volume' ? formatWeight(b.volume) : b[metric].toLocaleString('pt-BR')) +
+              ' ' +
+              t(
+                metric === 'volume'
+                  ? 'activityUnitVolume'
+                  : metric === 'minutes'
+                    ? 'activityUnitMinutes'
+                    : 'activityUnitSets',
+              )
+            }
             max={max}
             label={date(b.from)}
             selected={i === selected}

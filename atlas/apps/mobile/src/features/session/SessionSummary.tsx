@@ -1,3 +1,4 @@
+import { formatWeight } from '../../lib/format-weight';
 import { StyleSheet, View } from 'react-native';
 import type { TrainingSession } from '@atlas/contracts';
 import { layout, spacing } from '@atlas/design-tokens';
@@ -29,7 +30,7 @@ export function SessionSummary({
             {t('sessionFinished')}
           </Text>
           <Text tone="onAccent" variant="display" weight="bold">
-            {session.totalVolumeKg.toLocaleString('pt-BR')} kg
+            {formatWeight(session.totalVolumeKg)} kg
           </Text>
           <Text tone="onAccent" variant="subhead">
             {t('sessionVolume')}
@@ -49,7 +50,7 @@ export function SessionSummary({
         />
         <MetricTile
           label={t('sessionComparison')}
-          value={delta === null ? t('sessionFirstHistory') : delta.toLocaleString('pt-BR') + ' kg'}
+          value={delta === null ? t('sessionFirstHistory') : formatWeight(delta) + ' kg'}
           accent="energy"
         />
       </View>

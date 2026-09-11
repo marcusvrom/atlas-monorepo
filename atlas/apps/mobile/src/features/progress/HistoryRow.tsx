@@ -1,3 +1,4 @@
+import { formatWeight } from '../../lib/format-weight';
 import type { SessionSummary } from '@atlas/contracts';
 import { useMemo } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
@@ -91,7 +92,7 @@ export function HistoryRow({ session, onPress }: { session: SessionSummary; onPr
           <MetaChip icon="layers" label={session.setCount + ' ' + t('setsShort')} />
           <MetaChip
             icon="bolt"
-            label={session.totalVolumeKg.toLocaleString('pt-BR') + ' ' + t('kilogramsShort')}
+            label={formatWeight(session.totalVolumeKg) + ' ' + t('kilogramsShort')}
           />
         </MetaChipRow>
       </View>

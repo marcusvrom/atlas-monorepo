@@ -56,7 +56,7 @@ export function CheckInHistory({
                 {date.toLocaleDateString('pt-BR', { day: 'numeric', month: 'numeric' })}
               </Text>
               <Text weight="bold" tone={entry?.status === 'completed' ? 'success' : 'secondary'}>
-                {entry?.sleepHours ?? '—'} {t('checkInHoursUnit')}
+                {entry?.sleepHours?.toLocaleString('pt-BR') ?? '—'} {t('checkInHoursUnit')}
               </Text>
               <Text variant="caption" tone="secondary">
                 {entry

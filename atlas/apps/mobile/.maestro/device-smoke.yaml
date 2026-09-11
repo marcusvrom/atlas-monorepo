@@ -67,7 +67,8 @@ appId: app.atlas.mobile
 - extendedWaitUntil:
     visible: 'Concluir série'
     timeout: 15000
-- tapOn: 'Aumentar'
+- tapOn:
+    id: 'session-load-increase'
 - tapOn: 'Concluir série'
 # O descanso é um timer animado: se o worklet não rodar, ele fica parado.
 - assertVisible: 'Descanso'

@@ -22,12 +22,14 @@ import { t } from '../../i18n';
  */
 export function SessionControls({
   onRecord,
+  busy = false,
   onPrevious,
   onNext,
   canPrevious,
   canNext,
 }: {
   onRecord: () => void;
+  busy?: boolean;
   onPrevious: () => void;
   onNext: () => void;
   canPrevious: boolean;
@@ -58,6 +60,8 @@ export function SessionControls({
         accessibilityRole="button"
         accessibilityLabel={t('sessionRecord')}
         onPress={onRecord}
+        disabled={busy}
+        accessibilityState={{ disabled: busy, busy }}
         style={styles.primary}
       >
         <Text weight="bold" style={styles.label}>
@@ -69,7 +73,7 @@ export function SessionControls({
           variant="ghost"
           icon="back"
           label={t('sessionPreviousExercise')}
-          disabled={!canPrevious}
+          disabled={busy || !canPrevious}
           onPress={onPrevious}
           style={styles.navButton}
         />
@@ -77,7 +81,7 @@ export function SessionControls({
           variant="ghost"
           icon="arrow"
           label={t('sessionNextExercise')}
-          disabled={!canNext}
+          disabled={busy || !canNext}
           onPress={onNext}
           style={styles.navButton}
         />

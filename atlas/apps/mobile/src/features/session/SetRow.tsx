@@ -1,3 +1,4 @@
+import { formatWeight } from '../../lib/format-weight';
 import { useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import type { PerformedSet } from '@atlas/contracts';
@@ -56,7 +57,7 @@ export function SetRow({
     [colors, isRecord],
   );
 
-  const load = set.weightKg === null ? null : set.weightKg.toLocaleString('pt-BR') + ' kg';
+  const load = set.weightKg === null ? null : formatWeight(set.weightKg) + ' kg';
   const effort =
     set.reps !== null
       ? set.reps + ' ' + t('repsShort')

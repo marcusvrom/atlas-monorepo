@@ -1,3 +1,4 @@
+import { formatWeight } from '../../lib/format-weight';
 import { StyleSheet, View } from 'react-native';
 import type { SessionSummary } from '@atlas/contracts';
 import { spacing } from '@atlas/design-tokens';
@@ -90,7 +91,7 @@ export function DashboardOverview({
         <View style={styles.tile}>
           <MetricTile
             label={t('dashboardVolume')}
-            value={current.volume.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}
+            value={formatWeight(current.volume)}
             delta={delta(current.volume, previous.volume)}
             deltaTone={deltaTone(current.volume, previous.volume)}
             accent="strength"

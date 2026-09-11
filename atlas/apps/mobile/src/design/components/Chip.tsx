@@ -5,11 +5,13 @@ import { useTheme } from '../theme-provider';
 import { Text } from './Text';
 export function Chip({
   label,
+  accessibilityRole = 'checkbox',
   selected = false,
   disabled = false,
   onPress,
 }: {
   label: string;
+  accessibilityRole?: 'checkbox' | 'radio';
   selected?: boolean;
   disabled?: boolean;
   onPress: () => void;
@@ -36,7 +38,7 @@ export function Chip({
   );
   return (
     <Pressable
-      accessibilityRole="checkbox"
+      accessibilityRole={accessibilityRole}
       accessibilityLabel={label}
       accessibilityState={{ checked: selected, disabled }}
       disabled={disabled}

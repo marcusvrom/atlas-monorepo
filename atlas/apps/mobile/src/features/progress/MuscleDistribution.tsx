@@ -1,3 +1,4 @@
+import { formatWeight } from '../../lib/format-weight';
 import type { MuscleVolume } from '@atlas/contracts';
 import { useState } from 'react';
 import { StyleSheet, View, Pressable } from 'react-native';
@@ -66,7 +67,7 @@ export function MuscleDistribution({ days }: { days: 7 | 30 | 90 }) {
         {selected ? (
           <View style={styles.details}>
             <Text variant="display" weight="bold">
-              {selected.weightedVolumeKg.toLocaleString('pt-BR')} {t('kilogramsShort')}
+              {formatWeight(selected.weightedVolumeKg)} {t('kilogramsShort')}
             </Text>
             <Text>
               {selected.effectiveSets}{' '}

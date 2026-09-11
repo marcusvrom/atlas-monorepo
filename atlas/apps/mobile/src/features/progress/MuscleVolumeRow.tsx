@@ -1,3 +1,4 @@
+import { formatWeight } from '../../lib/format-weight';
 import type { MuscleVolume } from '@atlas/contracts';
 import { StyleSheet, View } from 'react-native';
 import { spacing } from '@atlas/design-tokens';
@@ -11,7 +12,7 @@ export function MuscleVolumeRow({ muscle }: { muscle: MuscleVolume }) {
           {muscle.displayName}
         </Text>
         <Text variant="subhead">
-          {muscle.weightedVolumeKg.toLocaleString('pt-BR')} {t('kilogramsShort')}
+          {formatWeight(muscle.weightedVolumeKg)} {t('kilogramsShort')}
         </Text>
       </View>
       <ProgressBar value={muscle.intensity} label={muscle.displayName} />

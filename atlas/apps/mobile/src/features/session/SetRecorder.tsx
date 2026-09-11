@@ -1,10 +1,11 @@
+import { formatWeight } from '../../lib/format-weight';
 import { useMemo, useReducer } from 'react';
 import { StyleSheet, View } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { PerformedSet, type ExercisePrescription, type TrainingSession } from '@atlas/contracts';
 import { estimateOneRepMax } from '@atlas/domain';
 import { spacing } from '@atlas/design-tokens';
-import { MetaChip, MetaChipRow, NumericStepper, Text } from '../../design/components';
+import { ErrorState, MetaChip, MetaChipRow, NumericStepper, Text } from '../../design/components';
 import { newId } from '../../lib/id';
 import { showToast } from '../../design/components/toast-store';
 import { plural, t } from '../../i18n';
@@ -68,6 +69,7 @@ export function SetRecorder({
   const byTime = target.targetDurationSeconds !== null;
 
   const record = () => {
+    if (log.isPending) return;
     const set = PerformedSet.parse({
       clientGeneratedId: newId(),
       exerciseId: exercise.exerciseId,
@@ -88,14 +90,24 @@ export function SetRecorder({
     const beatsRecord =
       !target.isWarmup && !byTime && best > 0 && estimateOneRepMax(input.weight, input.reps) > best;
 
-    log.mutate([set]);
-    if (beatsRecord) {
-      showToast(t('sessionNewRecord') + ' · ' + exercise.exerciseName);
-      void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    } else {
-      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    }
-    onRest(target.restSeconds);
+    log.mutate([set], {
+      onSuccess: () => {
+        if (beatsRecord) {
+          showToast(t('sessionNewRecord') + ' · ' + exercise.exerciseName);
+          void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        } else {
+          void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        }
+        const next = exercise.sets[Math.min(completed.length + 1, exercise.sets.length - 1)]!;
+        change({
+          weight: next.targetWeightKg ?? input.weight,
+          reps: next.targetReps ?? input.reps,
+          rir: next.targetRir ?? input.rir,
+          duration: next.targetDurationSeconds ?? input.duration,
+        });
+        onRest(target.restSeconds);
+      },
+    });
   };
 
   const styles = useMemo(
@@ -134,7 +146,7 @@ export function SetRecorder({
               label={
                 t('sessionLastTime') +
                 ': ' +
-                (last.weightKg ?? 0).toLocaleString('pt-BR') +
+                formatWeight(last.weightKg) +
                 ' kg × ' +
                 (last.reps ?? last.durationSeconds ?? 0)
               }
@@ -152,6 +164,8 @@ export function SetRecorder({
 
       <View style={styles.fields}>
         <NumericStepper
+          disabled={log.isPending}
+          testID="session-load"
           label={t('sessionLoad')}
           unit={t('unitKg')}
           value={input.weight}
@@ -161,6 +175,7 @@ export function SetRecorder({
         />
         {byTime ? (
           <NumericStepper
+            disabled={log.isPending}
             label={t('sessionSeconds')}
             unit={t('secondsShort')}
             value={input.duration}
@@ -169,6 +184,7 @@ export function SetRecorder({
           />
         ) : (
           <NumericStepper
+            disabled={log.isPending}
             label={t('sessionReps')}
             value={input.reps}
             min={0}
@@ -176,6 +192,7 @@ export function SetRecorder({
           />
         )}
         <NumericStepper
+          disabled={log.isPending}
           label={t('sessionRir')}
           value={input.rir}
           min={0}
@@ -184,7 +201,17 @@ export function SetRecorder({
         />
       </View>
 
+      <Text variant="footnote" tone="secondary">
+        {t('dailySetHint')}
+      </Text>
+      {log.isError ? (
+        <ErrorState
+          message={t('dailySetError')}
+          onRetry={() => log.variables && log.mutate(log.variables)}
+        />
+      ) : null}
       <SessionControls
+        busy={log.isPending}
         onRecord={record}
         onPrevious={onPrevious}
         onNext={onNext}

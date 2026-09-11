@@ -634,5 +634,19 @@
   "sessionTargetLabel": "Alvo",
   "sessionSetDone": "série registrada",
   "sessionSetsDone": "séries registradas",
-  "sessionFinishWorkout": "Concluir treino"
+  "sessionFinishWorkout": "Concluir treino",
+  "dailyTitle": "Seu registro de hoje",
+  "dailyDone": "Check-in concluído. Obrigado por se cuidar!",
+  "dailyDraft": "Seu rascunho está salvo. Vamos completar?",
+  "dailyEmpty": "Como você está se sentindo hoje?",
+  "dailyAnswered": "campos preenchidos",
+  "dailyHint": "Registre como você realmente está. Pode salvar uma parte e continuar depois.",
+  "dailyDoneHint": "Seu registro já está no histórico. Você pode revisar se precisar corrigir algo.",
+  "dailyReview": "Revisar check-in",
+  "dailyWorkoutHint": "Nos dias de treino, registre as séries realizadas na sua ficha. Nos dias de descanso, o check-in também conta como cuidado.",
+  "dailyCompleteStep": "Preencha os campos desta etapa para continuar. Se precisar sair, use “Salvar por enquanto”.",
+  "dailySetHint": "Confira a carga, as repetições ou o tempo e o RIR que você realmente realizou antes de registrar.",
+  "dailySetError": "Não foi possível salvar esta série. Tente novamente para manter seu registro completo.",
+  "checkInPreviousStep": "Etapa anterior",
+  "sessionRestInProgress": "Respeite seu intervalo antes da próxima série."
 }

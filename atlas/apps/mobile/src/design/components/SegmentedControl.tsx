@@ -16,11 +16,12 @@ export function SegmentedControl({
   disabled?: boolean;
 }) {
   return (
-    <View accessibilityLabel={label} style={styles.root}>
+    <View accessibilityRole="radiogroup" accessibilityLabel={label} style={styles.root}>
       {options.map((option) =>
         option ? (
           <Chip
             key={option.value}
+            accessibilityRole="radio"
             label={option.label}
             selected={value === option.value}
             disabled={disabled}

@@ -14,6 +14,10 @@ scope:
   - packages/contracts
   - contracts/openapi.v1.yaml
 acceptance_criteria:
+  - Valores exibidos em kg usam inteiro ou meio quilograma, com vírgula decimal, preservando dados e cálculos originais.
+  - Navegação e acessibilidade revisadas, com evidências e limitações declaradas.
+  - Home distingue check-in pendente, rascunho e concluído e incentiva registros corretos respeitando dias de descanso.
+  - Data do check-in acompanha a virada do dia e feedback de série aguarda confirmação de salvamento.
   - Paleta roxa centralizada em tokens, com contraste verificado.
   - Modelo anatômico estilizado mantém 26 regiões, frente/costas e seleção acessível.
   - Gráfico de atividade permite alternar volume/minutos/séries e selecionar intervalo para detalhes.

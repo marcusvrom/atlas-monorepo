@@ -153,7 +153,7 @@ export function SessionHeader({
           <View style={styles.restCopy}>
             <Text weight="semibold">{t('restTitle')}</Text>
             <Text variant="footnote" tone="secondary">
-              {t('sessionRestReady')}
+              {t('sessionRestInProgress')}
             </Text>
           </View>
         </View>

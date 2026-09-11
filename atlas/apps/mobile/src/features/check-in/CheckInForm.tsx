@@ -37,6 +37,11 @@ export function CheckInForm({
   );
   const [invalid, setInvalid] = useState(false),
     save = useSaveCheckIn();
+  const update = (patch: Parameters<typeof change>[0]) => {
+    save.reset();
+    setInvalid(false);
+    change(patch);
+  };
   const count = rehabilitation ? 3 : 2;
   const hours = form.hours.trim() === '' ? null : Number(form.hours.replace(',', '.'));
   const sleepReady =
@@ -74,7 +79,12 @@ export function CheckInForm({
         }
         label={t('checkInTitle')}
       />
-      <Text variant="title2" weight="bold">
+      <Text
+        variant="title2"
+        weight="bold"
+        accessibilityRole="header"
+        accessibilityLiveRegion="polite"
+      >
         {t(form.step === 0 ? 'checkInSleep' : form.step === 1 ? 'checkInEnergy' : 'checkInPain')}
       </Text>
       {form.step === 0 ? (
@@ -83,37 +93,47 @@ export function CheckInForm({
             label={t('checkInSleepHours')}
             keyboardType="decimal-pad"
             value={form.hours}
-            onChangeText={(hours) => change({ hours })}
+            onChangeText={(hours) => update({ hours })}
           />
           <RatingChoices
             kind="quality"
             value={form.quality}
-            onChange={(quality) => change({ quality })}
+            onChange={(quality) => update({ quality })}
           />
         </>
       ) : form.step === 1 ? (
         <RatingChoices
           kind="energy"
           value={form.energy}
-          onChange={(energy) => change({ energy })}
+          onChange={(energy) => update({ energy })}
         />
       ) : (
         <>
           <Text tone="secondary" variant="subhead">
             {t('checkInPainHint')}
           </Text>
-          <View style={styles.options}>
+          <View
+            style={styles.options}
+            accessibilityRole="radiogroup"
+            accessibilityLabel={t('checkInPain')}
+          >
             {Array.from({ length: 11 }, (_, score) => (
               <Chip
                 key={score}
+                accessibilityRole="radio"
                 label={String(score)}
                 selected={form.pain === score}
-                onPress={() => change({ pain: score })}
+                onPress={() => update({ pain: score })}
               />
             ))}
           </View>
         </>
       )}
+      {!ready ? (
+        <Text variant="footnote" tone="secondary">
+          {t('dailyCompleteStep')}
+        </Text>
+      ) : null}
       {invalid ? (
         <Text tone="danger" accessibilityRole="alert">
           {t('checkInIncomplete')}
@@ -134,7 +154,7 @@ export function CheckInForm({
         {form.step > 0 ? (
           <Button
             variant="ghost"
-            label={t('back')}
+            label={t('checkInPreviousStep')}
             onPress={() => change({ step: form.step - 1 })}
           />
         ) : null}
