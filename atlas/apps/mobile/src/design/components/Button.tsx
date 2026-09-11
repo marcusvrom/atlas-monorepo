@@ -2,14 +2,16 @@ import { useMemo } from 'react';
 import { Pressable, StyleSheet, type StyleProp, type ViewStyle } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
-import { glass, motion, radius, spacing } from '@atlas/design-tokens';
+import { glass, layout, motion, radius, spacing } from '@atlas/design-tokens';
 import { useAccessibilityPreferences } from '../accessibility';
 import { useTheme } from '../theme-provider';
+import { Icon, type IconName } from './Icon';
 import { Text } from './Text';
 
 export function Button({
   label,
   onPress,
+  icon,
   variant = 'solid',
   disabled = false,
   busy = false,
@@ -19,6 +21,8 @@ export function Button({
 }: {
   label: string;
   onPress: () => void;
+  /** Ícone à esquerda do rótulo. Decorativo: quem lê o botão é o `label`. */
+  icon?: IconName;
   variant?: 'solid' | 'ghost' | 'danger';
   disabled?: boolean;
   busy?: boolean;
@@ -40,8 +44,10 @@ export function Button({
           paddingHorizontal: spacing.xl,
           paddingVertical: spacing.md,
           borderRadius: radius.pill,
+          flexDirection: 'row',
           alignItems: 'center',
           justifyContent: 'center',
+          gap: spacing.sm,
         },
         solid: { backgroundColor: colors.brand },
         danger: { backgroundColor: colors.danger },
@@ -54,7 +60,9 @@ export function Button({
           borderColor: colors.borderStrong,
         },
         pressed: { backgroundColor: colors.brandPressed },
-        disabled: { backgroundColor: colors.backgroundElevated },
+        // Também apaga o contorno: só trocar o preenchimento não bastava para a
+        // ghost — com o mesmo `borderStrong` ela continuava lendo como tocável.
+        disabled: { backgroundColor: colors.backgroundElevated, borderColor: colors.border },
         label: { color: variant === 'ghost' ? colors.textPrimary : colors.textOnBrand },
         pressedLabel: { color: colors.textOnBrand },
         muted: { color: colors.textSecondary },
@@ -88,20 +96,21 @@ export function Button({
           blocked && styles.disabled,
         ]}
       >
-        {({ pressed }) => (
-          <Text
-            weight="semibold"
-            style={
-              blocked
-                ? styles.muted
-                : pressed || previewPressed
-                  ? styles.pressedLabel
-                  : styles.label
-            }
-          >
-            {label}
-          </Text>
-        )}
+        {({ pressed }) => {
+          const labelStyle = blocked
+            ? styles.muted
+            : pressed || previewPressed
+              ? styles.pressedLabel
+              : styles.label;
+          return (
+            <>
+              {icon ? <Icon name={icon} size={layout.iconSize} color={labelStyle.color} /> : null}
+              <Text weight="semibold" style={labelStyle}>
+                {label}
+              </Text>
+            </>
+          );
+        }}
       </Pressable>
     </Animated.View>
   );

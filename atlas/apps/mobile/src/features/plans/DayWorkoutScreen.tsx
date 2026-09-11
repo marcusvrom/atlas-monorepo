@@ -17,7 +17,7 @@ import { usePlan } from './hooks';
 import { useStartSession } from '../../data/queries/training';
 import { PrescriptionRow } from '../today/PrescriptionRow';
 import { newId } from '../../lib/id';
-import { t } from '../../i18n';
+import { plural, t } from '../../i18n';
 export function DayWorkoutScreen() {
   const params = useLocalSearchParams<{ id: string; dayId: string }>(),
     router = useRouter();
@@ -51,7 +51,7 @@ export function DayWorkoutScreen() {
             <View style={styles.headerContent}>
               <Text tone="secondary">
                 {day.estimatedMinutes} {t('minutesShort')} · {day.exercises.length}{' '}
-                {t('planExercises')}
+                {plural(day.exercises.length, 'planExercisesOne', 'planExercises')}
               </Text>
               <Button
                 label={t('startWorkout')}

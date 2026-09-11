@@ -2,7 +2,7 @@ import type { MuscleVolume } from '@atlas/contracts';
 import { StyleSheet, View } from 'react-native';
 import { spacing } from '@atlas/design-tokens';
 import { ProgressBar, Text } from '../../design/components';
-import { t } from '../../i18n';
+import { plural, t } from '../../i18n';
 export function MuscleVolumeRow({ muscle }: { muscle: MuscleVolume }) {
   return (
     <View style={styles.root}>
@@ -16,7 +16,8 @@ export function MuscleVolumeRow({ muscle }: { muscle: MuscleVolume }) {
       </View>
       <ProgressBar value={muscle.intensity} label={muscle.displayName} />
       <Text variant="footnote" tone="secondary">
-        {muscle.effectiveSets} {t('dashboardEffectiveSets')}
+        {muscle.effectiveSets}{' '}
+        {plural(muscle.effectiveSets, 'dashboardEffectiveSetsOne', 'dashboardEffectiveSets')}
       </Text>
     </View>
   );

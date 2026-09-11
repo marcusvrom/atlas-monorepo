@@ -1,0 +1,68 @@
+id: ATL-DSH-007
+stage: mock-first
+title: Dashboard do atleta — tendência, consistência e um insight por vez
+authorization: Pedido do usuário em 11/09/2026 — "adicione ao planejamento também
+  uma melhoria em nossos Dashboard e também na visão de profissionais que atendem
+  alunos".
+references:
+  - docs/roadmap-produto.md
+  - docs/specs/00-produto-e-dominio.md
+  - docs/specs/12-estrategia-mock-first.md
+  - docs/agent/AGENTS.md
+scope:
+  - apps/mobile/src/features/progress/DashboardOverview.tsx
+  - apps/mobile/src/features/progress/InsightCard.tsx
+  - apps/mobile/src/features/dashboard
+  - packages/domain/src/insights.ts
+  - packages/domain/src/consistency.ts
+
+goal: >
+  Nem "Hoje" nem "Progresso" respondem "estou melhorando?" acima da dobra. Hoje é
+  uma boa tela de hoje; Progresso é uma boa tela de contadores. Falta o meio: a
+  tendência, a consistência ao longo do tempo, e uma leitura redigida do que
+  mudou.
+
+acceptance_criteria:
+  - O gráfico de tendência (carga/volume) ocupa o topo de Progresso, acima dos tiles.
+  - Os tiles permanecem abaixo, explicando o gráfico em vez de substituí-lo.
+  - Streak de semanas batendo a meta aparece no cabeçalho de Hoje, calculado em
+    packages/domain por função pura e testada.
+  - Um único cartão de insight por vez, derivado de packages/domain/src/insights.ts.
+  - A seleção do insight é determinística e testada por prioridade — mesmo estado
+    de entrada produz sempre o mesmo insight.
+  - Sem insight aplicável, o cartão não renderiza; nunca renderiza texto genérico
+    de preenchimento.
+  - Insight redigido em linguagem concreta e verificável pelo usuário ("sua carga
+    no supino não sobe há 3 semanas"), nunca vago ("continue assim").
+  - Se há profissional vinculado, o dashboard exibe a última nota dele, respeitando
+    o escopo de compartilhamento.
+  - Histórico insuficiente (menos de 3 pontos) renderiza estado vazio desenhado,
+    não gráfico achatado.
+  - Nenhum cálculo de domínio dentro de componente (R1); sem valor de estilo mágico (R5).
+
+out_of_scope:
+  - Modelo preditivo ou recomendação por ML.
+  - Comparação com outros usuários / benchmark social.
+  - Widget de sistema operacional.
+  - Notificação push do insight.
+
+risks:
+  - id: insight-errado-custa-confianca
+    description: >
+      Um insight factualmente errado ("você bateu recorde" quando não bateu)
+      destrói a credibilidade de toda a tela de uma vez.
+    mitigation: >
+      Regras determinísticas, puras e testadas por unidade, com os mesmos
+      fixtures usados no cálculo de recorde da sessão. Nenhuma heurística que
+      dependa de dado ausente.
+  - id: dois-insights-viram-ruido
+    description: >
+      A pressão natural é mostrar todos os insights disponíveis; com dois ou mais,
+      nenhum é lido.
+    mitigation: Limite de um, com ordem de prioridade explícita e testada.
+  - id: heuristica-sem-medicao
+    description: >
+      "3 semanas sem subir carga = estagnação" é desenho de produto fundamentado,
+      não resultado medido — mesmo risco declarado na spec 14.
+    mitigation: >
+      Limiares nomeados e centralizados em domain; instrumentar antes de otimizar.

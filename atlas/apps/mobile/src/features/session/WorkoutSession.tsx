@@ -1,26 +1,24 @@
-import { useState, useMemo } from 'react';
-import { Alert, StyleSheet, View, ScrollView } from 'react-native';
+import { useMemo, useState } from 'react';
+import { Alert, ScrollView, StyleSheet, View } from 'react-native';
 import { useRouter, useNavigation } from 'expo-router';
 import { usePreventRemove } from 'expo-router/react-navigation';
 import { useKeepAwake } from 'expo-keep-awake';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { scheduleOnRN } from 'react-native-worklets';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { FlashList } from '@shopify/flash-list';
-import { spacing } from '@atlas/design-tokens';
+import { layout, spacing } from '@atlas/design-tokens';
 import type { TrainingSession } from '@atlas/contracts';
 import {
   Button,
   EmptyState,
   ErrorState,
-  ScreenHeader,
-  IconButton,
   LoadingState,
   Screen,
+  SectionHeader,
   Text,
 } from '../../design/components';
 import { notifyAfterRest } from '../../data/rest-notification';
-import { t } from '../../i18n';
+import { plural, t } from '../../i18n';
 import {
   useRestDeadline,
   useCompleteSession,
@@ -28,9 +26,27 @@ import {
   usePlan,
   useSessionQueue,
 } from './hooks';
-import { RestTimer } from './RestTimer';
+import { SessionHeader } from './SessionHeader';
 import { SetRecorder } from './SetRecorder';
+import { SetRow } from './SetRow';
 import { SessionSummary } from './SessionSummary';
+import { recordSetIds } from './session-summary';
+
+/**
+ * ATL-SES-005 — a tela de execução.
+ *
+ * Reescrita da composição. A versão anterior era uma `FlashList` de séries com
+ * o registrador preso em 65 % da altura por baixo: o cabeçalho rolava junto com
+ * a lista, o registrador não, e no meio ficava um bloco fixo com três campos
+ * empilhados. Na prática o usuário via três steppers e pouco mais — sem saber
+ * em que exercício estava, quantas séries faltavam ou o que tinha levantado da
+ * última vez.
+ *
+ * Agora é uma coluna só: cabeçalho com identidade e progresso, registrador
+ * compacto, e as séries já feitas embaixo. `ScrollView` e não `FlashList` de
+ * propósito — a lista aqui é do tamanho da prescrição (3 a 6 itens), e
+ * virtualizar isso custava mais em complexidade de layout do que rendia.
+ */
 export function WorkoutSession({ session }: { session: TrainingSession }) {
   useKeepAwake();
   const router = useRouter(),
@@ -43,8 +59,18 @@ export function WorkoutSession({ session }: { session: TrainingSession }) {
   const [index, setIndex] = useState(0);
   const { deadline, set: setDeadline } = useRestDeadline(session.id);
   const [allowExit, setAllowExit] = useState(false);
+
   const day = plan.data?.days.find((item) => item.label === session.dayLabel);
-  const exercise = day?.exercises[index];
+  const exercises = day?.exercises ?? [];
+  const exercise = exercises[index];
+  const performed = useMemo(
+    () => session.sets.filter((set) => set.exerciseId === exercise?.exerciseId),
+    [session.sets, exercise?.exerciseId],
+  );
+  const records = useMemo(() => recordSetIds(session, last.data ?? null), [session, last.data]);
+  const restSeconds =
+    exercise?.sets[Math.min(performed.length, exercise.sets.length - 1)]?.restSeconds ?? 60;
+
   usePreventRemove(!allowExit && session.status === 'inProgress', ({ data }) =>
     Alert.alert(t('sessionExitTitle'), t('sessionExitDescription'), [
       { text: t('stay'), style: 'cancel' },
@@ -57,10 +83,10 @@ export function WorkoutSession({ session }: { session: TrainingSession }) {
       },
     ]),
   );
+
   const move = (offset: number) =>
-    setIndex((current) =>
-      Math.max(0, Math.min((day?.exercises.length ?? 1) - 1, current + offset)),
-    );
+    setIndex((current) => Math.max(0, Math.min(exercises.length - 1, current + offset)));
+
   const swipe = Gesture.Pan()
     .activeOffsetX([-spacing.xxl, spacing.xxl])
     .failOffsetY([-spacing.lg, spacing.lg])
@@ -68,22 +94,21 @@ export function WorkoutSession({ session }: { session: TrainingSession }) {
       if (Math.abs(event.translationX) > spacing.huge)
         scheduleOnRN(move, event.translationX < 0 ? 1 : -1);
     });
+
   const styles = useMemo(
     () =>
       StyleSheet.create({
-        root: { flex: 1 },
-        list: { padding: spacing.lg, paddingBottom: spacing.huge },
-        header: { gap: spacing.md },
-
-        recorder: {
-          height: '65%',
-          paddingHorizontal: spacing.lg,
-          paddingBottom: insets.bottom + spacing.sm,
+        content: {
+          padding: layout.pageInset,
+          paddingBottom: insets.bottom + spacing.huge,
+          gap: layout.sectionGap,
         },
-        set: { paddingVertical: spacing.sm },
+        section: { gap: spacing.sm },
+        notices: { gap: spacing.sm },
       }),
     [insets.bottom],
   );
+
   if (session.status === 'completed')
     return (
       <Screen>
@@ -96,84 +121,52 @@ export function WorkoutSession({ session }: { session: TrainingSession }) {
         </ScrollView>
       </Screen>
     );
+
+  if (plan.isPending)
+    return (
+      <Screen>
+        <LoadingState />
+      </Screen>
+    );
+
+  if (!exercise)
+    return (
+      <Screen>
+        <EmptyState
+          title={t('sessionNoPrescription')}
+          description={t('sessionChoosePlan')}
+          actionLabel={t('sessionExit')}
+          onAction={() => router.back()}
+        />
+      </Screen>
+    );
+
   return (
     <Screen edges={['top']}>
       <GestureDetector gesture={swipe}>
-        <View style={styles.root}>
-          <FlashList
-            data={session.sets.filter((set) => set.exerciseId === exercise?.exerciseId)}
-            keyExtractor={(set) => set.clientGeneratedId}
-            contentContainerStyle={styles.list}
-            ListHeaderComponent={
-              <View style={styles.header}>
-                <ScreenHeader
-                  title={exercise?.exerciseName ?? session.dayLabel}
-                  subtitle={session.dayLabel}
-                  leading={
-                    <IconButton
-                      icon="back"
-                      label={t('sessionExit')}
-                      onPress={() => router.back()}
-                    />
-                  }
-                />
-                <RestTimer deadline={deadline} />
-                {exercise ? (
-                  <Button
-                    variant="ghost"
-                    label={t('dashboardExerciseGuide')}
-                    onPress={() =>
-                      router.push({
-                        pathname: '/exercise/[id]',
-                        params: { id: exercise.exerciseId },
-                      })
-                    }
-                  />
-                ) : null}
-                {queue.pending ? (
-                  <Text accessibilityLiveRegion="polite">
-                    {queue.pending} {t('sessionPending')}
-                  </Text>
-                ) : null}
-                {queue.rejected ? (
-                  <Text tone="warning">
-                    {queue.rejected} {t('sessionRejected')}
-                  </Text>
-                ) : null}
-                {queue.pending ? (
-                  <Button
-                    label={t('retry')}
-                    busy={queue.retry.isPending}
-                    variant="ghost"
-                    onPress={() => queue.retry.mutate()}
-                  />
-                ) : null}
-                {plan.isPending ? (
-                  <LoadingState lines={1} />
-                ) : plan.isError ? (
-                  <ErrorState message={t('planLoadError')} onRetry={() => void plan.refetch()} />
-                ) : null}
-                {last.isError ? (
-                  <Text tone="secondary">{t('sessionPreviousUnavailable')}</Text>
-                ) : null}
-                {finish.isError ? <ErrorState message={t('sessionFinishError')} /> : null}
-              </View>
+        <ScrollView
+          contentContainerStyle={styles.content}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          <SessionHeader
+            exercise={exercise}
+            dayLabel={session.dayLabel}
+            exerciseIndex={index}
+            exerciseCount={exercises.length}
+            setIndex={performed.length}
+            setCount={exercise.sets.length}
+            restDeadline={deadline}
+            restSeconds={restSeconds}
+            onBack={() => router.back()}
+            onGuide={() =>
+              router.push({
+                pathname: '/exercise/[id]',
+                params: { id: exercise.exerciseId },
+              })
             }
-            ListEmptyComponent={<Text>{t('sessionNoSets')}</Text>}
-            renderItem={({ item }) => (
-              <View style={styles.set}>
-                <Text>
-                  {t('planSetNumber')} {item.order}: {item.weightKg ?? 0} kg ×{' '}
-                  {item.reps ?? item.durationSeconds ?? 0}
-                  {item.reps === null ? ' ' + t('sessionSeconds') : ''}
-                </Text>
-              </View>
-            )}
           />
-        </View>
-      </GestureDetector>
-      {exercise ? (
-        <View style={styles.recorder}>
+
           <SetRecorder
             key={exercise.exerciseId + '-' + index + '-' + session.sets.length}
             session={session}
@@ -185,17 +178,66 @@ export function WorkoutSession({ session }: { session: TrainingSession }) {
             }}
             onPrevious={() => move(-1)}
             onNext={() => move(1)}
-            onFinish={() => finish.mutate(session.id)}
+            canPrevious={index > 0}
+            canNext={index < exercises.length - 1}
           />
-        </View>
-      ) : !plan.isPending ? (
-        <EmptyState
-          title={t('sessionNoPrescription')}
-          description={t('sessionChoosePlan')}
-          actionLabel={t('sessionExit')}
-          onAction={() => router.back()}
-        />
-      ) : null}
+
+          <View style={styles.section}>
+            <SectionHeader title={t('dashboardSets')} />
+            {performed.length ? (
+              performed.map((set, position) => (
+                <SetRow
+                  key={set.clientGeneratedId}
+                  set={set}
+                  order={position + 1}
+                  isRecord={records.has(set.clientGeneratedId)}
+                />
+              ))
+            ) : (
+              <Text tone="secondary">{t('sessionNoSets')}</Text>
+            )}
+          </View>
+
+          {/* Concluir o treino acontece uma vez, no fim — então mora no fim da
+              tela, depois das séries registradas. No cluster de controles ele
+              disputava atenção com "Concluir série" a cada repetição. */}
+          <Button
+            label={t('sessionFinishWorkout')}
+            variant="ghost"
+            icon="check"
+            busy={finish.isPending}
+            onPress={() => finish.mutate(session.id)}
+          />
+
+          {/* Avisos de fila e erro ficam no fim: são importantes quando
+              acontecem e ruído visual quando não. */}
+          <View style={styles.notices}>
+            {queue.pending ? (
+              <Text accessibilityLiveRegion="polite" tone="secondary">
+                {queue.pending} {plural(queue.pending, 'sessionPendingOne', 'sessionPending')}
+              </Text>
+            ) : null}
+            {queue.pending ? (
+              <Button
+                label={t('retry')}
+                busy={queue.retry.isPending}
+                variant="ghost"
+                onPress={() => queue.retry.mutate()}
+              />
+            ) : null}
+            {queue.rejected ? (
+              <Text tone="warning">
+                {queue.rejected} {plural(queue.rejected, 'sessionRejectedOne', 'sessionRejected')}
+              </Text>
+            ) : null}
+            {plan.isError ? (
+              <ErrorState message={t('planLoadError')} onRetry={() => void plan.refetch()} />
+            ) : null}
+            {last.isError ? <Text tone="secondary">{t('sessionPreviousUnavailable')}</Text> : null}
+            {finish.isError ? <ErrorState message={t('sessionFinishError')} /> : null}
+          </View>
+        </ScrollView>
+      </GestureDetector>
     </Screen>
   );
 }

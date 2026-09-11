@@ -229,6 +229,19 @@ export const layout = {
   coverRow: 84,
   /** Largura do card dentro de um `<Carousel>`. */
   carouselItem: 232,
+
+  /**
+   * ATL-SES-005 — alvo de toque de um controle redondo. 44 é o mínimo das HIG
+   * da Apple e do Material; o stepper vive numa tela usada com a mão suada e
+   * o braço estendido, então não é lugar de economizar área.
+   */
+  controlSize: 44,
+  /**
+   * Largura reservada ao valor do stepper. Fixa de propósito: com largura
+   * automática os botões dançam horizontalmente quando o número passa de 9
+   * para 10, e o polegar erra o alvo que estava mirando.
+   */
+  stepperValue: 88,
 } as const;
 export const opacity = { pressed: 0.72, decorative: 0.16, subtle: 0.06 } as const;
 

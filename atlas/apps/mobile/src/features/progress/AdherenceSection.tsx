@@ -1,7 +1,7 @@
 import { StyleSheet, View } from 'react-native';
 import { spacing } from '@atlas/design-tokens';
 import { Card, ErrorState, LoadingState, ProgressRing, Text } from '../../design/components';
-import { t } from '../../i18n';
+import { plural, t } from '../../i18n';
 import { useAdherence } from './hooks';
 export function AdherenceSection({ days = 30 }: { days?: 7 | 30 | 90 }) {
   const query = useAdherence(days);
@@ -18,7 +18,8 @@ export function AdherenceSection({ days = 30 }: { days?: 7 | 30 | 90 }) {
         <View style={styles.center}>
           <ProgressRing value={query.data.rate} label={t('adherenceTitle')} accent="activity" />
           <Text tone="secondary">
-            {query.data.completedSessions} / {query.data.plannedSessions} {t('completedSessions')}
+            {query.data.completedSessions} / {query.data.plannedSessions}{' '}
+            {plural(query.data.plannedSessions, 'completedSessionsOne', 'completedSessions')}
           </Text>
         </View>
       )}

@@ -3,7 +3,7 @@ import type { TrainingSession } from '@atlas/contracts';
 import { layout, spacing } from '@atlas/design-tokens';
 import { Button, CoverImage, MetricTile, Text } from '../../design/components';
 import { CoverScrim } from '../../design/media';
-import { t } from '../../i18n';
+import { plural, t } from '../../i18n';
 import { sessionRecords } from './session-summary';
 import { useSessionQueue } from './hooks';
 export function SessionSummary({
@@ -55,7 +55,7 @@ export function SessionSummary({
       </View>
       {queue.pending ? (
         <Text accessibilityLiveRegion="polite">
-          {queue.pending} {t('sessionPending')}
+          {queue.pending} {plural(queue.pending, 'sessionPendingOne', 'sessionPending')}
         </Text>
       ) : null}
       <Button label={t('sessionExit')} onPress={onClose} />

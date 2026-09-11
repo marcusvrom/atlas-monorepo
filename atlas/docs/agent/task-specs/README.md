@@ -42,3 +42,4 @@ sem aguardar resposta do adapter" é.
 | ATL-BIL | Billing |
 | ATL-AVT | Avatar |
 | ATL-ONB | Onboarding e tour |
+| ATL-DSH | Dashboard do atleta |

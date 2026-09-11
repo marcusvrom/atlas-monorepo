@@ -13,6 +13,8 @@ const paths = {
   arrow: ['M5 12h14m-6-6 6 6-6 6'],
   back: ['M19 12H5m6-6-6 6 6 6'],
   plus: ['M12 5v14M5 12h14'],
+  minus: ['M5 12h14'],
+  alert: ['M12 8v5', 'M12 16.5h.01', 'M12 3 2.5 20h19L12 3Z'],
   filter: ['M4 7h16M4 17h16M8 4v6m8 4v6'],
   search: ['M21 21l-5-5M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0'],
   dumbbell: ['M8 12h8M3 9v6m3-9v12m12-12v12m3-9v6M3 12h3m12 0h3'],

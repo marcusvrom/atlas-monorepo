@@ -16,13 +16,15 @@
         "NSHealthShareUsageDescription": "Usamos seus dados de saúde para acompanhar sua evolução de treino.",
         "NSCameraUsageDescription": "Para registrar fotos de progresso e vídeos de execução.",
         "NSPhotoLibraryUsageDescription": "Para você escolher uma foto de perfil da sua galeria."
-      }
+      },
+      "icon": "./assets/brand/icon.png"
     },
     "android": {
       "package": "app.atlas.mobile",
       "edgeToEdgeEnabled": true,
       "adaptiveIcon": {
-        "backgroundColor": "#05070D"
+        "foregroundImage": "./assets/brand/adaptive-icon.png",
+        "backgroundColor": "#0B0912"
       }
     },
     "plugins": [
@@ -30,7 +32,9 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#05070D",
+          "image": "./assets/brand/splash.png",
+          "imageWidth": 180,
+          "backgroundColor": "#0B0912",
           "resizeMode": "contain"
         }
       ],
@@ -57,6 +61,7 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "icon": "./assets/brand/icon.png"
   }
 }

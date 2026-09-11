@@ -5,7 +5,7 @@ import { useRouter } from 'expo-router';
 import type { SessionSummary } from '@atlas/contracts';
 import { spacing } from '@atlas/design-tokens';
 import { Card, Text, SegmentedControl, Button, Sheet, EmptyState } from '../../design/components';
-import { t } from '../../i18n';
+import { plural, t } from '../../i18n';
 import { activityBuckets } from './activity-buckets';
 import { shiftDay } from './dashboard-math';
 import { ActivityBar } from './ActivityBar';
@@ -74,7 +74,8 @@ export function ActivityTimeline({
       </View>
       <Text weight="semibold">{range}</Text>
       <Text tone="secondary" variant="footnote">
-        {bucket.records.length} {t('activitySessionCount')}
+        {bucket.records.length}{' '}
+        {plural(bucket.records.length, 'activitySessionCountOne', 'activitySessionCount')}
       </Text>
       <Button variant="ghost" label={t('dashboardHistory')} onPress={() => setOpen(true)} />
       <Sheet visible={open} title={range} onClose={() => setOpen(false)}>
