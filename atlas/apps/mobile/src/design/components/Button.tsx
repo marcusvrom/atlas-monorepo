@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { Pressable, StyleSheet, type StyleProp, type ViewStyle } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
-import { motion, radius, spacing } from '@atlas/design-tokens';
+import { glass, motion, radius, spacing } from '@atlas/design-tokens';
 import { useAccessibilityPreferences } from '../accessibility';
 import { useTheme } from '../theme-provider';
 import { Text } from './Text';
@@ -45,7 +45,14 @@ export function Button({
         },
         solid: { backgroundColor: colors.brand },
         danger: { backgroundColor: colors.danger },
-        ghost: { backgroundColor: colors.surface },
+        // A ghost ganhou contorno: sem ele, o fundo é o mesmo `surface` do
+        // <Card>, e o botão sumia sempre que era usado dentro de um — ficava
+        // um rótulo solto no meio do card, sem nada que dissesse "toque aqui".
+        ghost: {
+          backgroundColor: colors.surface,
+          borderWidth: glass.borderWidth,
+          borderColor: colors.borderStrong,
+        },
         pressed: { backgroundColor: colors.brandPressed },
         disabled: { backgroundColor: colors.backgroundElevated },
         label: { color: variant === 'ghost' ? colors.textPrimary : colors.textOnBrand },

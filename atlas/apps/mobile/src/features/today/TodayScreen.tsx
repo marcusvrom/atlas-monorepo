@@ -21,6 +21,7 @@ import { useTodayWorkout, useStartSession } from '../../data/queries/training';
 import { useMe } from '../../data/queries/identity';
 import { useAdherence } from '../../data/queries/progress';
 import { Avatar } from '../avatar/Avatar';
+import { HydrationCard } from '../nutrition/HydrationCard';
 import { WeeklyPlan } from './WeeklyPlan';
 import { TodayExercises } from './TodayExercises';
 import { t } from '../../i18n';
@@ -184,6 +185,31 @@ export function TodayScreen() {
               )}
             </Card>
           </View>
+
+          {/* ATL-NUT-001 — hidratação e metas do dia entram na home: são as duas
+              coisas que o healthapp trouxe e que se consultam várias vezes ao
+              dia, não uma vez por semana. */}
+          <HydrationCard />
+
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('nutritionTitle')}
+            onPress={() => router.push('/nutrition')}
+            style={({ pressed }) => pressed && styles.pressed}
+          >
+            <Card>
+              <View style={styles.header}>
+                <Icon name="flame" />
+                <View style={styles.greeting}>
+                  <Text weight="semibold">{t('nutritionTitle')}</Text>
+                  <Text variant="footnote" tone="secondary">
+                    {t('nutritionSubtitle')}
+                  </Text>
+                </View>
+                <Icon name="arrow" />
+              </View>
+            </Card>
+          </Pressable>
 
           <Button
             variant="ghost"

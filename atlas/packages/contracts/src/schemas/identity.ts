@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { GoalType, Instant, UserId } from '../primitives.js';
+import { ActivityLevel, BiologicalSex } from './nutrition.js';
 
 export const AvatarConfig = z.object({
   /**
@@ -17,6 +18,22 @@ export const AvatarConfig = z.object({
   accessory: z.string().nullable(),
   frame: z.string().nullable(),
   background: z.string(),
+
+  /**
+   * ATL-AVT-002 — cor separada da forma.
+   *
+   * Antes a cor de cabelo, roupa e fundo era **derivada do índice da peça**:
+   * escolher "roupa 4" escolhia forma e cor de uma vez, e as oito "roupas" eram
+   * na prática duas formas repetidas em quatro cores. Quem quisesse a regata na
+   * cor da camiseta não tinha como pedir.
+   *
+   * Nulo = usa a cor padrão da peça, que é exatamente o comportamento antigo.
+   * Por isso o campo é opcional com default `null`: avatares já persistidos
+   * continuam válidos e renderizam igual. Ver `avatar-assets.ts`.
+   */
+  hairColor: z.string().nullable().default(null),
+  outfitColor: z.string().nullable().default(null),
+  backgroundColor: z.string().nullable().default(null),
 });
 export type AvatarConfig = z.infer<typeof AvatarConfig>;
 
@@ -68,6 +85,14 @@ export const UserProfile = z.object({
   goal: CurrentGoal.nullable(),
   heightCm: z.number().min(80).max(260).nullable(),
   birthDate: z.string().nullable(),
+  /**
+   * ATL-NUT-001 — entradas da estimativa metabólica. Anuláveis com default
+   * `null` porque o perfil existia antes delas: quem nunca preencheu continua
+   * válido, e `DailyTargets.missingInputs` diz à tela o que ainda falta em vez
+   * de o app inventar um valor médio e apresentá-lo como se fosse do usuário.
+   */
+  biologicalSex: BiologicalSex.nullable().default(null),
+  activityLevel: ActivityLevel.nullable().default(null),
   planKey: PlanKey,
   entitlements: z.array(Entitlement),
   createdAt: Instant,
@@ -79,6 +104,8 @@ export const UpdateProfileInput = UserProfile.pick({
   displayName: true,
   heightCm: true,
   birthDate: true,
+  biologicalSex: true,
+  activityLevel: true,
 });
 export type UpdateProfileInput = z.infer<typeof UpdateProfileInput>;
 

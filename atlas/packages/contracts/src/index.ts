@@ -11,3 +11,4 @@ export * from './schemas/onboarding.js';
 export * from './schemas/offline.js';
 
 export * from './schemas/check-in.js';
+export * from './schemas/nutrition.js';

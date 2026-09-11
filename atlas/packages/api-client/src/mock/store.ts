@@ -20,8 +20,8 @@ import { buildSeedData } from './seed.js';
  * Sem isso, a demo mente e a integração descobre requisitos. Ver spec 12 §2.
  */
 export interface MockStore {
-  checkIns: Map<string,CheckInEntry>;
-  checkInWrites: Map<string,CheckInEntry>;
+  checkIns: Map<string, CheckInEntry>;
+  checkInWrites: Map<string, CheckInEntry>;
   config: MockRuntimeConfig;
   me: UserProfile;
   muscleGroups: MuscleGroup[];
@@ -31,6 +31,8 @@ export interface MockStore {
   measurements: MeasurementEntry[];
   professionals: ProfessionalSummary[];
   clientOverviews: ClientOverview[];
+  /** ATL-NUT-001 — água consumida por dia local ("YYYY-MM-DD" → ml). */
+  hydration: Map<string, number>;
   /** Deduplicação de escrita — o mock também implementa idempotência. */
   idempotencyKeys: Set<string>;
 }
@@ -40,7 +42,9 @@ export function createMockStore(config: MockRuntimeConfig): MockStore {
   const seed = buildSeedData(random);
   return {
     config,
-    checkIns:new Map(),checkInWrites:new Map(),
+    checkIns: new Map(),
+    checkInWrites: new Map(),
+    hydration: new Map(),
     ...seed,
     idempotencyKeys: new Set<string>(),
   };

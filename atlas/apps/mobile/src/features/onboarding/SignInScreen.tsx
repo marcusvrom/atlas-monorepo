@@ -25,6 +25,8 @@ export function SignInScreen() {
             displayName: me.data.displayName,
             heightCm: me.data.heightCm,
             birthDate: me.data.birthDate,
+            biologicalSex: me.data.biologicalSex,
+            activityLevel: me.data.activityLevel,
           },
           goal: me.data.goal,
           baseline: null,

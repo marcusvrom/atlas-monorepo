@@ -1,6 +1,6 @@
 import { Avatar } from '../avatar/Avatar';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
-import { CurrentGoal, GoalType } from '@atlas/contracts';
+import { ActivityLevel, BiologicalSex, CurrentGoal, GoalType } from '@atlas/contracts';
 import { useRouter } from 'expo-router';
 import { layout, spacing, opacity } from '@atlas/design-tokens';
 import {
@@ -17,10 +17,11 @@ import {
 } from '../../design/components';
 import { CoverScrim } from '../../design/media';
 import { t } from '../../i18n';
-import { useMe, useUpdateGoal } from './hooks';
+import { useMe, useUpdateGoal, useUpdateProfile } from './hooks';
 export function ProfileScreen() {
   const me = useMe(),
     save = useUpdateGoal(),
+    saveProfile = useUpdateProfile(),
     router = useRouter();
   if (me.isPending)
     return (
@@ -96,11 +97,86 @@ export function ProfileScreen() {
           </View>
           {save.isError ? <ErrorState message={t('profileError')} /> : null}
         </Card>
+        {/*
+          ATL-NUT-001 — entradas da estimativa metabólica.
+
+          Ficam no perfil, ao lado do objetivo, porque é onde o usuário já vai
+          quando algo muda. Sem elas a tela de metas mostra `missingInputs` e
+          não consegue estimar; com elas, a mesma biometria que o app já
+          guardava vira meta calórica.
+        */}
+        <Card>
+          <Text weight="bold">{t('profileBiologicalSex')}</Text>
+          <View style={styles.options}>
+            {BiologicalSex.options.map((value) => (
+              <Chip
+                key={value}
+                label={t(sexLabel[value])}
+                selected={profile.biologicalSex === value}
+                disabled={saveProfile.isPending}
+                onPress={() =>
+                  saveProfile.mutate({
+                    displayName: profile.displayName,
+                    heightCm: profile.heightCm,
+                    birthDate: profile.birthDate,
+                    biologicalSex: value,
+                    activityLevel: profile.activityLevel,
+                  })
+                }
+              />
+            ))}
+          </View>
+        </Card>
+
+        <Card>
+          <Text weight="bold">{t('profileActivityLevel')}</Text>
+          <View style={styles.options}>
+            {ActivityLevel.options.map((value) => (
+              <Chip
+                key={value}
+                label={t(activityLabel[value])}
+                selected={profile.activityLevel === value}
+                disabled={saveProfile.isPending}
+                onPress={() =>
+                  saveProfile.mutate({
+                    displayName: profile.displayName,
+                    heightCm: profile.heightCm,
+                    birthDate: profile.birthDate,
+                    biologicalSex: profile.biologicalSex,
+                    activityLevel: value,
+                  })
+                }
+              />
+            ))}
+          </View>
+          {saveProfile.isError ? <ErrorState message={t('profileError')} /> : null}
+        </Card>
+
+        <Button
+          label={t('nutritionTitle')}
+          variant="ghost"
+          onPress={() => router.push('/nutrition')}
+        />
         <Button label={t('plansCompare')} variant="ghost" onPress={() => router.push('/paywall')} />
       </ScrollView>
     </Screen>
   );
 }
+/** Rótulos fora do componente: mapa estável, não recriado a cada render. */
+const sexLabel: Record<BiologicalSex, Parameters<typeof t>[0]> = {
+  male: 'sexMale',
+  female: 'sexFemale',
+  unspecified: 'sexUnspecified',
+};
+
+const activityLabel: Record<ActivityLevel, Parameters<typeof t>[0]> = {
+  sedentary: 'activitySedentary',
+  light: 'activityLight',
+  moderate: 'activityModerate',
+  high: 'activityHigh',
+  athlete: 'activityAthlete',
+};
+
 const styles = StyleSheet.create({
   content: { padding: layout.pageInset, paddingBottom: spacing.huge * 2, gap: layout.sectionGap },
   // Sem altura fixa: o hero do perfil cresce com o conteúdo (nome longo,

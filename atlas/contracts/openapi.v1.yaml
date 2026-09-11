@@ -529,6 +529,73 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ClientDetail"
+  /api/v1/nutrition/daily-targets:
+    get:
+      tags:
+        - Nutrition
+      operationId: getDailyTargets
+      description: Estimativa metabólica do dia (TMB, manutenção, alvo, macros e água),
+        calculada pela fórmula versionada de @atlas/domain. NÃO é prescrição
+        dietética; missingInputs lista o que falta no perfil para a estimativa
+        ficar completa.
+      responses:
+        "200":
+          description: Metas do dia
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DailyTargets"
+  /api/v1/nutrition/hydration/{date}:
+    get:
+      tags:
+        - Nutrition
+      operationId: getHydrationDay
+      parameters:
+        - name: date
+          in: path
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        "200":
+          description: Meta, consumo e cronograma de água do dia
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HydrationDay"
+  /api/v1/nutrition/hydration/{date}/logs:
+    post:
+      tags:
+        - Nutrition
+      operationId: logWater
+      description: Registra um copo. Reenvio do mesmo clientGeneratedId é no-op.
+      parameters:
+        - name: date
+          in: path
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LogWaterInput"
+      responses:
+        "200":
+          description: Dia de hidratação após o registro
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HydrationDay"
   /api/v1/check-ins:
     get:
       tags:
@@ -1716,6 +1783,18 @@ components:
                 - "null"
             background:
               type: string
+            hairColor:
+              type:
+                - string
+                - "null"
+            outfitColor:
+              type:
+                - string
+                - "null"
+            backgroundColor:
+              type:
+                - string
+                - "null"
           required:
             - base
             - skinTone
@@ -1775,6 +1854,27 @@ components:
                 - targetWeightKg
                 - targetBodyFatPct
                 - weeklySessionTarget
+            - type: "null"
+        biologicalSex:
+          description: Usado apenas na equação de Mifflin-St Jeor. Nulo quando o usuário
+            não informou; a estimativa então usa a média das constantes.
+          anyOf:
+            - type: string
+              enum:
+                - male
+                - female
+                - unspecified
+            - type: "null"
+        activityLevel:
+          description: Nível de atividade (PAL) da estimativa metabólica.
+          anyOf:
+            - type: string
+              enum:
+                - sedentary
+                - light
+                - moderate
+                - high
+                - athlete
             - type: "null"
         heightCm:
           anyOf:
@@ -1857,10 +1957,30 @@ components:
           type:
             - string
             - "null"
+        biologicalSex:
+          anyOf:
+            - type: string
+              enum:
+                - male
+                - female
+                - unspecified
+            - type: "null"
+        activityLevel:
+          anyOf:
+            - type: string
+              enum:
+                - sedentary
+                - light
+                - moderate
+                - high
+                - athlete
+            - type: "null"
       required:
         - displayName
         - heightCm
         - birthDate
+        - biologicalSex
+        - activityLevel
     CurrentGoal:
       type: object
       properties:
@@ -2192,6 +2312,128 @@ components:
         - profile
         - goal
         - baseline
+    MacroTargets:
+      type: object
+      properties:
+        proteinG:
+          type: number
+          minimum: 0
+        carbsG:
+          type: number
+          minimum: 0
+        fatG:
+          type: number
+          minimum: 0
+        energyFromMacrosKcal:
+          description: Calorias que os macros somam. Pode divergir de targetKcal quando o
+            piso proteico não cabe num alvo muito baixo.
+          type: number
+          minimum: 0
+      required:
+        - proteinG
+        - carbsG
+        - fatG
+        - energyFromMacrosKcal
+    DailyTargets:
+      type: object
+      properties:
+        formulaVersion:
+          type: integer
+          minimum: 1
+        basalKcal:
+          type: number
+          minimum: 0
+        maintenanceKcal:
+          type: number
+          minimum: 0
+        goalAdjustmentKcal:
+          type: number
+        targetKcal:
+          type: number
+          minimum: 0
+        macros:
+          $ref: "#/components/schemas/MacroTargets"
+        waterMl:
+          type: integer
+          minimum: 0
+        missingInputs:
+          type: array
+          items:
+            type: string
+            enum:
+              - weight
+              - height
+              - birthDate
+              - sex
+              - goal
+        disclaimerKey:
+          description: Chave i18n do aviso de que a estimativa não é prescrição. Toda
+            superfície que mostra a meta precisa exibi-lo.
+          type: string
+        computedAt:
+          type: string
+          format: date-time
+      required:
+        - formulaVersion
+        - basalKcal
+        - maintenanceKcal
+        - goalAdjustmentKcal
+        - targetKcal
+        - macros
+        - waterMl
+        - missingInputs
+        - disclaimerKey
+        - computedAt
+    WaterReminder:
+      type: object
+      properties:
+        time:
+          type: string
+          pattern: "^[0-9]{2}:[0-9]{2}$"
+        volumeMl:
+          type: integer
+          minimum: 0
+      required:
+        - time
+        - volumeMl
+    HydrationDay:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        targetMl:
+          type: integer
+          minimum: 0
+        consumedMl:
+          type: integer
+          minimum: 0
+        schedule:
+          type: array
+          items:
+            $ref: "#/components/schemas/WaterReminder"
+      required:
+        - date
+        - targetMl
+        - consumedMl
+        - schedule
+    LogWaterInput:
+      type: object
+      properties:
+        clientGeneratedId:
+          type: string
+          format: uuid
+        date:
+          type: string
+          format: date
+        volumeMl:
+          type: integer
+          minimum: 1
+          maximum: 3000
+      required:
+        - clientGeneratedId
+        - date
+        - volumeMl
     AvatarConfig:
       type: object
       properties:
@@ -2222,6 +2464,24 @@ components:
             - "null"
         background:
           type: string
+        hairColor:
+          description: Cor do cabelo, independente da forma. Nulo usa a cor padrão da
+            peça. Opcional; default null.
+          type:
+            - string
+            - "null"
+        outfitColor:
+          description: Cor da roupa, independente da forma. Nulo usa a cor padrão da
+            peça. Opcional; default null.
+          type:
+            - string
+            - "null"
+        backgroundColor:
+          description: Cor do fundo do avatar, independente da peça. Nulo usa a cor
+            padrão. Opcional; default null.
+          type:
+            - string
+            - "null"
       required:
         - base
         - skinTone

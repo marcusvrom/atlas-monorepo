@@ -1,9 +1,10 @@
-import {MockWellbeingAdapter} from './mock/wellbeing.mock.js';
-import {HttpWellbeingAdapter} from './http/wellbeing.http.js';
+import { MockWellbeingAdapter } from './mock/wellbeing.mock.js';
+import { HttpWellbeingAdapter } from './http/wellbeing.http.js';
 import { HttpCatalogAdapter } from './http/catalog.http.js';
 import { HttpClient } from './http/http-client.js';
 import { HttpProgrammingAdapter } from './http/programming.http.js';
 import { HttpSessionAdapter } from './http/session.http.js';
+import { HttpNutritionAdapter } from './http/nutrition.http.js';
 import {
   HttpCoachingAdapter,
   HttpIdentityAdapter,
@@ -17,6 +18,7 @@ import { MockInsightsAdapter } from './mock/insights.mock.js';
 import { MockMeasurementAdapter } from './mock/measurement.mock.js';
 import { MockProgrammingAdapter } from './mock/programming.mock.js';
 import { MockSessionAdapter } from './mock/session.mock.js';
+import { MockNutritionAdapter } from './mock/nutrition.mock.js';
 import { defaultMockConfig, type MockRuntimeConfig } from './mock/runtime.js';
 import { createMockStore } from './mock/store.js';
 import type { ApiClient } from './ports/index.js';
@@ -59,7 +61,7 @@ export function createApiClient(options: CreateApiClientOptions): ApiClient {
   const store = createMockStore(mockConfig);
 
   const mock = {
-    wellbeing:new MockWellbeingAdapter(store),
+    wellbeing: new MockWellbeingAdapter(store),
     catalog: new MockCatalogAdapter(store),
     programming: new MockProgrammingAdapter(store),
     session: new MockSessionAdapter(store),
@@ -67,6 +69,7 @@ export function createApiClient(options: CreateApiClientOptions): ApiClient {
     insights: new MockInsightsAdapter(store),
     coaching: new MockCoachingAdapter(store),
     identity: new MockIdentityAdapter(store),
+    nutrition: new MockNutritionAdapter(store),
   } as const;
 
   if (options.mode === 'mock' && !options.httpOverrides) {
@@ -83,7 +86,7 @@ export function createApiClient(options: CreateApiClientOptions): ApiClient {
   });
 
   const httpAdapters = {
-    wellbeing:new HttpWellbeingAdapter(http),
+    wellbeing: new HttpWellbeingAdapter(http),
     catalog: new HttpCatalogAdapter(http),
     programming: new HttpProgrammingAdapter(http),
     session: new HttpSessionAdapter(http),
@@ -91,6 +94,7 @@ export function createApiClient(options: CreateApiClientOptions): ApiClient {
     insights: new HttpInsightsAdapter(http),
     coaching: new HttpCoachingAdapter(http),
     identity: new HttpIdentityAdapter(http),
+    nutrition: new HttpNutritionAdapter(http),
   } as const;
 
   const shouldUseHttp = (domain: keyof typeof httpAdapters): boolean =>
@@ -106,5 +110,6 @@ export function createApiClient(options: CreateApiClientOptions): ApiClient {
     insights: shouldUseHttp('insights') ? httpAdapters.insights : mock.insights,
     coaching: shouldUseHttp('coaching') ? httpAdapters.coaching : mock.coaching,
     identity: shouldUseHttp('identity') ? httpAdapters.identity : mock.identity,
+    nutrition: shouldUseHttp('nutrition') ? httpAdapters.nutrition : mock.nutrition,
   };
 }

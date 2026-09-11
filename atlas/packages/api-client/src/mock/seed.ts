@@ -153,7 +153,10 @@ export function buildSeedData(random: () => number): SeedData {
   const activePlan = plans[0]!;
   const sessions = buildSessions(random, activePlan);
   const measurements = buildMeasurements(random);
-  for(const plan of plans.slice(2)){plan.status='archived';plan.isActive=false;}
+  for (const plan of plans.slice(2)) {
+    plan.status = 'archived';
+    plan.isActive = false;
+  }
   const professionals = buildProfessionals(random);
   const clientOverviews = buildClientOverviews(random);
 
@@ -163,16 +166,25 @@ export function buildSeedData(random: () => number): SeedData {
     email: 'demo@atlas.app',
     avatar: {
       photoUri: null,
-      base: 'base-01',
-      skinTone: 'tone-04',
-      hair: 'hair-short-02',
-      face: 'face-03',
-      outfit: 'outfit-tank-01',
+      // Ids do catálogo em apps/mobile/src/features/avatar/avatar-assets.ts.
+      // Antes eram de outra numeração ('hair-short-02'), o que fazia todo item
+      // cair no fallback de índice 0 e nada aparecer selecionado no editor.
+      base: 'base-1',
+      skinTone: 'skinTone-3',
+      hair: 'hair-1',
+      face: 'face-2',
+      outfit: 'outfit-0',
       accessory: null,
       frame: null,
-      background: 'bg-gradient-03',
+      background: 'background-2',
+      hairColor: null,
+      outfitColor: null,
+      backgroundColor: null,
     },
     roles: ['athlete'],
+    // ATL-NUT-001 — entradas da estimativa metabólica.
+    biologicalSex: 'male',
+    activityLevel: 'moderate',
     goal: {
       type: 'hypertrophy',
       targetDate: iso(addDays(new Date(), 90)),
@@ -184,7 +196,11 @@ export function buildSeedData(random: () => number): SeedData {
     birthDate: '1994-05-12',
     planKey: 'free',
     entitlements: [
-      { feature: 'activeWorkoutPlans', limit: 2, used: plans.filter((p) => p.status !== 'archived').length },
+      {
+        feature: 'activeWorkoutPlans',
+        limit: 2,
+        used: plans.filter((p) => p.status !== 'archived').length,
+      },
       { feature: 'customExercises', limit: 5, used: 0 },
       { feature: 'fullHistory', limit: 0, used: 0 },
       { feature: 'advancedInsights', limit: 0, used: 0 },
@@ -196,7 +212,16 @@ export function buildSeedData(random: () => number): SeedData {
     createdAt: iso(addDays(new Date(), -HISTORY_WEEKS * 7 - 10)),
   };
 
-  return { me, muscleGroups, exercises, plans, sessions, measurements, professionals, clientOverviews };
+  return {
+    me,
+    muscleGroups,
+    exercises,
+    plans,
+    sessions,
+    measurements,
+    professionals,
+    clientOverviews,
+  };
 }
 
 type DaySpec = {
@@ -271,9 +296,10 @@ function buildSessions(random: () => number, plan: WorkoutPlan): TrainingSession
       for (const prescription of day.exercises) {
         prescription.sets.forEach((setSpec, index) => {
           const baseWeight = setSpec.targetWeightKg ?? 0;
-          const weight = baseWeight > 0
-            ? roundToPlate(baseWeight * progressionFactor * (1 + (random() - 0.5) * 0.03))
-            : 0;
+          const weight =
+            baseWeight > 0
+              ? roundToPlate(baseWeight * progressionFactor * (1 + (random() - 0.5) * 0.03))
+              : 0;
           const reps = setSpec.targetReps ?? 12;
 
           sets.push({
@@ -308,9 +334,7 @@ function buildSessions(random: () => number, plan: WorkoutPlan): TrainingSession
     }
   }
 
-  return sessions.sort(
-    (a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime(),
-  );
+  return sessions.sort((a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime());
 }
 
 /** Peso com tendência de recomposição + ruído diário — o ruído é o ponto:
@@ -335,17 +359,18 @@ function buildMeasurements(random: () => number): MeasurementEntry[] {
       weightKg: w,
       bodyFatPct: bf,
       leanMassKg: leanMass(w, bf),
-      circumferences: day % 14 === 0
-        ? {
-            chestCm: round1(103 + random()),
-            waistCm: round1(86 - (HISTORY_WEEKS * 7 - day) * 0.012),
-            hipCm: round1(100 + random()),
-            rightArmCm: round1(37 + random() * 0.6),
-            leftArmCm: round1(36.7 + random() * 0.6),
-            rightThighCm: round1(59 + random()),
-            leftThighCm: round1(58.8 + random()),
-          }
-        : null,
+      circumferences:
+        day % 14 === 0
+          ? {
+              chestCm: round1(103 + random()),
+              waistCm: round1(86 - (HISTORY_WEEKS * 7 - day) * 0.012),
+              hipCm: round1(100 + random()),
+              rightArmCm: round1(37 + random() * 0.6),
+              leftArmCm: round1(36.7 + random() * 0.6),
+              rightThighCm: round1(59 + random()),
+              leftThighCm: round1(58.8 + random()),
+            }
+          : null,
       notes: null,
       hasPhotos: false,
     });
@@ -355,7 +380,13 @@ function buildMeasurements(random: () => number): MeasurementEntry[] {
 }
 
 function buildProfessionals(random: () => number): ProfessionalSummary[] {
-  const seedList: [string, string, ProfessionalSummary['specialties'], ProfessionalSummary['modality'], number][] = [
+  const seedList: [
+    string,
+    string,
+    ProfessionalSummary['specialties'],
+    ProfessionalSummary['modality'],
+    number,
+  ][] = [
     ['Renata Alves', 'CREF 012345-G/SP', ['hypertrophy', 'weightLoss'], 'hybrid', 289],
     ['Diego Monteiro', 'CREF 023981-G/SP', ['strength', 'sportsPerformance'], 'inPerson', 420],
     ['Camila Prado', 'CREFITO 98213-F', ['physiotherapy', 'postural'], 'hybrid', 350],
@@ -388,11 +419,30 @@ function buildProfessionals(random: () => number): ProfessionalSummary[] {
  */
 function buildClientOverviews(random: () => number): ClientOverview[] {
   const names = [
-    'Ana Beatriz', 'Carlos Eduardo', 'Priscila Moura', 'Rafael Lima', 'Juliana Castro',
-    'Thiago Barros', 'Marina Rocha', 'Gustavo Freitas', 'Letícia Amaral', 'Vinícius Sá',
-    'Patrícia Nogueira', 'Eduardo Pires', 'Fernanda Duarte', 'Rodrigo Melo', 'Bianca Teixeira',
-    'André Vasques', 'Isabela Correia', 'Marcelo Fontes', 'Natália Ribeiro', 'Henrique Lopes',
-    'Sofia Andrade', 'Leonardo Cruz', 'Tatiane Vieira', 'Otávio Bastos',
+    'Ana Beatriz',
+    'Carlos Eduardo',
+    'Priscila Moura',
+    'Rafael Lima',
+    'Juliana Castro',
+    'Thiago Barros',
+    'Marina Rocha',
+    'Gustavo Freitas',
+    'Letícia Amaral',
+    'Vinícius Sá',
+    'Patrícia Nogueira',
+    'Eduardo Pires',
+    'Fernanda Duarte',
+    'Rodrigo Melo',
+    'Bianca Teixeira',
+    'André Vasques',
+    'Isabela Correia',
+    'Marcelo Fontes',
+    'Natália Ribeiro',
+    'Henrique Lopes',
+    'Sofia Andrade',
+    'Leonardo Cruz',
+    'Tatiane Vieira',
+    'Otávio Bastos',
   ];
   const goals: ClientOverview['goal'][] = ['hypertrophy', 'fatLoss', 'strength', 'rehabilitation'];
 
