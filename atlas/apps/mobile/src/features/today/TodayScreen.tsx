@@ -28,6 +28,7 @@ import { WeeklyPlan } from './WeeklyPlan';
 import { TodayExercises } from './TodayExercises';
 import { t } from '../../i18n';
 import { newId } from '../../lib/id';
+import homeWorkoutImage from '../../../assets/marketing/home-workout.webp';
 
 /**
  * Home do atleta.
@@ -112,6 +113,7 @@ export function TodayScreen() {
             <View style={styles.section}>
               <CoverCard
                 seed={today.data.day.id}
+                asset={homeWorkoutImage}
                 glyph="dumbbell"
                 height={layout.coverHero}
                 eyebrow={t('todayEyebrow')}

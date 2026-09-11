@@ -3,8 +3,9 @@ import { StyleSheet, View } from 'react-native';
 import { spacing } from '@atlas/design-tokens';
 import { FlashList } from '@shopify/flash-list';
 import type { ExerciseSummary } from '@atlas/contracts';
-import { Button, Input, LoadingState, ErrorState, EmptyState } from '../../design/components';
+import { Input, LoadingState, ErrorState, EmptyState } from '../../design/components';
 import { useDebouncedSearch } from '../catalog/use-debounced-search';
+import { ExerciseRow } from '../catalog/ExerciseRow';
 import { useExercisePages } from './hooks';
 import { t } from '../../i18n';
 export function ExercisePicker({ onPick }: { onPick: (exercise: ExerciseSummary) => void }) {
@@ -23,9 +24,7 @@ export function ExercisePicker({ onPick }: { onPick: (exercise: ExerciseSummary)
           <FlashList
             data={results.data.pages.flatMap((p) => p.items)}
             keyExtractor={(item) => item.id}
-            renderItem={({ item }) => (
-              <Button variant="ghost" label={item.name} onPress={() => onPick(item)} />
-            )}
+            renderItem={({ item }) => <ExerciseRow exercise={item} onPress={() => onPick(item)} />}
             onEndReached={() => {
               if (results.hasNextPage && !results.isFetchingNextPage) void results.fetchNextPage();
             }}

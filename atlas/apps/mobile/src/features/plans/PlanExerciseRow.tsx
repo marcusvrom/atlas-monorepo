@@ -4,9 +4,9 @@ import { StyleSheet, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { scheduleOnRN } from 'react-native-worklets';
-import { motion, spacing } from '@atlas/design-tokens';
+import { layout, motion, spacing } from '@atlas/design-tokens';
 import type { ExercisePrescription } from '@atlas/contracts';
-import { Button, Card, Text } from '../../design/components';
+import { Button, Card, CoverImage, Text } from '../../design/components';
 import { plural, t } from '../../i18n';
 export function PlanExerciseRow({
   exercise,
@@ -60,19 +60,30 @@ export function PlanExerciseRow({
         style={[styles.root, animated]}
       >
         <Card>
-          <Text weight="bold">
-            {exercise.order}. {exercise.exerciseName}
-          </Text>
-          <Text>
-            {exercise.sets.length} {plural(exercise.sets.length, 'planSetsOne', 'planSets')} ·{' '}
-            {t(
-              exercise.technique === 'superset'
-                ? 'techniqueSuperset'
-                : exercise.technique === 'dropset'
-                  ? 'techniqueDropset'
-                  : 'techniqueStraight',
-            )}
-          </Text>
+          <View style={styles.summary}>
+            <CoverImage
+              seed={exercise.exerciseId}
+              uri={exercise.thumbnailUrl}
+              glyph="dumbbell"
+              radius="md"
+              style={styles.thumbnail}
+            />
+            <View style={styles.copy}>
+              <Text weight="bold">
+                {exercise.order}. {exercise.exerciseName}
+              </Text>
+              <Text>
+                {exercise.sets.length} {plural(exercise.sets.length, 'planSetsOne', 'planSets')} ·{' '}
+                {t(
+                  exercise.technique === 'superset'
+                    ? 'techniqueSuperset'
+                    : exercise.technique === 'dropset'
+                      ? 'techniqueDropset'
+                      : 'techniqueStraight',
+                )}
+              </Text>
+            </View>
+          </View>
           <Text variant="caption">{t('planGestureHint')}</Text>
           <View style={styles.actions}>
             <Button label={t('edit')} variant="ghost" onPress={onEdit} />
@@ -97,5 +108,8 @@ export function PlanExerciseRow({
 }
 const styles = StyleSheet.create({
   root: { paddingVertical: spacing.sm },
+  summary: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
+  thumbnail: { width: layout.thumbnail, height: layout.thumbnail },
+  copy: { flex: 1, gap: spacing.xs },
   actions: { gap: spacing.sm, flexDirection: 'row', flexWrap: 'wrap' },
 });

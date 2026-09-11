@@ -1,7 +1,7 @@
 import type { ExercisePrescription, SetPrescription } from '@atlas/contracts';
 import { StyleSheet, View } from 'react-native';
-import { spacing } from '@atlas/design-tokens';
-import { Button, Chip, Input, NumericStepper, Text } from '../../design/components';
+import { layout, spacing } from '@atlas/design-tokens';
+import { Button, Chip, CoverImage, Input, NumericStepper, Text } from '../../design/components';
 import { t } from '../../i18n';
 import { defaultSet } from './editor-state';
 import { useState } from 'react';
@@ -23,7 +23,18 @@ export function PrescriptionEditor({
     });
   return (
     <View style={styles.root}>
-      <Text weight="bold">{value.exerciseName}</Text>
+      <View style={styles.header}>
+        <CoverImage
+          seed={value.exerciseId}
+          uri={value.thumbnailUrl}
+          glyph="dumbbell"
+          radius="md"
+          style={styles.thumbnail}
+        />
+        <Text weight="bold" style={styles.title}>
+          {value.exerciseName}
+        </Text>
+      </View>
       <View style={styles.row}>
         {(['straight', 'superset', 'dropset'] as const).map((technique) => (
           <Chip
@@ -131,5 +142,8 @@ export function PrescriptionEditor({
 }
 const styles = StyleSheet.create({
   root: { gap: spacing.md },
+  header: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
+  thumbnail: { width: layout.thumbnail, height: layout.thumbnail },
+  title: { flex: 1 },
   row: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
 });

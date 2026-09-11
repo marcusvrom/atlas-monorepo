@@ -101,9 +101,7 @@ export function ExerciseDetailScreen() {
           {exercise.isError ? (
             <ErrorState message={t('catalogError')} onRetry={() => void exercise.refetch()} />
           ) : null}
-          <ExerciseVideo
-            media={detail.media.find((item) => item.kind === 'loop' || item.kind === 'video')}
-          />
+          <ExerciseVideo media={detail.media} exerciseName={detail.name} />
           <ExerciseSteps cues={detail.executionCues} mistakes={detail.commonMistakes} />
           <Card>
             <Text weight="bold">{t('catalogAnatomy')}</Text>
