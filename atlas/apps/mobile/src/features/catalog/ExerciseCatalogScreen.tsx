@@ -14,27 +14,42 @@ import {
   LoadingState,
   MetaChip,
   MetaChipRow,
+  Chip,
   Screen,
   ScreenHeader,
   SectionHeader,
+  Text,
   IconButton,
 } from '../../design/components';
+import { assessExercise } from '@atlas/domain';
 import { difficultyLabel, equipmentLabel } from './labels';
 import { t } from '../../i18n';
 import { useExercisePages } from './hooks';
 import { useDebouncedSearch } from './use-debounced-search';
 import { ExerciseFilters } from './ExerciseFilters';
 import { ExerciseRow } from './ExerciseRow';
+import { usePersonalizedFilter } from './use-personalized-filter';
 export function ExerciseCatalogScreen() {
   const router = useRouter();
   const [search, setSearch] = useState('');
   const query = useDebouncedSearch(search);
   const [filter, setFilter] = useState<ExerciseFilter>({});
   const [filtersOpen, setFiltersOpen] = useState(false);
-  const result = useExercisePages({ ...filter, query, limit: 20 });
+  // Ligado por padrão quando há perfil: quem respondeu "poupe meu joelho"
+  // espera que o app se lembre disso. O que não pode é acontecer em silêncio —
+  // daí o interruptor e a frase abaixo dele.
+  const [personalized, setPersonalized] = useState(true);
+  const profile = usePersonalizedFilter(personalized);
+  const result = useExercisePages({ ...filter, ...profile.filter, query, limit: 20 });
   const items = useMemo(
     () => result.data?.pages.flatMap((page) => page.items) ?? [],
     [result.data],
+  );
+  // O veredito é calculado sobre a lista já carregada — inclusive com o filtro
+  // desligado, que é justamente quando o selo precisa aparecer.
+  const fits = useMemo(
+    () => new Map(items.map((item) => [item.id, assessExercise(item, profile.preferences)])),
+    [items, profile.preferences],
   );
   const clear = () => {
     setSearch('');
@@ -66,6 +81,18 @@ export function ExerciseCatalogScreen() {
           }
         />
         <Input label={t('catalogSearch')} value={search} onChangeText={setSearch} />
+        {profile.available ? (
+          <View style={styles.personalized}>
+            <Chip
+              label={t('catalogPersonalized')}
+              selected={personalized}
+              onPress={() => setPersonalized(!personalized)}
+            />
+            <Text variant="footnote" tone="secondary" style={styles.personalizedHint}>
+              {t(personalized ? 'catalogPersonalizedOn' : 'catalogPersonalizedOff')}
+            </Text>
+          </View>
+        ) : null}
       </View>
       {result.isPending ? (
         <LoadingState />
@@ -77,6 +104,7 @@ export function ExerciseCatalogScreen() {
           renderItem={({ item }) => (
             <ExerciseRow
               exercise={item}
+              fit={profile.preferences ? fits.get(item.id) : undefined}
               onPress={() => router.push({ pathname: '/exercise/[id]', params: { id: item.id } })}
             />
           )}
@@ -127,12 +155,23 @@ export function ExerciseCatalogScreen() {
           }
           ListEmptyComponent={
             !result.isError ? (
-              <EmptyState
-                title={t('catalogEmptyTitle')}
-                description={t('catalogEmptyDescription')}
-                actionLabel={t('catalogClear')}
-                onAction={clear}
-              />
+              // Lista vazia por causa do perfil tem saída própria: mandar
+              // "limpar busca" a quem não buscou nada não resolve nada.
+              personalized && profile.available && !query ? (
+                <EmptyState
+                  title={t('catalogPersonalizedEmpty')}
+                  description={t('catalogPersonalizedEmptyHint')}
+                  actionLabel={t('catalogPersonalized')}
+                  onAction={() => setPersonalized(false)}
+                />
+              ) : (
+                <EmptyState
+                  title={t('catalogEmptyTitle')}
+                  description={t('catalogEmptyDescription')}
+                  actionLabel={t('catalogClear')}
+                  onAction={clear}
+                />
+              )
             ) : null
           }
           onEndReached={() => {
@@ -165,6 +204,10 @@ const FEATURED_SIZE = 6;
 
 const styles = StyleSheet.create({
   header: { padding: layout.pageInset, gap: spacing.sm },
+  personalized: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: spacing.sm },
+  // A frase precisa poder ocupar duas linhas ao lado do chip num aparelho
+  // estreito, em vez de ser truncada — é ela que explica o que sumiu da lista.
+  personalizedHint: { flex: 1, minWidth: layout.stepperValue },
   content: { paddingHorizontal: layout.pageInset, paddingBottom: spacing.huge },
   listHeader: { gap: layout.sectionGap },
   featured: { gap: spacing.md },

@@ -1,48 +1,49 @@
 
  RUN  v3.2.7 /home/user/atlas-monorepo/atlas
 
-(node:5694) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(node:8533) ExperimentalWarning: SQLite is an experimental feature and might change at any time
 (Use `node --trace-warnings ...` to show where the warning was created)
- ✓ apps/mobile/src/data/session-pending.test.ts (4 tests) 64ms
- ✓ packages/api-client/src/catalog.test.ts (3 tests) 116ms
- ✓ packages/api-client/src/programming.test.ts (4 tests) 63ms
- ✓ packages/api-client/src/wellbeing.test.ts (4 tests) 55ms
- ✓ apps/mobile/src/data/restore-onboarding.test.ts (2 tests) 51ms
- ✓ packages/api-client/src/contract.test.ts (12 tests) 58ms
- ✓ packages/api-client/src/billing.test.ts (1 test) 36ms
- ✓ packages/api-client/src/coaching.test.ts (3 tests) 45ms
- ✓ apps/mobile/src/design/media/cover-art.test.ts (7 tests) 30ms
- ✓ apps/mobile/src/offline/sync-engine.test.ts (4 tests) 1842ms
-   ✓ 10k operações usam lotes de até 50 e consumo de memória limitado no host  1744ms
- ✓ apps/mobile/src/features/plans/editor-state.test.ts (1 test) 33ms
- ✓ apps/mobile/src/lib/format.test.ts (44 tests) 28ms
- ✓ apps/mobile/src/features/progress/chart-summary.test.ts (14 tests) 19ms
- ✓ packages/api-client/src/mock-runtime.test.ts (1 test) 33ms
- ✓ packages/domain/src/metabolism.test.ts (26 tests) 8ms
- ✓ apps/mobile/src/features/avatar/avatar-assets.test.ts (19 tests) 11ms
- ✓ apps/mobile/src/features/progress/dashboard-math.test.ts (5 tests) 13ms
- ✓ apps/mobile/src/features/session/session-records.test.ts (9 tests) 12ms
- ✓ apps/mobile/src/design/tests/contrast.test.ts (5 tests) 5ms
+ ✓ packages/api-client/src/catalog.test.ts (3 tests) 109ms
+ ✓ packages/api-client/src/personalization.test.ts (10 tests) 124ms
+ ✓ packages/api-client/src/programming.test.ts (4 tests) 66ms
+ ✓ packages/api-client/src/contract.test.ts (12 tests) 68ms
+ ✓ apps/mobile/src/data/session-pending.test.ts (4 tests) 58ms
+ ✓ packages/api-client/src/wellbeing.test.ts (4 tests) 51ms
+ ✓ packages/api-client/src/coaching.test.ts (3 tests) 54ms
+ ✓ apps/mobile/src/data/restore-onboarding.test.ts (2 tests) 55ms
+ ✓ apps/mobile/src/design/media/cover-art.test.ts (7 tests) 33ms
+ ✓ apps/mobile/src/offline/sync-engine.test.ts (4 tests) 1792ms
+   ✓ 10k operações usam lotes de até 50 e consumo de memória limitado no host  1707ms
+ ✓ packages/api-client/src/billing.test.ts (1 test) 39ms
+ ✓ apps/mobile/src/features/progress/chart-summary.test.ts (14 tests) 18ms
+ ✓ apps/mobile/src/features/plans/editor-state.test.ts (1 test) 29ms
+ ✓ packages/api-client/src/mock-runtime.test.ts (1 test) 26ms
+ ✓ apps/mobile/src/lib/format.test.ts (44 tests) 21ms
+ ✓ apps/mobile/src/dev/demo-settings.test.ts (2 tests) 12ms
+ ✓ apps/mobile/src/features/session/session-records.test.ts (9 tests) 10ms
  ✓ apps/mobile/src/features/progress/progress.test.ts (4 tests) 9ms
- ✓ apps/mobile/src/features/progress/activity-buckets.test.ts (1 test) 9ms
- ✓ apps/mobile/src/dev/demo-settings.test.ts (2 tests) 5ms
- ✓ packages/api-client/src/mock/exercise-media.test.ts (2 tests) 3ms
- ✓ apps/mobile/src/data/session-history.test.ts (2 tests) 8ms
- ✓ apps/mobile/src/features/progress/chart-geometry.test.ts (5 tests) 7ms
- ✓ apps/mobile/src/features/today/home-hero.test.ts (16 tests) 8ms
- ✓ apps/mobile/src/components/body-paths.test.ts (2 tests) 6ms
- ✓ apps/mobile/src/design/components/components.test.ts (6 tests) 6ms
- ✓ packages/domain/src/calculations.test.ts (10 tests) 13ms
- ✓ apps/mobile/src/design/media/artwork.test.ts (9 tests) 5ms
- ✓ apps/mobile/src/features/today/prescription-summary.test.ts (3 tests) 6ms
- ✓ apps/mobile/src/i18n/plural.test.ts (3 tests) 6ms
+ ✓ packages/domain/src/metabolism.test.ts (26 tests) 8ms
+ ✓ apps/mobile/src/features/progress/dashboard-math.test.ts (5 tests) 10ms
+ ✓ apps/mobile/src/features/progress/activity-buckets.test.ts (1 test) 12ms
+ ✓ apps/mobile/src/features/today/prescription-summary.test.ts (3 tests) 5ms
+ ✓ packages/domain/src/exercise-fit.test.ts (21 tests) 11ms
+ ✓ apps/mobile/src/design/media/artwork.test.ts (13 tests) 6ms
+ ✓ apps/mobile/src/data/session-history.test.ts (2 tests) 7ms
+ ✓ apps/mobile/src/components/body-paths.test.ts (2 tests) 7ms
+ ✓ apps/mobile/src/features/today/home-hero.test.ts (16 tests) 7ms
+ ✓ packages/domain/src/calculations.test.ts (19 tests) 9ms
  ✓ apps/mobile/src/features/onboarding/feature-tour.test.ts (8 tests) 5ms
+ ✓ apps/mobile/src/features/progress/chart-geometry.test.ts (5 tests) 6ms
+ ✓ apps/mobile/src/design/tests/contrast.test.ts (5 tests) 4ms
+ ✓ apps/mobile/src/design/components/components.test.ts (6 tests) 5ms
  ✓ apps/mobile/src/data/paywall-events.test.ts (1 test) 4ms
+ ✓ apps/mobile/src/i18n/plural.test.ts (3 tests) 4ms
  ✓ apps/mobile/src/design/media/initials.test.ts (4 tests) 3ms
+ ✓ packages/api-client/src/mock/exercise-media.test.ts (2 tests) 3ms
  ✓ apps/mobile/src/design/glass/resolve-capability.test.ts (6 tests) 3ms
 
- Test Files  36 passed (36)
-      Tests  252 passed (252)
-   Start at  19:41:20
-   Duration  5.60s (transform 1.10s, setup 0ms, collect 4.83s, tests 2.63s, environment 8ms, prepare 2.59s)
+ Test Files  37 passed (37)
+      Tests  277 passed (277)
+   Start at  20:23:16
+   Duration  5.51s (transform 1.00s, setup 0ms, collect 4.46s, tests 2.69s, environment 7ms, prepare 2.52s)
 

@@ -13,6 +13,7 @@ import {
   ExerciseSummary as SummarySchema,
   page,
 } from '@atlas/contracts';
+import { assessExercise, isExcluded } from '@atlas/domain';
 import { ApiError } from '../errors.js';
 import type { CatalogPort } from '../ports/catalog.port.js';
 import { simulate } from './runtime.js';
@@ -27,11 +28,27 @@ export class MockCatalogAdapter implements CatalogPort {
       const limit = filter.limit ?? 20;
       const term = filter.query?.trim().toLowerCase();
 
+      // A regra de adequação vem do domínio, e não de um `if` local: é a mesma
+      // que a tela usa para explicar o porquê ao usuário, e duplicá-la aqui
+      // seria repetir o erro que deixou séries efetivas divergentes entre o
+      // mock e `@atlas/domain`.
+      const preferences =
+        filter.protectedRegions || filter.availableEquipment
+          ? {
+              // O nível não filtra a listagem: exercício acima do nível é
+              // cautela, e cautela se mostra, não se esconde.
+              experienceLevel: 'advanced' as const,
+              protectedRegions: filter.protectedRegions ?? [],
+              availableEquipment: filter.availableEquipment ?? null,
+            }
+          : null;
+
       const filtered = this.store.exercises.filter((e) => {
         if (term && !normalize(e.name).includes(normalize(term))) return false;
         if (filter.muscleCode && e.primaryMuscleCode !== filter.muscleCode) return false;
         if (filter.equipment && e.equipment !== filter.equipment) return false;
         if (filter.difficulty && e.difficulty !== filter.difficulty) return false;
+        if (preferences && isExcluded(assessExercise(e, preferences))) return false;
         return true;
       });
 
@@ -71,6 +88,7 @@ function toSummary(e: ExerciseDetail): ExerciseSummary {
     difficulty: e.difficulty,
     thumbnailUrl: e.thumbnailUrl,
     isCustom: e.isCustom,
+    stressedRegions: e.stressedRegions,
   };
 }
 

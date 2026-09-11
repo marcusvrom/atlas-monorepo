@@ -1,6 +1,6 @@
 import { StyleSheet, View } from 'react-native';
 import type { TrainingSession } from '@atlas/contracts';
-import { layout, spacing } from '@atlas/design-tokens';
+import { spacing } from '@atlas/design-tokens';
 import { Button, HeroArtwork, MetricTile, Text } from '../../design/components';
 import { formatCount, formatDuration, formatTonnage } from '../../lib/format';
 import { plural, t } from '../../i18n';
@@ -75,7 +75,7 @@ export function SessionSummary({
 }
 const styles = StyleSheet.create({
   root: { padding: spacing.lg, gap: spacing.lg },
-  hero: { height: layout.coverHero },
+  hero: {},
   heroBody: { flex: 1, justifyContent: 'flex-end', padding: spacing.lg, gap: spacing.xs },
   metrics: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.md },
 });

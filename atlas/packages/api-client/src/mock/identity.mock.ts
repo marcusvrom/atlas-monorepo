@@ -3,10 +3,10 @@ import {
   UserProfile as ProfileSchema,
   UpdateProfileInput as ProfileInputSchema,
   CurrentGoal as GoalSchema,
-  AvatarConfig as AvatarSchema,
+  ProfilePhoto as PhotoSchema,
   Entitlement as EntitlementSchema,
   type UpdateProfileInput,
-  type AvatarConfig,
+  type ProfilePhoto,
   type CurrentGoal,
   type Entitlement,
   type Feature,
@@ -31,7 +31,14 @@ export class MockIdentityAdapter implements IdentityPort {
     });
   }
 
-  private profile(){return ProfileSchema.parse({...this.store.me,planKey:this.store.config.plan??this.store.me.planKey,entitlements:mockEntitlements(this.store),roles:this.store.config.role?[this.store.config.role]:this.store.me.roles});}
+  private profile() {
+    return ProfileSchema.parse({
+      ...this.store.me,
+      planKey: this.store.config.plan ?? this.store.me.planKey,
+      entitlements: mockEntitlements(this.store),
+      roles: this.store.config.role ? [this.store.config.role] : this.store.me.roles,
+    });
+  }
   async getMe(): Promise<UserProfile> {
     return simulate(this.store.config, () => this.profile());
   }
@@ -43,9 +50,9 @@ export class MockIdentityAdapter implements IdentityPort {
     });
   }
 
-  async updateAvatar(avatar: AvatarConfig): Promise<UserProfile> {
+  async updateProfilePhoto(photoUri: ProfilePhoto): Promise<UserProfile> {
     return simulate(this.store.config, () => {
-      this.store.me = { ...this.store.me, avatar: AvatarSchema.parse(avatar) };
+      this.store.me = { ...this.store.me, photoUri: PhotoSchema.parse(photoUri) };
       return this.profile();
     });
   }

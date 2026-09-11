@@ -11,7 +11,16 @@ export interface HttpClientConfig {
 
 export interface RequestOptions {
   method?: 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE';
-  query?: Record<string, string | number | boolean | null | undefined>;
+  /**
+   * Um array vira o mesmo parâmetro repetido (`?a=1&a=2`), e não uma lista
+   * separada por vírgula: CSV obrigaria client e backend a combinarem
+   * separador e escape, e a primeira região com vírgula no nome quebraria em
+   * silêncio. Repetição é o que toda stack de servidor já sabe desmontar.
+   */
+  query?: Record<
+    string,
+    string | number | boolean | null | undefined | readonly (string | number)[]
+  >;
   body?: unknown;
   /** Enviado como header Idempotency-Key. Ver spec 30 §5. */
   idempotencyKey?: string;
@@ -29,14 +38,15 @@ export interface RequestOptions {
 export class HttpClient {
   constructor(private readonly config: HttpClientConfig) {}
 
-  async request<T>(
-    path: string,
-    schema: z.ZodType<T>,
-    options: RequestOptions = {},
-  ): Promise<T> {
+  async request<T>(path: string, schema: z.ZodType<T>, options: RequestOptions = {}): Promise<T> {
     const url = new URL(path, this.config.baseUrl);
     for (const [key, value] of Object.entries(options.query ?? {})) {
-      if (value !== null && value !== undefined) url.searchParams.set(key, String(value));
+      if (value === null || value === undefined) continue;
+      if (Array.isArray(value)) {
+        for (const item of value) url.searchParams.append(key, String(item));
+      } else {
+        url.searchParams.set(key, String(value));
+      }
     }
 
     const headers: Record<string, string> = {

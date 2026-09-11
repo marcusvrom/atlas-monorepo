@@ -1,5 +1,5 @@
 import { readOnboarding, saveOnboarding } from '../onboarding-storage';
-import { CurrentGoal, AvatarConfig, UpdateProfileInput, type Feature } from '@atlas/contracts';
+import { CurrentGoal, ProfilePhoto, UpdateProfileInput, type Feature } from '@atlas/contracts';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { useApi } from '../api-provider';
 import { queryKeys } from '../query-keys';
@@ -51,11 +51,12 @@ export function useUpdateGoal() {
   });
 }
 
-export function useUpdateAvatar() {
+export function useUpdateProfilePhoto() {
   const api = useApi(),
     cache = useQueryClient();
   return useMutation({
-    mutationFn: (avatar: AvatarConfig) => api.identity.updateAvatar(AvatarConfig.parse(avatar)),
+    mutationFn: (photoUri: ProfilePhoto) =>
+      api.identity.updateProfilePhoto(ProfilePhoto.parse(photoUri)),
     onSuccess: () => cache.invalidateQueries({ queryKey: queryKeys.me }),
   });
 }

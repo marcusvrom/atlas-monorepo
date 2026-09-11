@@ -8,6 +8,7 @@ import {
   LoadingState,
   InlineMetric,
   ProgressRing,
+  PersonAvatar,
   Screen,
   SectionHeader,
   Text,
@@ -17,7 +18,6 @@ import { useTodayWorkout, useStartSession } from '../../data/queries/training';
 import { useMe } from '../../data/queries/identity';
 import { useAdherence } from '../../data/queries/progress';
 import { useDashboardSessions } from '../../data/queries/dashboard';
-import { Avatar } from '../avatar/Avatar';
 import { DailyCheckInCard } from '../check-in/DailyCheckInCard';
 import { HydrationCard } from '../nutrition/HydrationCard';
 import { formatCount } from '../../lib/format';
@@ -103,10 +103,15 @@ export function TodayScreen() {
               <Pressable
                 accessibilityRole="button"
                 accessibilityLabel={t('avatarEdit')}
-                onPress={() => router.push('/avatar/edit')}
+                onPress={() => router.push('/(tabs)/profile')}
                 style={({ pressed }) => pressed && styles.pressed}
               >
-                <Avatar config={me.data.avatar} size={spacing.xxxl} />
+                <PersonAvatar
+                  id={me.data.id}
+                  name={me.data.displayName}
+                  uri={me.data.photoUri}
+                  size={spacing.xxxl}
+                />
               </Pressable>
             ) : null}
           </View>

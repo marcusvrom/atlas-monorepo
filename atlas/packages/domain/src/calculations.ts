@@ -7,7 +7,7 @@
  * Ver spec 00 §11.4.
  */
 
-export const CALCULATION_VERSION = 1 as const;
+export const CALCULATION_VERSION = 2 as const;
 
 export interface SetInput {
   readonly weightKg: number | null;
@@ -54,19 +54,79 @@ export function totalVolume(sets: readonly SetInput[]): number {
  * Volume ponderado por ativação muscular. É o que alimenta o heatmap: não basta
  * saber que o exercício "é de peito", é preciso saber o quanto.
  */
-export function weightedVolume(
-  sets: readonly SetInput[],
-  activationWeight: number,
-): number {
+export function weightedVolume(sets: readonly SetInput[], activationWeight: number): number {
   return round2(totalVolume(sets) * clamp(activationWeight, 0, 1));
 }
 
+export const DEFAULT_MAX_RIR = 3;
+
 /**
- * Séries efetivas: proximidade da falha é o que gera estímulo hipertrófico.
- * Séries com RIR > 3 contam pouco para hipertrofia e são excluídas.
+ * Séries efetivas — versão 1. **Não usar em código novo.**
+ *
+ * Mantida porque a fórmula é versionada (ver o topo deste arquivo): qualquer
+ * número já apresentado ou persistido sob a v1 precisa continuar reproduzível.
+ * Dois defeitos a condenaram, ambos observados em tela:
+ *
+ * 1. Exigia RIR registrado. Como RIR é opcional no contrato, quem não anota
+ *    reserva via "0 séries efetivas" em todos os grupos musculares — a métrica
+ *    lia como "você não treinou" para a maior parte dos usuários reais.
+ * 2. Contava série inteira ou nada, sem noção de ativação. Ver
+ *    `weightedEffectiveSets`.
  */
-export function effectiveSets(sets: readonly SetInput[], maxRir = 3): number {
+export function effectiveSetsV1(sets: readonly SetInput[], maxRir = DEFAULT_MAX_RIR): number {
   return sets.filter((s) => !s.isWarmup && s.rir !== null && s.rir <= maxRir).length;
+}
+
+/**
+ * Uma série conta como estímulo? — versão 2.
+ *
+ * Regra: série de aquecimento nunca conta. Série de trabalho conta, **a menos
+ * que** exista evidência explícita de que foi leve (RIR registrado acima do
+ * limite). RIR ausente conta.
+ *
+ * Essa última parte é a inversão em relação à v1, e é uma escolha, não um
+ * detalhe: RIR é um campo opcional que a maioria não preenche. Tratar ausência
+ * como "série fácil" zerava a métrica de quem treina e registra carga e
+ * repetição — ou seja, do usuário padrão. Tratar ausência como "série de
+ * trabalho" pode superestimar quem faz séries realmente leves sem anotar, e
+ * esse é o erro preferível: ele só aparece em quem tem o dado para corrigi-lo.
+ */
+export function isEffectiveSet(set: SetInput, maxRir = DEFAULT_MAX_RIR): boolean {
+  if (set.isWarmup) return false;
+  return set.rir === null || set.rir <= maxRir;
+}
+
+/**
+ * Séries efetivas de um músculo, ponderadas pela ativação — versão 2.
+ *
+ * O número é **fracionário** de propósito. Um agachamento é uma série efetiva
+ * para o quadríceps e cerca de meia para o glúteo; a v1 dava 1 e 0, o que
+ * produzia "0 séries efetivas · 25,5 t de carga" para o glúteo de quem só
+ * agacha — verdadeiro dentro da definição antiga, e sem sentido para quem lê.
+ *
+ * O peso vem do próprio `activationWeight` do catálogo (1,0 para o motor
+ * primário, 0,4–0,5 para sinergistas), e não de uma tabela nova: a mesma
+ * ponderação que alimenta o volume alimenta o estímulo, então as duas medidas
+ * nunca se contradizem.
+ *
+ * A camada de apresentação arredonda; aqui a fração é preservada, porque somar
+ * dez meias séries precisa dar cinco, não zero nem dez.
+ */
+export function weightedEffectiveSets(
+  sets: readonly SetInput[],
+  activationWeight: number,
+  maxRir = DEFAULT_MAX_RIR,
+): number {
+  const weight = clamp(activationWeight, 0, 1);
+  return round2(sets.reduce((total, s) => (isEffectiveSet(s, maxRir) ? total + weight : total), 0));
+}
+
+/**
+ * Séries efetivas sem ponderação, para quando o recorte já é de um exercício
+ * só e a pergunta é "quantas séries de trabalho eu fiz".
+ */
+export function effectiveSets(sets: readonly SetInput[], maxRir = DEFAULT_MAX_RIR): number {
+  return sets.filter((s) => isEffectiveSet(s, maxRir)).length;
 }
 
 /** Massa magra é sempre derivada, nunca informada. */
@@ -104,10 +164,7 @@ export function adherenceRate(completed: number, planned: number): number {
  * conteúdo intestinal, glicogênio); plotar o valor cru gera ansiedade e leitura
  * errada da tendência. A UI sempre exibe o suavizado como linha principal.
  */
-export function movingAverage(
-  values: readonly number[],
-  window = 7,
-): (number | null)[] {
+export function movingAverage(values: readonly number[], window = 7): (number | null)[] {
   return values.map((_, i) => {
     if (i + 1 < window) return null;
     let sum = 0;
@@ -117,9 +174,7 @@ export function movingAverage(
 }
 
 /** Tendência linear por semana (regressão de mínimos quadrados). */
-export function weeklyTrend(
-  points: readonly { atMs: number; value: number }[],
-): number | null {
+export function weeklyTrend(points: readonly { atMs: number; value: number }[]): number | null {
   if (points.length < 2) return null;
   const n = points.length;
   const meanX = points.reduce((a, p) => a + p.atMs, 0) / n;

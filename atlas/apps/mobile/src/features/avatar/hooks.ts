@@ -1,1 +1,1 @@
-export { useMe, useEntitlement, useUpdateAvatar } from '../../data/queries/identity';
+export { useMe, useEntitlement, useUpdateProfilePhoto } from '../../data/queries/identity';

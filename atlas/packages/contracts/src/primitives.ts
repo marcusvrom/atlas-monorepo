@@ -40,13 +40,53 @@ export const MuscleRole = z.enum(['primary', 'secondary', 'stabilizer']);
 export type MuscleRole = z.infer<typeof MuscleRole>;
 
 export const Equipment = z.enum([
-  'barbell', 'dumbbell', 'machine', 'cable', 'bodyweight',
-  'kettlebell', 'band', 'ball', 'none',
+  'barbell',
+  'dumbbell',
+  'machine',
+  'cable',
+  'bodyweight',
+  'kettlebell',
+  'band',
+  'ball',
+  'none',
 ]);
 export type Equipment = z.infer<typeof Equipment>;
 
 export const Difficulty = z.enum(['beginner', 'intermediate', 'advanced']);
 export type Difficulty = z.infer<typeof Difficulty>;
+
+/**
+ * Nível de experiência do usuário.
+ *
+ * É deliberadamente a **mesma escala** de `Difficulty`: a pergunta que o app
+ * precisa responder é "este exercício está no meu nível ou acima?", e uma
+ * escala separada exigiria uma tabela de conversão que seria a primeira coisa
+ * a sair de sincronia. O alias existe para a intenção ficar legível na
+ * assinatura — `experienceLevel: ExperienceLevel` diz o que o campo é.
+ */
+export const ExperienceLevel = Difficulty;
+export type ExperienceLevel = Difficulty;
+
+/**
+ * Região do corpo que uma pessoa pode precisar poupar.
+ *
+ * A lista é **musculoesquelética e articular** de propósito. O Atlas não é
+ * dispositivo médico e não pergunta diagnóstico: pergunta "o que dói" para
+ * ordenar melhor o catálogo, e nada mais. Condições que exigem liberação
+ * clínica — cardiopatia, gestação, pós-operatório — ficam de fora porque a
+ * resposta certa a elas não é filtrar exercício, é procurar um profissional.
+ */
+export const BodyRegion = z.enum([
+  'shoulder',
+  'elbow',
+  'wrist',
+  'neck',
+  'lowerBack',
+  'hip',
+  'knee',
+  'ankle',
+]);
+export type BodyRegion = z.infer<typeof BodyRegion>;
 
 /** Página com cursor opaco. O client nunca constrói cursor. */
 export const page = <T extends z.ZodTypeAny>(item: T) =>

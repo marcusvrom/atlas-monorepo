@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { coverGlyphPaths } from './cover-art';
 import {
+  ARTWORK_ASPECT,
+  VECTOR_ASPECT,
+  artworkAspect,
   artworkAssetKeys,
   artworkContexts,
   artworkFor,
@@ -58,5 +61,32 @@ describe('registro de arte editorial', () => {
     for (const key of artworkAssetKeys) {
       expect(contextsUsing(key).length).toBeLessThanOrEqual(Math.ceil(artworkContexts.length / 2));
     }
+  });
+});
+
+describe('proporção das artes', () => {
+  it('responde a todo contexto com uma proporção utilizável', () => {
+    for (const context of artworkContexts) {
+      const aspect = artworkAspect(context);
+      expect(Number.isFinite(aspect)).toBe(true);
+      expect(aspect).toBeGreaterThan(0);
+    }
+  });
+
+  it('usa a proporção real do arquivo, que é retrato', () => {
+    // Os assets são 1080x1440 e 960x1440. A caixa fixa de 212 pt que existia
+    // antes cortava mais da metade da altura e decepava a figura central.
+    for (const aspect of Object.values(ARTWORK_ASPECT)) expect(aspect).toBeLessThan(1);
+    expect(artworkAspect('active-workout')).toBeCloseTo(960 / 1440, 5);
+    expect(artworkAspect('onboarding-training')).toBeCloseTo(1080 / 1440, 5);
+  });
+
+  it('dá forma mais larga ao contexto que não tem foto para preservar', () => {
+    expect(artworkAspect('nutrition-targets')).toBe(VECTOR_ASPECT);
+    expect(VECTOR_ASPECT).toBeGreaterThan(1);
+  });
+
+  it('mede toda arte empacotada, sem chave faltando nem sobrando', () => {
+    expect(Object.keys(ARTWORK_ASPECT).sort()).toEqual([...artworkAssetKeys].sort());
   });
 });

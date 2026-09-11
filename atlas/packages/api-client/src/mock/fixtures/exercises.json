@@ -19,7 +19,8 @@
       "Quicar a barra no peito",
       "Abrir os cotovelos a 90 graus",
       "Levantar o quadril do banco"
-    ]
+    ],
+    "stressedRegions": ["shoulder", "wrist"]
   },
   {
     "slug": "supino-inclinado-halteres",
@@ -40,7 +41,8 @@
     "mistakes": [
       "Inclinação acima de 45 graus vira exercício de ombro",
       "Bater os halteres no topo"
-    ]
+    ],
+    "stressedRegions": ["shoulder"]
   },
   {
     "slug": "crucifixo-cabo",
@@ -53,7 +55,8 @@
       ["anterior_deltoid", "secondary", 0.3]
     ],
     "cues": ["Cotovelo levemente flexionado e fixo", "Junte pelas mãos, não pelos braços"],
-    "mistakes": ["Transformar em supino flexionando o cotovelo"]
+    "mistakes": ["Transformar em supino flexionando o cotovelo"],
+    "stressedRegions": ["shoulder"]
   },
   {
     "slug": "barra-fixa-pronada",
@@ -72,7 +75,8 @@
       "Peito em direção à barra",
       "Evite balanço do quadril"
     ],
-    "mistakes": ["Amplitude parcial no topo", "Usar impulso de perna sem intenção"]
+    "mistakes": ["Amplitude parcial no topo", "Usar impulso de perna sem intenção"],
+    "stressedRegions": ["shoulder", "elbow"]
   },
   {
     "slug": "remada-curvada-barra",
@@ -92,7 +96,8 @@
       "Puxe em direção ao umbigo",
       "Coluna neutra do início ao fim"
     ],
-    "mistakes": ["Arredondar a lombar", "Usar impulso de quadril a cada repetição"]
+    "mistakes": ["Arredondar a lombar", "Usar impulso de quadril a cada repetição"],
+    "stressedRegions": ["lowerBack"]
   },
   {
     "slug": "puxada-frontal",
@@ -106,7 +111,8 @@
       ["trapezius_middle", "secondary", 0.35]
     ],
     "cues": ["Peito aberto, leve inclinação para trás", "Cotovelos em direção às costelas"],
-    "mistakes": ["Puxar atrás da nuca", "Inclinar demais e virar remada"]
+    "mistakes": ["Puxar atrás da nuca", "Inclinar demais e virar remada"],
+    "stressedRegions": []
   },
   {
     "slug": "remada-unilateral-halter",
@@ -120,7 +126,8 @@
       ["posterior_deltoid", "secondary", 0.3]
     ],
     "cues": ["Quadril estável, sem rotação de tronco", "Amplitude completa na descida"],
-    "mistakes": ["Rodar o tronco para ganhar amplitude"]
+    "mistakes": ["Rodar o tronco para ganhar amplitude"],
+    "stressedRegions": []
   },
   {
     "slug": "agachamento-livre",
@@ -140,7 +147,8 @@
       "Desça até pelo menos a paralela",
       "Core firme, respiração em bloco"
     ],
-    "mistakes": ["Joelho colapsando para dentro", "Elevar o quadril antes do tronco na subida"]
+    "mistakes": ["Joelho colapsando para dentro", "Elevar o quadril antes do tronco na subida"],
+    "stressedRegions": ["knee", "lowerBack", "hip", "ankle"]
   },
   {
     "slug": "leg-press-45",
@@ -154,7 +162,8 @@
       ["adductors", "secondary", 0.3]
     ],
     "cues": ["Não trave o joelho no topo", "Lombar colada no encosto"],
-    "mistakes": ["Descer até a lombar descolar do banco"]
+    "mistakes": ["Descer até a lombar descolar do banco"],
+    "stressedRegions": ["knee"]
   },
   {
     "slug": "cadeira-extensora",
@@ -164,7 +173,8 @@
     "primary": "quadriceps",
     "activations": [["quadriceps", "primary", 1]],
     "cues": ["Contração de 1 segundo no topo", "Ajuste o eixo na altura do joelho"],
-    "mistakes": ["Usar impulso de tronco"]
+    "mistakes": ["Usar impulso de tronco"],
+    "stressedRegions": ["knee"]
   },
   {
     "slug": "levantamento-terra",
@@ -184,7 +194,8 @@
       "Empurre o chão em vez de puxar a barra",
       "Trave quadril e joelho juntos"
     ],
-    "mistakes": ["Lombar em flexão", "Hiperextender a lombar no topo"]
+    "mistakes": ["Lombar em flexão", "Hiperextender a lombar no topo"],
+    "stressedRegions": ["lowerBack", "hip"]
   },
   {
     "slug": "stiff-halteres",
@@ -198,7 +209,8 @@
       ["erector_spinae", "stabilizer", 0.4]
     ],
     "cues": ["Joelho levemente flexionado e fixo", "Quadril para trás, não coluna para frente"],
-    "mistakes": ["Flexionar o joelho durante o movimento"]
+    "mistakes": ["Flexionar o joelho durante o movimento"],
+    "stressedRegions": ["lowerBack"]
   },
   {
     "slug": "mesa-flexora",
@@ -211,7 +223,8 @@
       ["gastrocnemius", "secondary", 0.25]
     ],
     "cues": ["Quadril colado no apoio", "Controle a volta em 2 segundos"],
-    "mistakes": ["Levantar o quadril para ganhar amplitude"]
+    "mistakes": ["Levantar o quadril para ganhar amplitude"],
+    "stressedRegions": []
   },
   {
     "slug": "elevacao-pelvica",
@@ -225,7 +238,8 @@
       ["quadriceps", "secondary", 0.2]
     ],
     "cues": ["Queixo para o peito, costelas fechadas", "Pausa de 1 segundo no topo"],
-    "mistakes": ["Hiperextensão lombar em vez de extensão de quadril"]
+    "mistakes": ["Hiperextensão lombar em vez de extensão de quadril"],
+    "stressedRegions": ["neck"]
   },
   {
     "slug": "desenvolvimento-halteres",
@@ -243,7 +257,8 @@
       "Costelas fechadas, sem arco lombar",
       "Cotovelos levemente à frente do plano do corpo"
     ],
-    "mistakes": ["Transformar em supino inclinado por excesso de arco"]
+    "mistakes": ["Transformar em supino inclinado por excesso de arco"],
+    "stressedRegions": ["shoulder"]
   },
   {
     "slug": "elevacao-lateral",
@@ -256,7 +271,8 @@
       ["trapezius_upper", "secondary", 0.3]
     ],
     "cues": ["Suba até a linha do ombro", "Conduza pelo cotovelo, não pela mão"],
-    "mistakes": ["Usar impulso de tronco", "Elevar acima do ombro recrutando trapézio"]
+    "mistakes": ["Usar impulso de tronco", "Elevar acima do ombro recrutando trapézio"],
+    "stressedRegions": ["shoulder"]
   },
   {
     "slug": "crucifixo-inverso",
@@ -270,7 +286,8 @@
       ["trapezius_middle", "secondary", 0.4]
     ],
     "cues": ["Tronco a 45 graus, coluna neutra", "Abra pelos cotovelos"],
-    "mistakes": ["Puxar como remada, recrutando dorsal"]
+    "mistakes": ["Puxar como remada, recrutando dorsal"],
+    "stressedRegions": []
   },
   {
     "slug": "rosca-direta",
@@ -284,7 +301,8 @@
       ["forearm_flexors", "secondary", 0.3]
     ],
     "cues": ["Cotovelo fixo ao lado do tronco", "Sem balanço de quadril"],
-    "mistakes": ["Levar o cotovelo à frente no topo"]
+    "mistakes": ["Levar o cotovelo à frente no topo"],
+    "stressedRegions": ["wrist", "elbow"]
   },
   {
     "slug": "triceps-testa",
@@ -294,7 +312,8 @@
     "primary": "triceps_brachii",
     "activations": [["triceps_brachii", "primary", 1]],
     "cues": ["Cotovelo apontado ao teto", "Amplitude completa atrás da cabeça"],
-    "mistakes": ["Abrir os cotovelos durante a descida"]
+    "mistakes": ["Abrir os cotovelos durante a descida"],
+    "stressedRegions": ["elbow", "wrist"]
   },
   {
     "slug": "triceps-corda",
@@ -304,7 +323,8 @@
     "primary": "triceps_brachii",
     "activations": [["triceps_brachii", "primary", 0.95]],
     "cues": ["Abra a corda no final do movimento", "Cotovelo fixo"],
-    "mistakes": ["Inclinar o tronco para empurrar mais carga"]
+    "mistakes": ["Inclinar o tronco para empurrar mais carga"],
+    "stressedRegions": []
   },
   {
     "slug": "prancha-isometrica",
@@ -319,7 +339,8 @@
       ["erector_spinae", "stabilizer", 0.3]
     ],
     "cues": ["Glúteo contraído, pelve neutra", "Respire de forma contínua"],
-    "mistakes": ["Quadril alto demais", "Lombar em hiperextensão"]
+    "mistakes": ["Quadril alto demais", "Lombar em hiperextensão"],
+    "stressedRegions": []
   },
   {
     "slug": "abdominal-cabo",
@@ -332,7 +353,8 @@
       ["obliques", "secondary", 0.35]
     ],
     "cues": ["Flexione a coluna, não o quadril", "Expire na contração"],
-    "mistakes": ["Puxar com os braços"]
+    "mistakes": ["Puxar com os braços"],
+    "stressedRegions": ["lowerBack", "neck"]
   },
   {
     "slug": "panturrilha-em-pe",
@@ -345,7 +367,8 @@
       ["soleus", "secondary", 0.4]
     ],
     "cues": ["Amplitude completa, pausa embaixo", "Joelho estendido para priorizar gastrocnêmio"],
-    "mistakes": ["Repetições rápidas e parciais"]
+    "mistakes": ["Repetições rápidas e parciais"],
+    "stressedRegions": ["ankle"]
   },
   {
     "slug": "rotacao-externa-banda",
@@ -361,7 +384,8 @@
     "mistakes": [
       "Afastar o cotovelo do corpo",
       "Usar carga alta demais em exercício de reabilitação"
-    ]
+    ],
+    "stressedRegions": []
   },
   {
     "slug": "ponte-glutea-unilateral",
@@ -375,7 +399,8 @@
       ["transverse_abdominis", "stabilizer", 0.3]
     ],
     "cues": ["Pelve nivelada durante todo o movimento", "Suba sem rotacionar o quadril"],
-    "mistakes": ["Deixar o quadril cair para o lado livre"]
+    "mistakes": ["Deixar o quadril cair para o lado livre"],
+    "stressedRegions": []
   },
   {
     "slug": "abducao-quadril-banda",
@@ -388,7 +413,8 @@
       ["gluteus_maximus", "secondary", 0.3]
     ],
     "cues": ["Tronco estável, sem inclinar", "Movimento controlado nas duas fases"],
-    "mistakes": ["Compensar inclinando o tronco"]
+    "mistakes": ["Compensar inclinando o tronco"],
+    "stressedRegions": []
   },
   {
     "slug": "supino-reto-com-halteres",
@@ -405,7 +431,8 @@
       "Mantenha o movimento controlado.",
       "Use uma amplitude confortável, sem compensar com o tronco."
     ],
-    "mistakes": ["Acelerar o movimento e perder o controle da execução."]
+    "mistakes": ["Acelerar o movimento e perder o controle da execução."],
+    "stressedRegions": []
   },
   {
     "slug": "supino-reto-na-maquina",
@@ -422,7 +449,8 @@
       "Mantenha o movimento controlado.",
       "Use uma amplitude confortável, sem compensar com o tronco."
     ],
-    "mistakes": ["Acelerar o movimento e perder o controle da execução."]
+    "mistakes": ["Acelerar o movimento e perder o controle da execução."],
+    "stressedRegions": []
   },
   {
     "slug": "supino-inclinado-com-barra",
@@ -439,7 +467,8 @@
       "Mantenha o movimento controlado.",
       "Use uma amplitude confortável, sem compensar com o tronco."
     ],
-    "mistakes": ["Acelerar o movimento e perder o controle da execução."]
+    "mistakes": ["Acelerar o movimento e perder o controle da execução."],
+    "stressedRegions": ["shoulder", "wrist"]
   },
   {
     "slug": "flexao-de-bracos",
@@ -456,7 +485,8 @@
       "Mantenha o movimento controlado.",
       "Use uma amplitude confortável, sem compensar com o tronco."
     ],
-    "mistakes": ["Acelerar o movimento e perder o controle da execução."]
+    "mistakes": ["Acelerar o movimento e perder o controle da execução."],
+    "stressedRegions": ["wrist"]
   },
   {
     "slug": "crucifixo-com-halteres",
@@ -472,7 +502,8 @@
       "Mantenha o movimento controlado.",
       "Use uma amplitude confortável, sem compensar com o tronco."
     ],
-    "mistakes": ["Acelerar o movimento e perder o controle da execução."]
+    "mistakes": ["Acelerar o movimento e perder o controle da execução."],
+    "stressedRegions": ["shoulder"]
   },
   {
     "slug": "crucifixo-na-maquina",
@@ -488,7 +519,8 @@
       "Mantenha o movimento controlado.",
       "Use uma amplitude confortável, sem compensar com o tronco."
     ],
-    "mistakes": ["Acelerar o movimento e perder o controle da execução."]
+    "mistakes": ["Acelerar o movimento e perder o controle da execução."],
+    "stressedRegions": []
   },
   {
     "slug": "barra-fixa-supinada",
@@ -506,7 +538,8 @@
       "Mantenha o movimento controlado.",
       "Use uma amplitude confortável, sem compensar com o tronco."
     ],
-    "mistakes": ["Acelerar o movimento e perder o controle da execução."]
+    "mistakes": ["Acelerar o movimento e perder o controle da execução."],
+    "stressedRegions": ["elbow"]
   },
   {
     "slug": "puxada-com-pegada-neutra",
@@ -523,7 +556,8 @@
       "Mantenha o movimento controlado.",
       "Use uma amplitude confortável, sem compensar com o tronco."
     ],
-    "mistakes": ["Acelerar o movimento e perder o controle da execução."]
+    "mistakes": ["Acelerar o movimento e perder o controle da execução."],
+    "stressedRegions": []
   },
   {
     "slug": "puxada-unilateral-na-polia",
@@ -540,7 +574,8 @@
       "Mantenha o movimento controlado.",
       "Use uma amplitude confortável, sem compensar com o tronco."
     ],
-    "mistakes": ["Acelerar o movimento e perder o controle da execução."]
+    "mistakes": ["Acelerar o movimento e perder o controle da execução."],
+    "stressedRegions": []
   },
   {
     "slug": "remada-com-barra-t",
@@ -559,7 +594,8 @@
       "Mantenha o movimento controlado.",
       "Use uma amplitude confortável, sem compensar com o tronco."
     ],
-    "mistakes": ["Acelerar o movimento e perder o controle da execução."]
+    "mistakes": ["Acelerar o movimento e perder o controle da execução."],
+    "stressedRegions": ["lowerBack"]
   },
   {
     "slug": "remada-apoiada-com-halteres",
@@ -576,7 +612,8 @@
       "Mantenha o movimento controlado.",
       "Use uma amplitude confortável, sem compensar com o tronco."
     ],
-    "mistakes": ["Acelerar o movimento e perder o controle da execução."]
+    "mistakes": ["Acelerar o movimento e perder o controle da execução."],
+    "stressedRegions": []
   },
   {
     "slug": "remada-sentada-na-polia",
@@ -593,7 +630,8 @@
       "Mantenha o movimento controlado.",
       "Use uma amplitude confortável, sem compensar com o tronco."
     ],
-    "mistakes": ["Acelerar o movimento e perder o controle da execução."]
+    "mistakes": ["Acelerar o movimento e perder o controle da execução."],
+    "stressedRegions": []
   },
   {
     "slug": "remada-na-maquina",
@@ -610,7 +648,8 @@
       "Mantenha o movimento controlado.",
       "Use uma amplitude confortável, sem compensar com o tronco."
     ],
-    "mistakes": ["Acelerar o movimento e perder o controle da execução."]
+    "mistakes": ["Acelerar o movimento e perder o controle da execução."],
+    "stressedRegions": []
   },
   {
     "slug": "agachamento-goblet",
@@ -629,7 +668,8 @@
       "Mantenha o movimento controlado.",
       "Use uma amplitude confortável, sem compensar com o tronco."
     ],
-    "mistakes": ["Acelerar o movimento e perder o controle da execução."]
+    "mistakes": ["Acelerar o movimento e perder o controle da execução."],
+    "stressedRegions": ["knee", "hip"]
   },
   {
     "slug": "agachamento-frontal",
@@ -648,7 +688,8 @@
       "Mantenha o movimento controlado.",
       "Use uma amplitude confortável, sem compensar com o tronco."
     ],
-    "mistakes": ["Acelerar o movimento e perder o controle da execução."]
+    "mistakes": ["Acelerar o movimento e perder o controle da execução."],
+    "stressedRegions": ["knee", "wrist", "shoulder", "ankle"]
   },
   {
     "slug": "agachamento-bulgaro",
@@ -667,7 +708,8 @@
       "Mantenha o movimento controlado.",
       "Use uma amplitude confortável, sem compensar com o tronco."
     ],
-    "mistakes": ["Acelerar o movimento e perder o controle da execução."]
+    "mistakes": ["Acelerar o movimento e perder o controle da execução."],
+    "stressedRegions": ["knee", "hip"]
   },
   {
     "slug": "passada-com-halteres",
@@ -686,7 +728,8 @@
       "Mantenha o movimento controlado.",
       "Use uma amplitude confortável, sem compensar com o tronco."
     ],
-    "mistakes": ["Acelerar o movimento e perder o controle da execução."]
+    "mistakes": ["Acelerar o movimento e perder o controle da execução."],
+    "stressedRegions": ["knee", "ankle"]
   },
   {
     "slug": "subida-no-banco",
@@ -705,7 +748,8 @@
       "Mantenha o movimento controlado.",
       "Use uma amplitude confortável, sem compensar com o tronco."
     ],
-    "mistakes": ["Acelerar o movimento e perder o controle da execução."]
+    "mistakes": ["Acelerar o movimento e perder o controle da execução."],
+    "stressedRegions": ["knee", "ankle"]
   },
   {
     "slug": "agachamento-hack",
@@ -722,7 +766,8 @@
       "Mantenha o movimento controlado.",
       "Use uma amplitude confortável, sem compensar com o tronco."
     ],
-    "mistakes": ["Acelerar o movimento e perder o controle da execução."]
+    "mistakes": ["Acelerar o movimento e perder o controle da execução."],
+    "stressedRegions": ["knee"]
   },
   {
     "slug": "levantamento-terra-romeno",
@@ -739,7 +784,8 @@
       "Mantenha o movimento controlado.",
       "Use uma amplitude confortável, sem compensar com o tronco."
     ],
-    "mistakes": ["Acelerar o movimento e perder o controle da execução."]
+    "mistakes": ["Acelerar o movimento e perder o controle da execução."],
+    "stressedRegions": ["lowerBack", "hip"]
   },
   {
     "slug": "stiff-unilateral",
@@ -756,7 +802,8 @@
       "Mantenha o movimento controlado.",
       "Use uma amplitude confortável, sem compensar com o tronco."
     ],
-    "mistakes": ["Acelerar o movimento e perder o controle da execução."]
+    "mistakes": ["Acelerar o movimento e perder o controle da execução."],
+    "stressedRegions": ["lowerBack"]
   },
   {
     "slug": "flexao-de-joelho-sentada",
@@ -772,7 +819,8 @@
       "Mantenha o movimento controlado.",
       "Use uma amplitude confortável, sem compensar com o tronco."
     ],
-    "mistakes": ["Acelerar o movimento e perder o controle da execução."]
+    "mistakes": ["Acelerar o movimento e perder o controle da execução."],
+    "stressedRegions": []
   },
   {
     "slug": "elevacao-pelvica-na-maquina",
@@ -789,7 +837,8 @@
       "Mantenha o movimento controlado.",
       "Use uma amplitude confortável, sem compensar com o tronco."
     ],
-    "mistakes": ["Acelerar o movimento e perder o controle da execução."]
+    "mistakes": ["Acelerar o movimento e perder o controle da execução."],
+    "stressedRegions": []
   },
   {
     "slug": "desenvolvimento-com-barra",
@@ -807,7 +856,8 @@
       "Mantenha o movimento controlado.",
       "Use uma amplitude confortável, sem compensar com o tronco."
     ],
-    "mistakes": ["Acelerar o movimento e perder o controle da execução."]
+    "mistakes": ["Acelerar o movimento e perder o controle da execução."],
+    "stressedRegions": ["shoulder", "neck"]
   },
   {
     "slug": "desenvolvimento-na-maquina",
@@ -825,7 +875,8 @@
       "Mantenha o movimento controlado.",
       "Use uma amplitude confortável, sem compensar com o tronco."
     ],
-    "mistakes": ["Acelerar o movimento e perder o controle da execução."]
+    "mistakes": ["Acelerar o movimento e perder o controle da execução."],
+    "stressedRegions": ["shoulder"]
   },
   {
     "slug": "elevacao-lateral-na-polia",
@@ -841,7 +892,8 @@
       "Mantenha o movimento controlado.",
       "Use uma amplitude confortável, sem compensar com o tronco."
     ],
-    "mistakes": ["Acelerar o movimento e perder o controle da execução."]
+    "mistakes": ["Acelerar o movimento e perder o controle da execução."],
+    "stressedRegions": ["shoulder"]
   },
   {
     "slug": "crucifixo-inverso-na-maquina",
@@ -858,7 +910,8 @@
       "Mantenha o movimento controlado.",
       "Use uma amplitude confortável, sem compensar com o tronco."
     ],
-    "mistakes": ["Acelerar o movimento e perder o controle da execução."]
+    "mistakes": ["Acelerar o movimento e perder o controle da execução."],
+    "stressedRegions": []
   },
   {
     "slug": "rosca-alternada",
@@ -875,7 +928,8 @@
       "Mantenha o movimento controlado.",
       "Use uma amplitude confortável, sem compensar com o tronco."
     ],
-    "mistakes": ["Acelerar o movimento e perder o controle da execução."]
+    "mistakes": ["Acelerar o movimento e perder o controle da execução."],
+    "stressedRegions": []
   },
   {
     "slug": "rosca-na-polia-baixa",
@@ -892,7 +946,8 @@
       "Mantenha o movimento controlado.",
       "Use uma amplitude confortável, sem compensar com o tronco."
     ],
-    "mistakes": ["Acelerar o movimento e perder o controle da execução."]
+    "mistakes": ["Acelerar o movimento e perder o controle da execução."],
+    "stressedRegions": []
   },
   {
     "slug": "rosca-martelo",
@@ -909,7 +964,8 @@
       "Mantenha o movimento controlado.",
       "Use uma amplitude confortável, sem compensar com o tronco."
     ],
-    "mistakes": ["Acelerar o movimento e perder o controle da execução."]
+    "mistakes": ["Acelerar o movimento e perder o controle da execução."],
+    "stressedRegions": []
   },
   {
     "slug": "extensao-de-triceps-com-halter",
@@ -922,7 +978,8 @@
       "Mantenha o movimento controlado.",
       "Use uma amplitude confortável, sem compensar com o tronco."
     ],
-    "mistakes": ["Acelerar o movimento e perder o controle da execução."]
+    "mistakes": ["Acelerar o movimento e perder o controle da execução."],
+    "stressedRegions": ["elbow", "shoulder"]
   },
   {
     "slug": "extensao-de-triceps-com-barra-na-polia",
@@ -935,7 +992,8 @@
       "Mantenha o movimento controlado.",
       "Use uma amplitude confortável, sem compensar com o tronco."
     ],
-    "mistakes": ["Acelerar o movimento e perder o controle da execução."]
+    "mistakes": ["Acelerar o movimento e perder o controle da execução."],
+    "stressedRegions": []
   },
   {
     "slug": "panturrilha-sentada",
@@ -951,7 +1009,8 @@
       "Mantenha o movimento controlado.",
       "Use uma amplitude confortável, sem compensar com o tronco."
     ],
-    "mistakes": ["Acelerar o movimento e perder o controle da execução."]
+    "mistakes": ["Acelerar o movimento e perder o controle da execução."],
+    "stressedRegions": ["ankle"]
   },
   {
     "slug": "prancha-lateral",
@@ -967,7 +1026,7 @@
       "Mantenha o movimento controlado.",
       "Use uma amplitude confortável, sem compensar com o tronco."
     ],
-    "mistakes": ["Acelerar o movimento e perder o controle da execução."]
+    "mistakes": ["Acelerar o movimento e perder o controle da execução."],
+    "stressedRegions": []
   }
 ]
-

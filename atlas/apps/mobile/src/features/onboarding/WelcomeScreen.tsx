@@ -41,12 +41,15 @@ export function WelcomeScreen() {
     () =>
       StyleSheet.create({
         root: { flex: 1 },
-        cover: { flex: 1.15, overflow: 'hidden' },
+        // Sem `flex`: a capa toma a altura da própria arte (ver
+        // `HeroArtwork`) e o corpo fica com o resto da tela. Com `flex` a
+        // proporção era ignorada e a figura voltava a ser cortada.
+        cover: { overflow: 'hidden' },
         body: {
           flex: 1,
+          justifyContent: 'center',
           padding: layout.pageInset,
           gap: spacing.lg,
-          justifyContent: 'center',
         },
         dots: { flexDirection: 'row', gap: spacing.sm },
         dot: {

@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import type { SessionSummary, TodayWorkout } from '@atlas/contracts';
-import { layout, spacing } from '@atlas/design-tokens';
+import { spacing } from '@atlas/design-tokens';
 import {
   Button,
   ErrorState,
@@ -148,7 +148,7 @@ export function HomeHero({
 
   return (
     <View style={styles.root}>
-      <HeroArtwork context={model.context} style={styles.cover}>
+      <HeroArtwork context={model.context}>
         <View style={styles.body}>
           <Text tone="onAccent" variant="caption" weight="bold">
             {t(model.eyebrow)}
@@ -179,6 +179,6 @@ export function HomeHero({
 
 const styles = StyleSheet.create({
   root: { gap: spacing.md },
-  cover: { height: layout.coverHero },
+  // Sem altura: o `HeroArtwork` assume a proporção da própria arte.
   body: { flex: 1, justifyContent: 'flex-end', padding: spacing.lg, gap: spacing.sm },
 });

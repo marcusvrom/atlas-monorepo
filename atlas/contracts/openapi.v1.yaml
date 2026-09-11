@@ -99,6 +99,29 @@ paths:
           in: query
           schema:
             $ref: "#/components/schemas/Difficulty"
+        - name: protectedRegion
+          in: query
+          description: >-
+            Regiões que o usuário pediu para poupar. Repetir o parâmetro para
+            várias. Exercícios cuja carga articular bate com alguma delas ficam
+            fora da página. Ver assessExercise em @atlas/domain.
+          schema:
+            type: array
+            items:
+              $ref: "#/components/schemas/BodyRegion"
+          style: form
+          explode: true
+        - name: availableEquipment
+          in: query
+          description: >-
+            Equipamento disponível. Ausente = sem restrição. Peso do corpo nunca
+            é barrado por indisponibilidade.
+          schema:
+            type: array
+            items:
+              $ref: "#/components/schemas/Equipment"
+          style: form
+          explode: true
         - name: cursor
           in: query
           schema:
@@ -738,6 +761,44 @@ components:
         - beginner
         - intermediate
         - advanced
+    BodyRegion:
+      description: >-
+        Região musculoesquelética que o usuário pode pedir para poupar. A lista
+        é deliberadamente articular: o Atlas não pergunta diagnóstico, e
+        condições que exigem liberação clínica não entram aqui.
+      type: string
+      enum:
+        - shoulder
+        - elbow
+        - wrist
+        - neck
+        - lowerBack
+        - hip
+        - knee
+        - ankle
+    TrainingPreferences:
+      type: object
+      required:
+        - experienceLevel
+        - protectedRegions
+        - availableEquipment
+      properties:
+        experienceLevel:
+          description: >-
+            Mesma escala de Difficulty, para que "exercício no meu nível" seja
+            comparação direta.
+          $ref: "#/components/schemas/Difficulty"
+        protectedRegions:
+          type: array
+          items:
+            $ref: "#/components/schemas/BodyRegion"
+        availableEquipment:
+          description: null = sem restrição, diferente de [] = nada disponível.
+          type:
+            - array
+            - "null"
+          items:
+            $ref: "#/components/schemas/Equipment"
     MuscleRole:
       type: string
       enum:
@@ -802,6 +863,7 @@ components:
         - difficulty
         - thumbnailUrl
         - isCustom
+        - stressedRegions
       properties:
         id:
           type: string
@@ -820,6 +882,14 @@ components:
             - "null"
         isCustom:
           type: boolean
+        stressedRegions:
+          description: >-
+            Regiões que o movimento carrega o bastante para importar a quem
+            precisa poupá-las. Critério discriminante, não exaustivo: só o que
+            um profissional trocaria primeiro. Não é contraindicação médica.
+          type: array
+          items:
+            $ref: "#/components/schemas/BodyRegion"
     ExerciseDetail:
       allOf:
         - $ref: "#/components/schemas/ExerciseSummary"
@@ -1615,7 +1685,10 @@ components:
         weightedVolumeKg:
           type: number
         effectiveSets:
-          type: integer
+          # Fracionário: ponderado pela ativação do músculo no movimento.
+          # Ver weightedEffectiveSets em @atlas/domain.
+          type: number
+          minimum: 0
         intensity:
           type: number
           minimum: 0
@@ -1760,50 +1833,14 @@ components:
           type: string
           format: email
           pattern: ^(?:[A-Za-z0-9_'+\-]+\.)*[A-Za-z0-9_'+\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\-]*\.)+[A-Za-z]{2,}$
-        avatar:
-          type: object
-          properties:
-            base:
-              type: string
-            skinTone:
-              type: string
-            hair:
-              type: string
-            face:
-              type: string
-            outfit:
-              type: string
-            accessory:
-              type:
-                - string
-                - "null"
-            frame:
-              type:
-                - string
-                - "null"
-            background:
-              type: string
-            hairColor:
-              type:
-                - string
-                - "null"
-            outfitColor:
-              type:
-                - string
-                - "null"
-            backgroundColor:
-              type:
-                - string
-                - "null"
-          required:
-            - base
-            - skinTone
-            - hair
-            - face
-            - outfit
-            - accessory
-            - frame
-            - background
+        photoUri:
+          description: >-
+            Foto de perfil. URI local do device enquanto não há upload; será a
+            URL remota quando o backend existir. Nulo = o app usa as iniciais.
+            O construtor de avatar vetorial foi removido.
+          type:
+            - string
+            - "null"
         roles:
           minItems: 1
           type: array
@@ -1876,6 +1913,14 @@ components:
                 - high
                 - athlete
             - type: "null"
+        trainingPreferences:
+          description: >-
+            Nulo enquanto o usuário não responde a etapa de preferências. Nulo e
+            "sem limitação" são estados distintos: no primeiro o catálogo não
+            filtra nada.
+          anyOf:
+            - $ref: "#/components/schemas/TrainingPreferences"
+            - type: "null"
         heightCm:
           anyOf:
             - type: number
@@ -1908,7 +1953,6 @@ components:
                   - bodyCompositionTracking
                   - progressPhotos
                   - interactiveAnatomy
-                  - premiumAvatarItems
                   - activeClients
                   - videoCallHours
                   - whiteLabelReports
@@ -1975,12 +2019,17 @@ components:
                 - high
                 - athlete
             - type: "null"
+        trainingPreferences:
+          anyOf:
+            - $ref: "#/components/schemas/TrainingPreferences"
+            - type: "null"
       required:
         - displayName
         - heightCm
         - birthDate
         - biologicalSex
         - activityLevel
+        - trainingPreferences
     CurrentGoal:
       type: object
       properties:
@@ -2434,63 +2483,6 @@ components:
         - clientGeneratedId
         - date
         - volumeMl
-    AvatarConfig:
-      type: object
-      properties:
-        photoUri:
-          description: URI local da foto do usuário (file://, ph://, content://). Quando
-            presente, tem prioridade sobre o avatar vetorial. Opcional; default
-            null.
-          type:
-            - string
-            - "null"
-        base:
-          type: string
-        skinTone:
-          type: string
-        hair:
-          type: string
-        face:
-          type: string
-        outfit:
-          type: string
-        accessory:
-          type:
-            - string
-            - "null"
-        frame:
-          type:
-            - string
-            - "null"
-        background:
-          type: string
-        hairColor:
-          description: Cor do cabelo, independente da forma. Nulo usa a cor padrão da
-            peça. Opcional; default null.
-          type:
-            - string
-            - "null"
-        outfitColor:
-          description: Cor da roupa, independente da forma. Nulo usa a cor padrão da
-            peça. Opcional; default null.
-          type:
-            - string
-            - "null"
-        backgroundColor:
-          description: Cor do fundo do avatar, independente da peça. Nulo usa a cor
-            padrão. Opcional; default null.
-          type:
-            - string
-            - "null"
-      required:
-        - base
-        - skinTone
-        - hair
-        - face
-        - outfit
-        - accessory
-        - frame
-        - background
     CreatePlanInput:
       type: object
       properties:

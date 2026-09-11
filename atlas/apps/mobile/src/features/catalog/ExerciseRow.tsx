@@ -1,10 +1,12 @@
 import type { ExerciseSummary } from '@atlas/contracts';
+import type { ExerciseFit } from '@atlas/domain';
 import { useMemo } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { layout, spacing, opacity } from '@atlas/design-tokens';
 import { CoverImage, Icon, MetaChip, MetaChipRow, Text } from '../../design/components';
 import { useTheme } from '../../design/theme-provider';
 import { equipmentLabel, difficultyLabel } from './labels';
+import { FitBadge } from './FitBadge';
 
 /**
  * Linha do catálogo.
@@ -17,9 +19,12 @@ import { equipmentLabel, difficultyLabel } from './labels';
  */
 export function ExerciseRow({
   exercise,
+  fit,
   onPress,
 }: {
   exercise: ExerciseSummary;
+  /** Adequação ao perfil. Ausente quando não há preferências declaradas. */
+  fit?: ExerciseFit;
   onPress: () => void;
 }) {
   const { colors } = useTheme();
@@ -61,6 +66,7 @@ export function ExerciseRow({
         <MetaChipRow>
           <MetaChip label={equipmentLabel(exercise.equipment)} />
           <MetaChip icon="target" label={difficultyLabel(exercise.difficulty)} />
+          {fit ? <FitBadge fit={fit} /> : null}
         </MetaChipRow>
       </View>
       <Icon name="arrow" />

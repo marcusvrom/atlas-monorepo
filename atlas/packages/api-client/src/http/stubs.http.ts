@@ -6,7 +6,7 @@ import {
   UserProfile as ProfileSchema,
   UpdateProfileInput as ProfileInputSchema,
   type UpdateProfileInput,
-  type AvatarConfig,
+  type ProfilePhoto,
   type ClientOverview,
   type CoachingEngagement,
   type CurrentGoal,
@@ -148,8 +148,8 @@ export class HttpIdentityAdapter implements IdentityPort {
   updateGoal(_goal: CurrentGoal): Promise<UserProfile> {
     throw new NotImplementedError('HttpIdentityAdapter', 'updateGoal', 'ATL-IDN-003');
   }
-  updateAvatar(_avatar: AvatarConfig): Promise<UserProfile> {
-    throw new NotImplementedError('HttpIdentityAdapter', 'updateAvatar', 'ATL-AVT-002');
+  updateProfilePhoto(_photoUri: ProfilePhoto): Promise<UserProfile> {
+    throw new NotImplementedError('HttpIdentityAdapter', 'updateProfilePhoto', 'ATL-IDN-004');
   }
   /** ATL-BIL-002 → GET {@link ROUTES.entitlements} */
   listEntitlements(): Promise<Entitlement[]> {

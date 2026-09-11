@@ -4,7 +4,7 @@ import {
   ExerciseProgression,
   MuscleVolume,
 } from '@atlas/contracts';
-import { adherenceRate, estimateOneRepMax, totalVolume } from '@atlas/domain';
+import { adherenceRate, estimateOneRepMax, isEffectiveSet, totalVolume } from '@atlas/domain';
 import { ApiError } from '../errors.js';
 import type { InsightsPort } from '../ports/insights.port.js';
 import { simulate } from './runtime.js';
@@ -37,10 +37,18 @@ export class MockInsightsAdapter implements InsightsPort {
           const exercise = this.store.exercises.find((e) => e.id === set.exerciseId);
           if (!exercise) continue;
 
+          // A regra de "esta série gerou estímulo?" vem do domínio, não daqui.
+          // A versão anterior a reimplementava inline como
+          // `activation.role === 'primary' && (set.rir ?? 10) <= 3` e divergiu
+          // de `@atlas/domain` em dois pontos: descartava o sinergista e tratava
+          // RIR ausente como série leve. Duplicar a fórmula foi o que permitiu
+          // a divergência passar sem ninguém notar.
+          const counts = isEffectiveSet(set);
+
           for (const activation of exercise.activations) {
             const current = totals.get(activation.muscleCode) ?? { volume: 0, effective: 0 };
             current.volume += set.weightKg * set.reps * activation.activationWeight;
-            if (activation.role === 'primary' && (set.rir ?? 10) <= 3) current.effective += 1;
+            if (counts) current.effective += activation.activationWeight;
             totals.set(activation.muscleCode, current);
           }
         }
@@ -57,7 +65,9 @@ export class MockInsightsAdapter implements InsightsPort {
               muscleCode: code,
               displayName: group?.displayName ?? code,
               weightedVolumeKg: Math.round(value.volume),
-              effectiveSets: value.effective,
+              // Fração preservada até a apresentação: somar dez meias séries
+              // precisa dar cinco.
+              effectiveSets: Math.round(value.effective * 100) / 100,
               intensity: Math.min(1, value.volume / max),
             } satisfies MuscleVolume;
           })

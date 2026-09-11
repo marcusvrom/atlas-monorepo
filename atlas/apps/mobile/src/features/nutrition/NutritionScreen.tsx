@@ -214,7 +214,7 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.huge * 2,
     gap: layout.sectionGap,
   },
-  hero: { height: layout.coverHero },
+  hero: {},
   heroBody: { flex: 1, justifyContent: 'flex-end', padding: spacing.lg, gap: spacing.sm },
   heroBack: { position: 'absolute', top: spacing.md, left: spacing.md },
   section: { gap: spacing.md },

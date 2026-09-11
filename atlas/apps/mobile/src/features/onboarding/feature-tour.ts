@@ -144,14 +144,17 @@ export const featureTour: readonly TourFeature[] = [
     routes: ['(tabs)/coach', 'professional/[id]', 'client/[id]'],
   },
   {
-    id: 'avatar',
+    // A tela dedicada de avatar deixou de existir junto com o construtor
+    // vetorial: a foto é escolhida no próprio perfil, então a feature aponta
+    // para lá.
+    id: 'profilePhoto',
     titleKey: 'tourAvatarTitle',
     bodyKey: 'tourAvatarBody',
     glyph: 'none',
-    route: '/avatar/edit',
+    route: '/(tabs)/profile',
     requiredFeature: null,
     stage: 'contextual',
-    routes: ['avatar/edit', '(tabs)/profile'],
+    routes: ['(tabs)/profile'],
   },
   {
     id: 'offline',
@@ -169,7 +172,7 @@ export const featureTour: readonly TourFeature[] = [
     bodyKey: 'tourProBody',
     glyph: 'trophy',
     route: '/paywall',
-    requiredFeature: 'premiumAvatarItems',
+    requiredFeature: 'advancedInsights',
     stage: 'firstRun',
     routes: ['paywall'],
   },

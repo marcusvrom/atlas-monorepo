@@ -2,7 +2,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { UserId } from '@atlas/contracts';
 import { FlashList } from '@shopify/flash-list';
 import { Alert, StyleSheet, View } from 'react-native';
-import { layout, spacing } from '@atlas/design-tokens';
+import { spacing } from '@atlas/design-tokens';
 import {
   Badge,
   Button,
@@ -98,7 +98,7 @@ export function ProfessionalScreen() {
 const styles = StyleSheet.create({
   content: { padding: spacing.lg, paddingBottom: spacing.huge },
   header: { gap: spacing.md },
-  hero: { height: layout.coverHero },
+  hero: {},
   heroBody: { flex: 1, justifyContent: 'flex-end', padding: spacing.lg, gap: spacing.xs },
   heroTop: {
     flexDirection: 'row',

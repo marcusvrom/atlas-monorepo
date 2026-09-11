@@ -1,5 +1,5 @@
 import { StyleSheet, View } from 'react-native';
-import { layout, spacing } from '@atlas/design-tokens';
+import { spacing } from '@atlas/design-tokens';
 import { HeroArtwork } from '../media/HeroArtwork';
 import type { ArtworkContext } from '../media/artwork';
 import { Card } from './Card';
@@ -35,7 +35,17 @@ export function EmptyState({
     <Card>
       <View style={styles.content}>
         {artwork ? (
-          <HeroArtwork context={artwork} scrim={false} radius="lg" style={styles.art} />
+          // Faixa larga, e não a proporção da arte: aqui a imagem apoia uma
+          // mensagem curta, e um retrato de 3:4 empurraria a ação para fora da
+          // primeira dobra num aparelho pequeno. É a exceção que `aspect` existe
+          // para cobrir.
+          <HeroArtwork
+            context={artwork}
+            scrim={false}
+            radius="lg"
+            aspect={16 / 9}
+            style={styles.art}
+          />
         ) : null}
         <Text variant="title3" weight="semibold">
           {title}
@@ -49,7 +59,5 @@ export function EmptyState({
 
 const styles = StyleSheet.create({
   content: { gap: spacing.md },
-  // Faixa baixa de propósito: apoia a mensagem sem empurrar a ação para fora
-  // da primeira dobra num aparelho pequeno.
-  art: { height: layout.coverCard },
+  art: {},
 });

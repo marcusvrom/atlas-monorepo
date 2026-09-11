@@ -229,6 +229,8 @@ export const layout = {
   coverRow: 84,
   /** Largura do card dentro de um `<Carousel>`. */
   carouselItem: 232,
+  /** Retrato do usuário na etapa de foto e no perfil. */
+  profilePhoto: 128,
 
   /**
    * ATL-SES-005 — alvo de toque de um controle redondo. 44 é o mínimo das HIG

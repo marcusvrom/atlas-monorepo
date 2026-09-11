@@ -27,6 +27,11 @@ export class HttpCatalogAdapter implements CatalogPort {
         muscle: filter.muscleCode,
         equipment: filter.equipment,
         difficulty: filter.difficulty,
+        // Listas repetidas, e não CSV: o backend recebe `?protectedRegion=knee
+        // &protectedRegion=hip` sem precisar combinar com o client sobre
+        // separador e escape.
+        protectedRegion: filter.protectedRegions,
+        availableEquipment: filter.availableEquipment,
         cursor: filter.cursor,
         limit: filter.limit,
       },

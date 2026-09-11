@@ -67,6 +67,30 @@ export const artworkContexts = [
 ] as const;
 export type ArtworkContext = (typeof artworkContexts)[number];
 
+/**
+ * Proporções das artes editoriais, medidas nos próprios arquivos.
+ *
+ * Existem como token porque a altura do hero passou a ser **derivada da
+ * imagem**, e não escolhida à mão: os assets são retrato (3:4 e 2:3), e a caixa
+ * de 212 pt que existia antes cortava mais da metade da altura — a figura
+ * central perdia cabeça ou pés dependendo do arquivo. Uma constante por arte é
+ * mais verboso que um número único, e é o que evita voltar a cortar quando a
+ * próxima imagem tiver outra proporção.
+ */
+export const ARTWORK_ASPECT = {
+  onboardingTrain: 1080 / 1440,
+  onboardingProgress: 1080 / 1440,
+  onboardingCoach: 1080 / 1440,
+  homeWorkout: 960 / 1440,
+} as const satisfies Record<ArtworkAssetKey, number>;
+
+/**
+ * Proporção de um contexto sem foto, servido só pela arte vetorial. Mais larga
+ * que retrato de propósito: a arte gerada não tem figura para preservar, e um
+ * bloco de 3:4 só de gradiente ocuparia meia tela sem dizer nada.
+ */
+export const VECTOR_ASPECT = 4 / 3;
+
 export interface ArtworkSpec {
   /**
    * Semente do fallback vetorial. Estável por contexto: se a foto não carregar,
@@ -84,6 +108,15 @@ export interface ArtworkSpec {
    * exige `alt` de quem o usa (ver `HeroArtwork`).
    */
   decorative: boolean;
+}
+
+/**
+ * Proporção (largura ÷ altura) com que o contexto deve ser desenhado para a
+ * imagem aparecer inteira.
+ */
+export function artworkAspect(context: ArtworkContext): number {
+  const asset = REGISTRY[context].asset;
+  return asset === null ? VECTOR_ASPECT : ARTWORK_ASPECT[asset];
 }
 
 const REGISTRY: Record<ArtworkContext, ArtworkSpec> = {

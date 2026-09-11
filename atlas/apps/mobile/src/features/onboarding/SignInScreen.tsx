@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
-import { layout, spacing } from '@atlas/design-tokens';
+import { spacing } from '@atlas/design-tokens';
 import {
   Button,
   ErrorState,
@@ -26,7 +26,9 @@ export function SignInScreen() {
             birthDate: me.data.birthDate,
             biologicalSex: me.data.biologicalSex,
             activityLevel: me.data.activityLevel,
+            trainingPreferences: me.data.trainingPreferences,
           },
+          photoUri: me.data.photoUri,
           goal: me.data.goal,
           baseline: null,
         },
@@ -67,6 +69,6 @@ export function SignInScreen() {
 }
 const styles = StyleSheet.create({
   content: { flex: 1, padding: spacing.xl, gap: spacing.lg, justifyContent: 'center' },
-  hero: { height: layout.coverHero },
+  hero: {},
   heroBody: { flex: 1, justifyContent: 'flex-end', padding: spacing.lg, gap: spacing.xs },
 });

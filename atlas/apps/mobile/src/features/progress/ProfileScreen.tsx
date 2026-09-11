@@ -1,8 +1,9 @@
-import { Avatar } from '../avatar/Avatar';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { ProfilePhotoPicker } from '../avatar/ProfilePhotoPicker';
+import { useUpdateProfilePhoto } from '../avatar/hooks';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { ActivityLevel, BiologicalSex, CurrentGoal, GoalType } from '@atlas/contracts';
 import { useRouter } from 'expo-router';
-import { layout, spacing, opacity } from '@atlas/design-tokens';
+import { layout, spacing } from '@atlas/design-tokens';
 import {
   Badge,
   Button,
@@ -17,11 +18,13 @@ import {
 } from '../../design/components';
 import { CoverScrim } from '../../design/media';
 import { t } from '../../i18n';
+import { activityLabel, sexLabel } from '../../i18n/enum-labels';
 import { useMe, useUpdateGoal, useUpdateProfile } from './hooks';
 export function ProfileScreen() {
   const me = useMe(),
     save = useUpdateGoal(),
     saveProfile = useUpdateProfile(),
+    photo = useUpdateProfilePhoto(),
     router = useRouter();
   if (me.isPending)
     return (
@@ -46,15 +49,17 @@ export function ProfileScreen() {
           <CoverScrim />
           <View style={styles.heroBody}>
             <View style={styles.header}>
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={t('avatarEdit')}
-                accessibilityHint={t('avatarTapHint')}
-                onPress={() => router.push('/avatar/edit')}
-                style={({ pressed }) => (pressed ? styles.avatarPressed : undefined)}
-              >
-                <Avatar config={profile.avatar} size={spacing.huge + spacing.lg} />
-              </Pressable>
+              {/* A foto é editada aqui mesmo. A tela dedicada `/avatar/edit`
+                  existia para o construtor vetorial; com foto, empurrar o
+                  usuário para outra rota só para escolher uma imagem era uma
+                  navegação a mais sem nada do outro lado. */}
+              <ProfilePhotoPicker
+                userId={profile.id}
+                name={profile.displayName}
+                photoUri={profile.photoUri}
+                busy={photo.isPending}
+                onChange={(uri) => photo.mutate(uri)}
+              />
               <Text tone="onAccent" variant="title2" weight="bold">
                 {profile.displayName}
               </Text>
@@ -64,11 +69,7 @@ export function ProfileScreen() {
               <View>
                 <Badge label={t(profile.planKey)} tone="brand" />
               </View>
-              <Text tone="onAccent" variant="footnote">
-                {t('avatarTapHint')}
-              </Text>
             </View>
-            <Button label={t('avatarEdit')} onPress={() => router.push('/avatar/edit')} />
           </View>
         </CoverImage>
         <Card>
@@ -121,6 +122,7 @@ export function ProfileScreen() {
                     birthDate: profile.birthDate,
                     biologicalSex: value,
                     activityLevel: profile.activityLevel,
+                    trainingPreferences: profile.trainingPreferences,
                   })
                 }
               />
@@ -144,6 +146,7 @@ export function ProfileScreen() {
                     birthDate: profile.birthDate,
                     biologicalSex: profile.biologicalSex,
                     activityLevel: value,
+                    trainingPreferences: profile.trainingPreferences,
                   })
                 }
               />
@@ -169,21 +172,6 @@ export function ProfileScreen() {
     </Screen>
   );
 }
-/** Rótulos fora do componente: mapa estável, não recriado a cada render. */
-const sexLabel: Record<BiologicalSex, Parameters<typeof t>[0]> = {
-  male: 'sexMale',
-  female: 'sexFemale',
-  unspecified: 'sexUnspecified',
-};
-
-const activityLabel: Record<ActivityLevel, Parameters<typeof t>[0]> = {
-  sedentary: 'activitySedentary',
-  light: 'activityLight',
-  moderate: 'activityModerate',
-  high: 'activityHigh',
-  athlete: 'activityAthlete',
-};
-
 const styles = StyleSheet.create({
   content: { padding: layout.pageInset, paddingBottom: spacing.huge * 2, gap: layout.sectionGap },
   // Sem altura fixa: o hero do perfil cresce com o conteúdo (nome longo,
@@ -191,6 +179,5 @@ const styles = StyleSheet.create({
   hero: {},
   heroBody: { padding: spacing.xl, gap: spacing.md },
   header: { alignItems: 'center', gap: spacing.sm, paddingBottom: spacing.md },
-  avatarPressed: { opacity: opacity.pressed },
   options: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
 });

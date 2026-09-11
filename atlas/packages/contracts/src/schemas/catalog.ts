@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { Difficulty, Equipment, ExerciseId, MuscleRole } from '../primitives.js';
+import { BodyRegion, Difficulty, Equipment, ExerciseId, MuscleRole } from '../primitives.js';
 
 /**
  * Grupo muscular. `svgPathId` liga o dado ao <path> do SVG anatômico —
@@ -40,6 +40,21 @@ export const ExerciseSummary = z.object({
   difficulty: Difficulty,
   thumbnailUrl: z.url().nullable(),
   isCustom: z.boolean(),
+  /**
+   * Regiões que o movimento carrega o bastante para importar a quem precisa
+   * poupá-las.
+   *
+   * O critério é **discriminante, não exaustivo**: quase todo exercício de
+   * membro superior usa o ombro em alguma medida, mas marcar `shoulder` nos
+   * vinte faria o filtro devolver lista vazia para quem tem ombro sensível — o
+   * que é o mesmo que não ter filtro. Só entra aqui o movimento que um
+   * profissional trocaria primeiro: sobrecarga em amplitude extrema, trajetória
+   * fixa que não deixa a escápula acompanhar, ou compressão característica
+   * daquela articulação.
+   *
+   * Não é diagnóstico nem contraindicação médica. É ordem de preferência.
+   */
+  stressedRegions: z.array(BodyRegion).default([]),
 });
 export type ExerciseSummary = z.infer<typeof ExerciseSummary>;
 
@@ -62,6 +77,13 @@ export const ExerciseFilter = z.object({
   muscleCode: z.string().optional(),
   equipment: Equipment.optional(),
   difficulty: Difficulty.optional(),
+  /**
+   * Personalização pelo perfil. Opcional de propósito: a tela **decide** aplicar
+   * e o usuário **vê** que aplicou. Filtro de perfil que entra por padrão e sem
+   * aviso é indistinguível de catálogo incompleto.
+   */
+  protectedRegions: z.array(BodyRegion).optional(),
+  availableEquipment: z.array(Equipment).optional(),
   cursor: z.string().nullable().optional(),
   limit: z.number().int().min(1).max(50).default(20),
 });

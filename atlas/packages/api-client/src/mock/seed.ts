@@ -41,6 +41,7 @@ interface RawExercise {
   activations: [string, string, number][];
   cues: string[];
   mistakes: string[];
+  stressedRegions: string[];
 }
 
 export interface SeedData {
@@ -68,6 +69,7 @@ export function buildSeedData(random: () => number): SeedData {
       difficulty: raw.difficulty as ExerciseDetail['difficulty'],
       thumbnailUrl: exerciseImageUrl(slug, 0),
       isCustom: false,
+      stressedRegions: raw.stressedRegions as ExerciseDetail['stressedRegions'],
       description: `Execução padrão de ${raw.name.toLowerCase()}.`,
       media: [
         { kind: 'image', url: exerciseImageUrl(slug, 0), angle: 'front' },
@@ -166,27 +168,19 @@ export function buildSeedData(random: () => number): SeedData {
     id: athleteId,
     displayName: 'Marcus',
     email: 'demo@atlas.app',
-    avatar: {
-      photoUri: null,
-      // Modelo gratuito masculino, ids do catálogo em
-      // apps/mobile/src/features/avatar/avatar-presets.ts. O usuário demo
-      // começa com um avatar que o plano Free realmente permite.
-      base: 'base-2',
-      skinTone: 'skinTone-2',
-      hair: 'hair-0',
-      face: 'face-3',
-      outfit: 'outfit-0',
-      accessory: null,
-      frame: null,
-      background: 'background-0',
-      hairColor: '#2B2119',
-      outfitColor: '#4CC9F0',
-      backgroundColor: '#2F4C86',
-    },
+    photoUri: null,
     roles: ['athlete'],
     // ATL-NUT-001 — entradas da estimativa metabólica.
     biologicalSex: 'male',
     activityLevel: 'moderate',
+    // O usuário de demonstração declara uma limitação de propósito: sem ela,
+    // a personalização do catálogo não teria nada para demonstrar, e o efeito
+    // que o filtro tem sobre a lista passaria despercebido na apresentação.
+    trainingPreferences: {
+      experienceLevel: 'intermediate',
+      protectedRegions: ['knee'],
+      availableEquipment: null,
+    },
     goal: {
       type: 'hypertrophy',
       targetDate: iso(addDays(new Date(), 90)),
@@ -209,7 +203,6 @@ export function buildSeedData(random: () => number): SeedData {
       { feature: 'bodyCompositionTracking', limit: 0, used: 0 },
       { feature: 'progressPhotos', limit: 0, used: 0 },
       { feature: 'interactiveAnatomy', limit: 0, used: 0 },
-      { feature: 'premiumAvatarItems', limit: 0, used: 0 },
     ],
     createdAt: iso(addDays(new Date(), -HISTORY_WEEKS * 7 - 10)),
   };

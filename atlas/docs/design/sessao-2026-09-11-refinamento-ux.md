@@ -209,3 +209,153 @@ semânticos.
   legível (a manchete virou a participação relativa), mas a métrica em si
   mereceria uma revisão de domínio — contar contribuição parcial — que está fora
   desta rodada de UI.
+
+---
+
+# Segunda rodada — personalização da jornada (11 set 2026)
+
+## 9. Séries efetivas: o cálculo estava errado em dois pontos
+
+A `v1` (`effectiveSetsV1`, mantida porque a fórmula é versionada) tinha dois
+defeitos, os dois visíveis em tela:
+
+1. **Exigia RIR registrado** (`s.rir !== null && s.rir <= 3`). RIR é opcional no
+   contrato, então quem não anota reserva — o usuário padrão — via "0 séries
+   efetivas" em todos os grupos musculares. A métrica lia como "você não
+   treinou".
+2. **Contava série inteira ou nada, sem noção de ativação**: só o músculo
+   primário pontuava. O glúteo de quem só agacha aparecia com `0 séries
+   efetivas` ao lado de 25 t de carga.
+
+Havia ainda um terceiro problema, que é o que permitiu os dois primeiros passarem:
+o **mock reimplementava a agregação inline** (`activation.role === 'primary' &&
+(set.rir ?? 10) <= 3`) em vez de chamar `@atlas/domain`. As duas cópias
+divergiram e ninguém notou.
+
+A `v2`:
+
+- `isEffectiveSet` — aquecimento nunca conta; série de trabalho conta **a menos
+  que** haja evidência explícita de que foi leve (RIR anotado acima do limite).
+  RIR ausente conta. É uma inversão deliberada: superestimar quem faz série leve
+  sem anotar é o erro preferível, porque só aparece em quem tem o dado para
+  corrigi-lo.
+- `weightedEffectiveSets` — contribuição **fracionária** pelo `activationWeight`
+  do próprio catálogo (1,0 no motor primário, 0,4–0,5 nos sinergistas). A mesma
+  ponderação que alimenta o volume alimenta o estímulo, então as duas medidas
+  nunca se contradizem.
+- `CALCULATION_VERSION` foi para `2`; o contrato Zod e o OpenAPI aceitam
+  fracionário (`effectiveSets: number`), e a UI arredonda com `formatEffort`.
+- O texto do app que descrevia a fórmula antiga ("consideram o músculo
+  principal…") foi reescrito — deixá-lo seria documentar um cálculo que não
+  existe mais.
+
+## 10. Personalização da jornada
+
+### Contrato
+
+- `BodyRegion` — oito regiões musculoesqueléticas. A lista é **articular de
+  propósito**: o Atlas não pergunta diagnóstico. Cardiopatia, gestação e
+  pós-operatório ficam fora porque a resposta certa a elas não é filtrar
+  exercício, é procurar um profissional.
+- `ExperienceLevel` — alias de `Difficulty`, mesma escala, para que "exercício
+  no meu nível" seja comparação direta sem tabela de conversão.
+- `TrainingPreferences` = nível + regiões a poupar + equipamento disponível.
+  Anulável no perfil: `null` (não respondeu) ≠ `[]` (respondeu "nenhuma").
+- `ExerciseSummary.stressedRegions` — carga articular de cada movimento.
+
+### Dados
+
+Os 60 exercícios do fixture foram etiquetados à mão. O critério é
+**discriminante, não exaustivo**: marcar `shoulder` nos vinte movimentos de
+membro superior devolveria lista vazia a quem tem ombro sensível, o que é o mesmo
+que não ter filtro. Só entra o que um profissional trocaria primeiro.
+
+Distribuição: 35 exercícios com alguma carga declarada, 25 sem nenhuma; ombro 13,
+joelho 9, lombar 8, punho 6, tornozelo 6, cotovelo 5, quadril 5, pescoço 3. Um
+teste de integração trava isso: excluir qualquer região tem de deixar **mais da
+metade** do catálogo de pé.
+
+### Domínio
+
+`packages/domain/src/exercise-fit.ts` — veredito
+(`recommended`/`suitable`/`caution`/`avoid`), motivos **em código** (a tela
+traduz), ordenação por adequação e `saferAlternative`. Três princípios:
+
+1. **Nada some em silêncio.** O veredito nunca é "não existe": é `avoid` com
+   motivo, e a tela sempre tem o porquê para mostrar.
+2. **Limitação não é diagnóstico.** O vocabulário é `avoid`/`caution`, nunca
+   "contraindicado".
+3. **Nível filtra para cima, nunca para baixo.** Avançado continua vendo flexão e
+   prancha. E nível **nunca** esconde: exercício acima do nível é alerta na linha,
+   porque esconder o agachamento de um iniciante é dizer que ele nunca vai agachar.
+
+### Telas
+
+- **Onboarding** ganhou o passo *Suas preferências* (entre objetivo e
+  disponibilidade) e passou a coletar **sexo biológico**, que já existia no
+  contrato e nunca era perguntado — por isso a tela de metas mostrava "faltam
+  dados" no primeiro dia de uso. O passo é o único com aviso de que o app não
+  substitui avaliação profissional: perguntar "o que dói" cria uma expectativa
+  clínica, e a hora de desfazê-la é no momento da pergunta.
+- Cada nível vem com uma frase de apoio ("Treino com constância há alguns
+  meses"). Sem ela, todo mundo se declara intermediário e o campo não informa nada.
+- **Catálogo** — filtro ligado por padrão quando há perfil, com **interruptor
+  visível** e uma frase dizendo o que saiu da lista. Lista vazia pelo perfil tem
+  estado próprio, com saída para o catálogo completo; mandar "limpar busca" a
+  quem não buscou nada não resolveria nada.
+- **Montador de ficha** — aqui a personalização **ordena, mas não esconde**: é a
+  hora em que o usuário pode legitimamente querer o exercício que ele mesmo
+  marcou para poupar, por orientação de um profissional.
+
+## 11. Avatar vetorial removido; foto no lugar
+
+Saíram `avatar-parts.ts`, `avatar-presets.ts`, `avatar-assets.ts` (+teste),
+`AvatarEditor`, `AvatarScreen`, `AvatarSwatch`, `Avatar`, a rota `/avatar/edit` e
+o entitlement `premiumAvatarItems`. O contrato `AvatarConfig` (nove campos e três
+cores) virou `photoUri: string | null`.
+
+O construtor custava um catálogo de geometria, uma tela de edição, um item de
+paywall e uma etapa na jornada — para entregar um boneco que ninguém confunde com
+a própria cara. `PersonAvatar` já sabia cair para as iniciais sobre a capa
+semeada pelo id, então o fallback já existia e não é um espaço vazio: ninguém
+fica obrigado a enviar foto para a tela parecer completa. A foto é escolhida no
+próprio perfil — a rota dedicada existia para o construtor.
+
+## 12. Heros sem corte vertical
+
+Os assets editoriais são retrato (1080×1440 e 960×1440) e viviam numa caixa de
+**212 pt** de altura. Na largura da tela, isso recortava mais da metade da altura
+da imagem e a figura central perdia cabeça ou pés conforme o arquivo.
+
+A altura passou a ser **derivada da imagem**: `ARTWORK_ASPECT` guarda a proporção
+medida de cada arte e `HeroArtwork` aplica `aspectRatio`, então o `cover` não tem
+o que cortar. Contextos só-vetor usam 4:3 (não há figura a preservar, e um bloco
+3:4 de puro gradiente ocuparia meia tela sem dizer nada). Superfícies com forma
+própria — a faixa do estado vazio — passam `aspect` explicitamente; é exceção
+declarada, não o padrão.
+
+## 13. Gates
+
+`pnpm typecheck`, `pnpm lint`, `vitest` (277 testes, +25 nesta rodada),
+`pnpm check:parity` e `expo export --platform web`: todos verdes. Logs em
+`docs/design/evidencias-ATL-UX-014/`.
+
+O fluxo de onboarding foi percorrido na prévia web (414 px): os cinco passos
+respondem, a foto cai para as iniciais quando não é enviada, e a home chega com
+o hero contextual correto.
+
+## 14. Fora de escopo (não implementado)
+
+- **Geração automática de ficha** a partir do perfil. O que existe é catálogo
+  filtrado e sugestão ordenada; montar uma periodização completa a partir de
+  nível + limitação + disponibilidade é outra feature, com decisões de domínio
+  (divisão, progressão, frequência por grupo) que não caberiam aqui sem virar
+  chute.
+- **Upload da foto**. `photoUri` guarda a URI local do device; o campo é o mesmo
+  que o backend vai preencher com URL remota, e `CoverImage` não distingue os
+  dois casos — mas não há upload, então trocar de aparelho perde a foto.
+- **Etiquetagem por revisão profissional**. `stressedRegions` foi preenchido com
+  critério de engenharia a partir de conhecimento de treino; merece validação de
+  um profissional antes de ir a público.
+- Nenhum teste automatizado percorre as telas (não há react-native-testing-library
+  no projeto). A verificação de UI segue sendo Maestro + prévia web.
