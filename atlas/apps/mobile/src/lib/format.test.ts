@@ -5,7 +5,6 @@ import {
   formatBodyMeasurement,
   formatCalorieAdjustment,
   formatCalories,
-  formatCompactNumber,
   formatCount,
   formatCurrency,
   formatDate,
@@ -27,7 +26,7 @@ import {
   formatWeekdayName,
   formatWeight,
   formatWorkoutVolume,
-  formatWorkoutVolumeCompact,
+  formatTonnage,
 } from './format';
 
 const ABSENCES = [null, undefined, NaN, Infinity, -Infinity] as const;
@@ -72,12 +71,22 @@ describe('volume de treino', () => {
     expect(formatWorkoutVolume(0)).toBe('0');
   });
 
-  it('compacta sem perder a ordem de grandeza', () => {
-    expect(formatCompactNumber(840)).toBe('840');
-    expect(formatCompactNumber(1000)).toBe('1 mil');
-    expect(formatWorkoutVolumeCompact(15660.3)).toBe('15,7 mil');
-    expect(formatCompactNumber(1_240_000)).toBe('1,2 mi');
-    expect(formatCompactNumber(-2500)).toBe('-2,5 mil');
+  it('troca para toneladas quando o número deixa de ser um peso plausível', () => {
+    // "15,7 mil kg" era lido como o peso de um exercício. A tonelada pelo menos
+    // nomeia uma grandeza que a pessoa reconhece como soma.
+    expect(formatTonnage(840)).toBe('840 kg');
+    expect(formatTonnage(999)).toBe('999 kg');
+    expect(formatTonnage(1000)).toBe('1 t');
+    expect(formatTonnage(15660.3)).toBe('15,7 t');
+    expect(formatTonnage(17548)).toBe('17,5 t');
+    expect(formatTonnage(108800)).toBe('108,8 t');
+    expect(formatTonnage(-2500)).toBe('-2,5 t');
+    expect(formatTonnage(null)).toBe(ABSENT);
+  });
+
+  it('nunca produz a forma "mil kg", que não descreve peso nenhum', () => {
+    for (const value of [1000, 15660, 108800, 999999])
+      expect(formatTonnage(value)).not.toContain('mil');
   });
 });
 

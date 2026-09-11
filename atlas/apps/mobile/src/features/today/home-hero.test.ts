@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { SessionId, SessionSummary, TodayWorkout } from '@atlas/contracts';
-import { AWAY_THRESHOLD_DAYS, homeHero, sessionsThisWeek } from './home-hero';
+import { AWAY_THRESHOLD_DAYS, homeHero, plannedSets, sessionsThisWeek } from './home-hero';
 
 const NOW = new Date(2026, 8, 11, 9, 0, 0); // sexta, 11 set 2026
 
@@ -219,5 +219,56 @@ describe('resumo da semana', () => {
 
   it('devolve zero sem histórico, em vez de quebrar', () => {
     expect(sessionsThisWeek([], NOW)).toBe(0);
+  });
+});
+
+describe('tamanho da tarefa do dia', () => {
+  const day = (sets: { isWarmup: boolean }[][]) =>
+    ({
+      id: 'day-1',
+      label: 'Legs',
+      slot: null,
+      estimatedMinutes: 55,
+      exercises: sets.map((exerciseSets, index) => ({
+        order: index + 1,
+        exerciseId: 'ex-' + index,
+        exerciseName: 'Exercício ' + index,
+        thumbnailUrl: null,
+        technique: 'straight',
+        supersetGroup: null,
+        notes: null,
+        sets: exerciseSets.map((set, order) => ({
+          order: order + 1,
+          targetReps: 10,
+          targetRepsMax: null,
+          targetDurationSeconds: null,
+          targetWeightKg: null,
+          targetRir: null,
+          targetRpe: null,
+          restSeconds: 90,
+          isWarmup: set.isWarmup,
+        })),
+      })),
+    }) as unknown as Parameters<typeof plannedSets>[0];
+
+  it('conta as séries de trabalho, que é o que o chip do hero promete', () => {
+    expect(
+      plannedSets(
+        day([
+          [{ isWarmup: false }, { isWarmup: false }, { isWarmup: false }],
+          [{ isWarmup: false }, { isWarmup: false }],
+        ]),
+      ),
+    ).toBe(5);
+  });
+
+  it('deixa o aquecimento de fora — ele não é o trabalho que espera o usuário', () => {
+    expect(plannedSets(day([[{ isWarmup: true }, { isWarmup: true }, { isWarmup: false }]]))).toBe(
+      1,
+    );
+  });
+
+  it('devolve zero para um dia sem exercício, sem quebrar o chip', () => {
+    expect(plannedSets(day([]))).toBe(0);
   });
 });

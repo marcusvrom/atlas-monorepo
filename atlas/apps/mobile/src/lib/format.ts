@@ -140,11 +140,18 @@ export function formatBodyFat(percent: number | null | undefined): string {
 }
 
 /**
- * Volume de treino, em kg. Sempre inteiro.
+ * Volume de treino (tonelagem), em kg e sempre inteiro.
  *
  * Volume é a soma de dezenas de séries; a casa decimal é resíduo aritmético, não
  * informação. "15.660" responde a pergunta que o usuário faz; "15.660,5" só
  * ocupa espaço e sugere uma precisão que a balança da academia não tem.
+ *
+ * **Regra de uso, e ela não é negociável:** este número nunca aparece sem um
+ * rótulo que o nomeie ("Carga total levantada"). Duração, séries e exercícios
+ * o usuário nomeia sozinho ao ver o valor; tonelagem, não — solta num chip ela
+ * é lida como "o peso que vou levantar neste exercício", que é falso e
+ * assustador. Onde não couber rótulo, o número não entra. Para o total do dia
+ * em card, prefira `formatTonnage`.
  */
 export function formatWorkoutVolume(kg: number | null | undefined): string {
   const value = usable(kg);
@@ -152,23 +159,23 @@ export function formatWorkoutVolume(kg: number | null | undefined): string {
 }
 
 /**
- * Forma compacta para card estreito: "15,7 mil", "1,2 mi".
+ * Tonelagem — a carga somada de um treino ou período, com a unidade embutida.
  *
- * Abaixo de mil devolve o número inteiro — comprimir "840" não economiza nada e
- * só custa legibilidade.
+ * Até uma tonelada sai em quilos ("840 kg"); acima disso, em toneladas
+ * ("17,5 t"). A forma compacta anterior ("15,7 mil kg") foi removida por ser
+ * ilegível no sentido literal: ninguém levanta "quinze mil quilos", e quem lia
+ * isso num chip ao lado de "5 exercícios · 55 min" entendia que **aquele** era
+ * o peso do exercício. "17,5 t" pelo menos nomeia uma grandeza que a pessoa
+ * reconhece, e a ordem de grandeza deixa claro que é uma soma, não uma barra.
+ *
+ * Continua sendo um número que **só funciona com rótulo**: ver a regra em
+ * `formatWorkoutVolume`.
  */
-export function formatCompactNumber(value: number | null | undefined): string {
-  const usableValue = usable(value);
-  if (usableValue === null) return ABSENT;
-  const magnitude = Math.abs(usableValue);
-  if (magnitude < 1000) return decimals(usableValue, 0);
-  if (magnitude < 1_000_000) return decimals(usableValue / 1000, 1) + ' mil';
-  return decimals(usableValue / 1_000_000, 1) + ' mi';
-}
-
-/** Volume de treino em card: compacto acima de mil, inteiro abaixo. */
-export function formatWorkoutVolumeCompact(kg: number | null | undefined): string {
-  return formatCompactNumber(kg);
+export function formatTonnage(kg: number | null | undefined): string {
+  const value = usable(kg);
+  if (value === null) return ABSENT;
+  if (Math.abs(value) < 1000) return decimals(value, 0) + ' kg';
+  return decimals(value / 1000, 1) + ' t';
 }
 
 // ---------------------------------------------------------------------------

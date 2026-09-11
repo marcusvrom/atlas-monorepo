@@ -3,7 +3,7 @@ Expo Autolinking module resolution enabled
 Starting Metro Bundler
 
 warning: Bundler cache is empty, rebuilding (this may take a minute)
-Web Bundled 27527ms node_modules/.pnpm/expo-router@57.0.20_fd88cafe175387d301bd08f2733e94cd/node_modules/expo-router/entry.js (1926 modules)
+Web Bundled 27844ms node_modules/.pnpm/expo-router@57.0.20_fd88cafe175387d301bd08f2733e94cd/node_modules/expo-router/entry.js (1926 modules)
 
 › Assets (23):
 ../../node_modules/.pnpm/expo-router@57.0.20_fd88cafe175387d301bd08f2733e94cd/node_modules/expo-router/assets/arrow_down.017bc6ba3fc25503e5eb5e53826d48a8.png (9.5KB)
@@ -26,7 +26,7 @@ assets/marketing/onboarding-train.7e0214c4cb55421eacadb049e27a87f1.webp (77KB)
 
 › web bundles (3):
 _expo/static/css/native-tabs.module-347b371292b74b7a5e8f52941dab1648.css (2.5KB)
-_expo/static/js/web/entry-3f6cc5a80409fa353361de22c842e72d.js (3.8MB)
+_expo/static/js/web/entry-088ddaa83b665705bad451056cde97e8.js (3.8MB)
 _expo/static/js/web/worker-ce5a66006e32d5fd1c29a9c874dd637f.js (133KB)
 
 › Files (2):

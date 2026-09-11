@@ -1,9 +1,4 @@
-import {
-  formatCount,
-  formatDuration,
-  formatWeekdayDate,
-  formatWorkoutVolumeCompact,
-} from '../../lib/format';
+import { formatCount, formatDuration, formatTonnage, formatWeekdayDate } from '../../lib/format';
 import type { SessionSummary } from '@atlas/contracts';
 import { useMemo } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
@@ -88,9 +83,13 @@ export function HistoryRow({ session, onPress }: { session: SessionSummary; onPr
         <MetaChipRow>
           <MetaChip icon="clock" label={formatDuration(session.durationSeconds)} />
           <MetaChip icon="layers" label={formatCount(session.setCount) + ' ' + t('setsShort')} />
+          {/* A carga volta com o rótulo embutido: "17,5 t" sozinho não dizia
+              nada, mas era o único número que diferenciava um Legs de um Push
+              ao percorrer a lista — tirá-lo deixava todas as linhas iguais.
+              "17,5 t no total" cabe no chip e não é lido como peso da barra. */}
           <MetaChip
             icon="bolt"
-            label={formatWorkoutVolumeCompact(session.totalVolumeKg) + ' ' + t('kilogramsShort')}
+            label={t('tonnageChip').replace('{value}', formatTonnage(session.totalVolumeKg))}
           />
         </MetaChipRow>
       </View>

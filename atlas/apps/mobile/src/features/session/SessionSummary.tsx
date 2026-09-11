@@ -2,12 +2,7 @@ import { StyleSheet, View } from 'react-native';
 import type { TrainingSession } from '@atlas/contracts';
 import { layout, spacing } from '@atlas/design-tokens';
 import { Button, HeroArtwork, MetricTile, Text } from '../../design/components';
-import {
-  formatCount,
-  formatDuration,
-  formatWorkoutVolume,
-  formatWorkoutVolumeCompact,
-} from '../../lib/format';
+import { formatCount, formatDuration, formatTonnage } from '../../lib/format';
 import { plural, t } from '../../i18n';
 import { sessionRecords } from './session-summary';
 import { useSessionQueue } from './hooks';
@@ -32,18 +27,22 @@ export function SessionSummary({
           <Text tone="onAccent" variant="footnote" weight="semibold">
             {t('sessionFinished')}
           </Text>
+          {/* O número de celebração passou a ser o tempo treinado, não a
+              tonelagem: "55 min" é uma conquista que a pessoa reconhece na hora,
+              enquanto "17.548 kg" precisava de uma aula antes de virar orgulho.
+              A carga continua logo abaixo, com nome. */}
           <Text tone="onAccent" variant="display" weight="bold">
-            {formatWorkoutVolume(session.totalVolumeKg)} {t('kilogramsShort')}
+            {formatDuration(session.durationSeconds)}
           </Text>
           <Text tone="onAccent" variant="subhead">
-            {t('sessionVolume')}
+            {t('sessionDurationTrained')}
           </Text>
         </View>
       </HeroArtwork>
       <View style={styles.metrics}>
         <MetricTile
-          label={t('sessionDuration')}
-          value={formatDuration(session.durationSeconds)}
+          label={t('sessionVolume')}
+          value={formatTonnage(session.totalVolumeKg)}
           accent="activity"
         />
         <MetricTile
@@ -56,14 +55,14 @@ export function SessionSummary({
           value={
             delta === null
               ? t('sessionFirstHistory')
-              : (delta > 0 ? '+' : delta < 0 ? '−' : '') +
-                formatWorkoutVolumeCompact(Math.abs(delta)) +
-                ' ' +
-                t('kilogramsShort')
+              : (delta > 0 ? '+' : delta < 0 ? '−' : '') + formatTonnage(Math.abs(delta))
           }
           accent="energy"
         />
       </View>
+      <Text variant="caption" tone="tertiary">
+        {t('tonnageExplained')}
+      </Text>
       {queue.pending ? (
         <Text accessibilityLiveRegion="polite">
           {formatCount(queue.pending)}{' '}

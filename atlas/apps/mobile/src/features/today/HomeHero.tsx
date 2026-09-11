@@ -11,9 +11,9 @@ import {
   MetaChipRow,
   Text,
 } from '../../design/components';
-import { formatCount, formatDuration, formatWorkoutVolumeCompact } from '../../lib/format';
+import { formatCount, formatDuration, formatTonnage } from '../../lib/format';
 import { plural, t } from '../../i18n';
-import { homeHero, sessionsThisWeek, type HomeHeroTarget } from './home-hero';
+import { homeHero, plannedSets, sessionsThisWeek, type HomeHeroTarget } from './home-hero';
 
 /**
  * O bloco que responde "o que eu faço agora".
@@ -80,6 +80,12 @@ export function HomeHero({
   // Os chips mudam com o estado porque a pergunta muda: antes do treino o que
   // importa é o tamanho da tarefa; depois dele, o que foi feito; sem treino
   // marcado, onde a semana está.
+  //
+  // Nenhum deles carrega tonelagem. Chip não tem rótulo, e número sem rótulo só
+  // pode ser algo que o usuário nomeia ao ver — duração, séries e exercícios
+  // passam nesse teste; "15,7 mil kg" não passava, e ao lado de "5 exercícios"
+  // era lido como o peso do exercício. A carga total continua existindo, com
+  // nome, no resumo da sessão e no Progresso.
   const meta =
     completed !== null ? (
       <MetaChipRow>
@@ -89,17 +95,19 @@ export function HomeHero({
           icon="layers"
           label={formatCount(completed.setCount) + ' ' + t('setsShort')}
         />
+        {/* Depois do treino a carga é resultado, e resultado merece aparecer —
+            com o rótulo dentro do chip, nunca como número solto. */}
         <MetaChip
           onCover
           icon="bolt"
-          label={formatWorkoutVolumeCompact(completed.totalVolumeKg) + ' ' + t('kilogramsShort')}
+          label={t('tonnageChip').replace('{value}', formatTonnage(completed.totalVolumeKg))}
         />
       </MetaChipRow>
     ) : workout ? (
       <MetaChipRow>
         <MetaChip
           onCover
-          icon="layers"
+          icon="dumbbell"
           label={formatCount(workout.day.exercises.length) + ' ' + t('planExercises')}
         />
         <MetaChip
@@ -109,8 +117,8 @@ export function HomeHero({
         />
         <MetaChip
           onCover
-          icon="bolt"
-          label={formatWorkoutVolumeCompact(workout.estimatedVolumeKg) + ' ' + t('kilogramsShort')}
+          icon="layers"
+          label={formatCount(plannedSets(workout.day)) + ' ' + t('setsShort')}
         />
       </MetaChipRow>
     ) : model.kind === 'noPlan' ? null : (

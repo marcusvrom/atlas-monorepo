@@ -1,4 +1,4 @@
-import type { SessionSummary, TodayWorkout } from '@atlas/contracts';
+import type { SessionSummary, TodayWorkout, WorkoutDay } from '@atlas/contracts';
 import type { ArtworkContext } from '../../design/media';
 import type { MessageKey } from '../../i18n';
 import { localDayKey } from '../progress/dashboard-math';
@@ -205,4 +205,23 @@ export function sessionsThisWeek(sessions: readonly SessionSummary[], now: Date)
       session.status === 'completed' &&
       keys.has(localDayKey(new Date(session.completedAt ?? session.startedAt))),
   ).length;
+}
+
+/**
+ * Séries de trabalho do dia — aquecimento fora.
+ *
+ * Substitui o volume estimado nos chips do hero. "18 séries" é uma grandeza que
+ * o usuário nomeia sozinho e que descreve o **tamanho da tarefa** que ele está
+ * prestes a começar; "15,7 mil kg" descrevia uma soma que ninguém levanta e que,
+ * ao lado de "5 exercícios", era lida como o peso do próprio exercício.
+ *
+ * Aquecimento sai da conta porque a pergunta que o chip responde é "quanto
+ * trabalho me espera", e série de aquecimento não é trabalho contabilizado —
+ * é a mesma definição que o dashboard usa para séries efetivas.
+ */
+export function plannedSets(day: WorkoutDay): number {
+  return day.exercises.reduce(
+    (total, exercise) => total + exercise.sets.filter((set) => !set.isWarmup).length,
+    0,
+  );
 }

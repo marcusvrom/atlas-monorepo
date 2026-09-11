@@ -1,4 +1,4 @@
-import { formatEffort, formatWorkoutVolume } from '../lib/format';
+import { formatEffort, formatTonnage } from '../lib/format';
 import { AnatomyRegion } from './AnatomyRegion';
 import { useAccessibilityPreferences } from '../design/accessibility';
 import type { MuscleActivation, MuscleGroup, MuscleVolume } from '@atlas/contracts';
@@ -103,9 +103,7 @@ export function AnatomicalModel({
       ': ' +
       description +
       (mode === 'volume_heatmap' ? ' · ' + intensityLevel(value) + '/3' : '') +
-      (volume
-        ? ' · ' + formatWorkoutVolume(volume.weightedVolumeKg) + ' ' + t('anatomyVolumeUnit')
-        : '')
+      (volume ? ' · ' + formatTonnage(volume.weightedVolumeKg) + ' ' + t('anatomyVolumeUnit') : '')
     );
   };
   const selectedGroup = muscleGroups.find((g) => g.code === selected);

@@ -12,7 +12,7 @@ import {
   formatCount,
   formatDurationMinutes,
   formatPercentageChange,
-  formatWorkoutVolumeCompact,
+  formatTonnage,
 } from '../../lib/format';
 import { t } from '../../i18n';
 import { summarizePeriod, percentageChange, calendarWeek } from './dashboard-math';
@@ -107,7 +107,7 @@ export function DashboardOverview({
         <View style={styles.tile}>
           <MetricTile
             label={t('dashboardVolume')}
-            value={formatWorkoutVolumeCompact(current.volume)}
+            value={formatTonnage(current.volume)}
             delta={delta(current.volume, previous.volume)}
             deltaTone={deltaTone(current.volume, previous.volume)}
             accent="strength"
@@ -127,6 +127,13 @@ export function DashboardOverview({
       </View>
       <Text variant="caption" tone="tertiary">
         {t('dashboardComparedShort')}
+      </Text>
+      {/* A frase que desfaz o jargão. Aparece uma vez, como legenda do bloco:
+          "carga total levantada" só quer dizer alguma coisa depois que o
+          usuário sabe que é peso × repetições somado. Sem ela o tile vira um
+          número grande sem referência. */}
+      <Text variant="caption" tone="tertiary">
+        {t('tonnageExplained')}
       </Text>
       <InlineMetric
         value={formatCount(current.activeDays) + ' / ' + formatCount(days)}

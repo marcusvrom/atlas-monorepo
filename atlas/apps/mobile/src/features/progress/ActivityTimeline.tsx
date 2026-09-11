@@ -10,7 +10,7 @@ import {
   formatDateRange,
   formatDurationMinutes,
   formatShortDate,
-  formatWorkoutVolume,
+  formatTonnage,
 } from '../../lib/format';
 import { plural, t } from '../../i18n';
 import { activityBuckets } from './activity-buckets';
@@ -20,10 +20,25 @@ import { ActivityBar } from './ActivityBar';
 
 type Metric = 'volume' | 'minutes' | 'sets';
 
+/** Frase que segue o número grande ("17,5 t · de carga levantada"). */
 const UNIT_KEY: Record<Metric, Parameters<typeof t>[0]> = {
   volume: 'activityUnitVolume',
   minutes: 'activityUnitMinutes',
   sets: 'activityUnitSets',
+};
+
+/**
+ * Nome da métrica, para título e descrição acessível.
+ *
+ * Separado da frase de unidade porque as duas têm gramática diferente: "Carga"
+ * é um rótulo, "de carga levantada" é um complemento. Usar o complemento como
+ * rótulo produzia "Seu ritmo de treino · de carga levantada", que não é uma
+ * frase em português.
+ */
+const METRIC_KEY: Record<Metric, Parameters<typeof t>[0]> = {
+  volume: 'activityVolume',
+  minutes: 'activityMinutes',
+  sets: 'activitySets',
 };
 
 /**
@@ -60,7 +75,7 @@ export function ActivityTimeline({
   // leitor de tela ouve é exatamente o que está desenhado.
   const display = (value: number) =>
     metric === 'volume'
-      ? formatWorkoutVolume(value)
+      ? formatTonnage(value)
       : metric === 'minutes'
         ? formatDurationMinutes(value)
         : formatCount(value);
@@ -70,7 +85,7 @@ export function ActivityTimeline({
   const summary = useMemo(
     () =>
       describeSeries({
-        label: t('activityTitle') + ' · ' + t(UNIT_KEY[metric]),
+        label: t('activityTitle') + ' · ' + t(METRIC_KEY[metric]),
         // A unidade já vai embutida na formatação de cada métrica (min/h), e
         // volume e séries carregam a sua no título do bloco.
         unit: '',
@@ -121,6 +136,11 @@ export function ActivityTimeline({
             {display(bucket[metric])}
           </Text>
           <Text tone="secondary">{t(UNIT_KEY[metric])}</Text>
+          {metric === 'volume' ? (
+            <Text variant="caption" tone="tertiary">
+              {t('tonnageExplained')}
+            </Text>
+          ) : null}
           <View style={styles.chart}>
             {buckets.map((item, index) => (
               <ActivityBar

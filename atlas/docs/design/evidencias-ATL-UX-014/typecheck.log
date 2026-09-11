@@ -13,22 +13,22 @@
 @atlas/design-tokens:typecheck: > @atlas/design-tokens@0.1.0 typecheck /home/user/atlas-monorepo/atlas/packages/design-tokens
 @atlas/design-tokens:typecheck: > tsc --noEmit
 @atlas/design-tokens:typecheck: 
-@atlas/contracts:typecheck: cache hit, replaying logs b43b036fe9525999
-@atlas/contracts:typecheck: 
-@atlas/contracts:typecheck: > @atlas/contracts@0.1.0 typecheck /home/user/atlas-monorepo/atlas/packages/contracts
-@atlas/contracts:typecheck: > tsc --noEmit
-@atlas/contracts:typecheck: 
 @atlas/domain:typecheck: cache hit, replaying logs e1820198e3cb2cad
 @atlas/domain:typecheck: 
 @atlas/domain:typecheck: > @atlas/domain@0.1.0 typecheck /home/user/atlas-monorepo/atlas/packages/domain
 @atlas/domain:typecheck: > tsc --noEmit
 @atlas/domain:typecheck: 
+@atlas/contracts:typecheck: cache hit, replaying logs b43b036fe9525999
 @atlas/api-client:typecheck: cache hit, replaying logs 9cade95a968ce86d
 @atlas/api-client:typecheck: 
 @atlas/api-client:typecheck: > @atlas/api-client@0.1.0 typecheck /home/user/atlas-monorepo/atlas/packages/api-client
 @atlas/api-client:typecheck: > tsc --noEmit
 @atlas/api-client:typecheck: 
-@atlas/mobile:typecheck: cache miss, executing 0b27c685238cb166
+@atlas/mobile:typecheck: cache miss, executing e00a4a8247c6cb1b
+@atlas/contracts:typecheck: 
+@atlas/contracts:typecheck: > @atlas/contracts@0.1.0 typecheck /home/user/atlas-monorepo/atlas/packages/contracts
+@atlas/contracts:typecheck: > tsc --noEmit
+@atlas/contracts:typecheck: 
 @atlas/mobile:typecheck: 
 @atlas/mobile:typecheck: > @atlas/mobile@0.1.0 typecheck /home/user/atlas-monorepo/atlas/apps/mobile
 @atlas/mobile:typecheck: > tsc --noEmit
@@ -36,5 +36,5 @@
 
  Tasks:    5 successful, 5 total
 Cached:    4 cached, 5 total
-  Time:    5.953s 
+  Time:    6.098s 
 

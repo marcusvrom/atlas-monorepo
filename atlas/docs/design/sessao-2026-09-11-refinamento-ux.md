@@ -78,7 +78,7 @@ parâmetro de precisão. Todas devolvem string; a precisão interna nunca é toc
 |---|---|---|---|
 | Carga | `formatWeight` | máx. 1 casa | `112.349 → 112,3` |
 | Peso/medidas | `formatBodyMeasurement`, `formatHeight`, `formatBodyFat` | máx. 1 casa | `18.46 → 18,5%` |
-| Volume | `formatWorkoutVolume` / `…Compact` | inteiro / compacto | `15660.3 → 15.660` / `15,7 mil` |
+| Carga somada (tonelagem) | `formatWorkoutVolume`, `formatTonnage` | inteiro / troca para t acima de 1.000 kg | `15660.3 → 15.660` / `17,5 t` |
 | Percentual | `formatPercentage` | inteiro; 1 casa só se o inteiro mentir | `0.004 → 0,4%`, `0.997 → 99,7%` |
 | Variação | `formatPercentageChange` | sinal obrigatório | `-8 → −8%` |
 | Calorias | `formatCalories`, `formatCalorieAdjustment` | inteiro com milhar | `2000 → 2.000` |
@@ -89,7 +89,7 @@ parâmetro de precisão. Todas devolvem string; a precisão interna nunca é toc
 | Datas | `formatDate`, `formatShortDate`, `formatWeekdayDate`, `formatFullDate`, `formatDateRange`, `formatDayMonth`, `formatWeekdayName`, `formatWeekdayAbbrev` | pt-BR | `11/09/2026`, `11 set`, `5 — 11 set` |
 | Preço | `formatCurrency` | centavos só quando existem | `249 → R$ 249` |
 
-Duas decisões que valem registro:
+Três decisões que valem registro:
 
 1. **O encaixe em meio quilo saiu do formatador.** A ATL-UI-012 exige kg inteiro
    ou meio — isso continua verdade, garantido pelo `step={0.5}` do
@@ -103,6 +103,37 @@ Duas decisões que valem registro:
 3. **Arredondamento é "meio para longe do zero".** `Math.round` puro manda
    −1,25 para −1,2 e +1,25 para +1,3: um par de deltas simétrico aparecia com
    magnitudes diferentes lado a lado.
+
+### Correção de rumo: a forma "mil kg" foi um erro
+
+A primeira versão desta rodada apresentava volume de treino como `15,7 mil kg`.
+Está errado, e o usuário apontou: **ninguém levanta quinze mil quilos**. Pior, no
+hero da home o número aparecia num chip sem rótulo, ao lado de "5 exercícios ·
+55 min" — o que o leitor entende é que *aquele* é o peso do exercício. O número
+estava certo e a leitura era falsa, que é o pior tipo de métrica.
+
+A forma compacta (`formatCompactNumber`, `formatWorkoutVolumeCompact`) foi
+**removida** do app. No lugar entrou uma regra explícita, registrada em
+`formatWorkoutVolume`:
+
+> Tonelagem nunca aparece sem um rótulo que a nomeie. Duração, séries e
+> exercícios o usuário nomeia sozinho ao ver o valor; tonelagem, não. Onde não
+> couber rótulo, o número não entra.
+
+Como isso se traduziu:
+
+| Onde | Antes | Agora | Por quê |
+|---|---|---|---|
+| Hero, antes do treino | `15,7 mil kg` | `17 séries` | Descreve o tamanho da tarefa que vai começar, não uma soma abstrata (`plannedSets`, aquecimento fora) |
+| Hero, treino concluído | `17,5 mil kg` | `17,5 t no total` | Depois do treino a carga é resultado; o rótulo vai dentro do chip |
+| Linha do histórico | `17,5 mil kg` | `17,5 t no total` | Era o único número que diferenciava um Legs de um Push na lista — tirá-lo deixava todas as linhas idênticas |
+| Tile do dashboard | `Volume total · kg` → `108,8 mil` | `Carga total levantada` → `108,8 t` | Rótulo nomeia, unidade é plausível |
+| Resumo da sessão | número grande = `17.548 kg` | número grande = `55 min`; carga num tile nomeado | "55 min" é conquista reconhecível na hora; tonelagem precisava de uma aula antes de virar orgulho |
+| Gráfico de atividade | opção "Volume", `15.660` | opção "Carga", `17,5 t` | — |
+| Distribuição muscular | manchete = `37,9 t` | manchete = `100%` (participação) | Séries efetivas contam só o músculo principal: um sinergista mostrava "0 séries efetivas" ao lado de 25 t. A participação relativa é o que a barra desenha e nunca se contradiz |
+
+Em toda tela onde a tonelagem aparece, uma linha explica o jargão uma única vez:
+**"Soma de peso × repetições de todas as séries."**
 
 Ausência é `—` em toda parte, nunca `0`: "não registrado" e "registrado como
 zero" são estados distintos.
@@ -171,6 +202,10 @@ semânticos.
 - Não há gate automático de luminância das imagens editoriais: decodificar webp
   exigiria dependência nova no CI. O requisito está documentado; a verificação é
   de revisão.
-- `MuscleDistribution`, `WellbeingSection` e `CheckInTrend` receberam só a
-  correção de formatação; a interação de seleção do `MetricChart` ainda não foi
-  estendida a eles.
+- `WellbeingSection` e `CheckInTrend` receberam só a correção de formatação; a
+  interação de seleção do `MetricChart` ainda não foi estendida a eles.
+- "Séries efetivas" continua contando apenas o músculo principal, o que produz
+  `0 séries efetivas · 25,5 t no total` para sinergistas. É verdade e agora está
+  legível (a manchete virou a participação relativa), mas a métrica em si
+  mereceria uma revisão de domínio — contar contribuição parcial — que está fora
+  desta rodada de UI.
