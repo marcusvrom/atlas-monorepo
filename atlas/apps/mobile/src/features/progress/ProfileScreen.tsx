@@ -1,6 +1,6 @@
 import { Avatar } from '../avatar/Avatar';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
-import { CurrentGoal, GoalType } from '@atlas/contracts';
+import { ActivityLevel, BiologicalSex, CurrentGoal, GoalType } from '@atlas/contracts';
 import { useRouter } from 'expo-router';
 import { layout, spacing, opacity } from '@atlas/design-tokens';
 import {
@@ -8,18 +8,20 @@ import {
   Button,
   Card,
   Chip,
+  CoverImage,
   ErrorState,
-  GradientSurface,
   LoadingState,
   Screen,
   ScreenHeader,
   Text,
 } from '../../design/components';
+import { CoverScrim } from '../../design/media';
 import { t } from '../../i18n';
-import { useMe, useUpdateGoal } from './hooks';
+import { useMe, useUpdateGoal, useUpdateProfile } from './hooks';
 export function ProfileScreen() {
   const me = useMe(),
     save = useUpdateGoal(),
+    saveProfile = useUpdateProfile(),
     router = useRouter();
   if (me.isPending)
     return (
@@ -38,31 +40,37 @@ export function ProfileScreen() {
     <Screen>
       <ScrollView contentContainerStyle={styles.content}>
         <ScreenHeader title={t('profile')} />
-        {/* Hero do perfil: superfície escura com avatar em destaque e plano. */}
-        <GradientSurface name="slate" radius="xl" level="none" style={styles.hero}>
-          <View style={styles.header}>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={t('avatarEdit')}
-              accessibilityHint={t('avatarTapHint')}
-              onPress={() => router.push('/avatar/edit')}
-              style={({ pressed }) => (pressed ? styles.avatarPressed : undefined)}
-            >
-              <Avatar config={profile.avatar} size={spacing.huge + spacing.lg} />
-            </Pressable>
-            <Text tone="onAccent" variant="title2" weight="bold">
-              {profile.displayName}
-            </Text>
-            <Text tone="onAccent" variant="subhead">
-              {profile.email}
-            </Text>
-            <Badge label={t(profile.planKey)} tone="brand" />
-            <Text tone="onAccent" variant="footnote">
-              {t('avatarTapHint')}
-            </Text>
+        {/* Hero do perfil: capa própria do usuário atrás do avatar. A semente é
+            o id do perfil, então a cor é dele e não muda a cada sessão. */}
+        <CoverImage seed={profile.id} glyph="none" radius="xl" style={styles.hero}>
+          <CoverScrim />
+          <View style={styles.heroBody}>
+            <View style={styles.header}>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t('avatarEdit')}
+                accessibilityHint={t('avatarTapHint')}
+                onPress={() => router.push('/avatar/edit')}
+                style={({ pressed }) => (pressed ? styles.avatarPressed : undefined)}
+              >
+                <Avatar config={profile.avatar} size={spacing.huge + spacing.lg} />
+              </Pressable>
+              <Text tone="onAccent" variant="title2" weight="bold">
+                {profile.displayName}
+              </Text>
+              <Text tone="onAccent" variant="subhead">
+                {profile.email}
+              </Text>
+              <View>
+                <Badge label={t(profile.planKey)} tone="brand" />
+              </View>
+              <Text tone="onAccent" variant="footnote">
+                {t('avatarTapHint')}
+              </Text>
+            </View>
+            <Button label={t('avatarEdit')} onPress={() => router.push('/avatar/edit')} />
           </View>
-          <Button label={t('avatarEdit')} onPress={() => router.push('/avatar/edit')} />
-        </GradientSurface>
+        </CoverImage>
         <Card>
           <Text weight="bold">{t('currentGoal')}</Text>
           <View style={styles.options}>
@@ -89,14 +97,99 @@ export function ProfileScreen() {
           </View>
           {save.isError ? <ErrorState message={t('profileError')} /> : null}
         </Card>
+        {/*
+          ATL-NUT-001 — entradas da estimativa metabólica.
+
+          Ficam no perfil, ao lado do objetivo, porque é onde o usuário já vai
+          quando algo muda. Sem elas a tela de metas mostra `missingInputs` e
+          não consegue estimar; com elas, a mesma biometria que o app já
+          guardava vira meta calórica.
+        */}
+        <Card>
+          <Text weight="bold">{t('profileBiologicalSex')}</Text>
+          <View style={styles.options}>
+            {BiologicalSex.options.map((value) => (
+              <Chip
+                key={value}
+                label={t(sexLabel[value])}
+                selected={profile.biologicalSex === value}
+                disabled={saveProfile.isPending}
+                onPress={() =>
+                  saveProfile.mutate({
+                    displayName: profile.displayName,
+                    heightCm: profile.heightCm,
+                    birthDate: profile.birthDate,
+                    biologicalSex: value,
+                    activityLevel: profile.activityLevel,
+                  })
+                }
+              />
+            ))}
+          </View>
+        </Card>
+
+        <Card>
+          <Text weight="bold">{t('profileActivityLevel')}</Text>
+          <View style={styles.options}>
+            {ActivityLevel.options.map((value) => (
+              <Chip
+                key={value}
+                label={t(activityLabel[value])}
+                selected={profile.activityLevel === value}
+                disabled={saveProfile.isPending}
+                onPress={() =>
+                  saveProfile.mutate({
+                    displayName: profile.displayName,
+                    heightCm: profile.heightCm,
+                    birthDate: profile.birthDate,
+                    biologicalSex: profile.biologicalSex,
+                    activityLevel: value,
+                  })
+                }
+              />
+            ))}
+          </View>
+          {saveProfile.isError ? <ErrorState message={t('profileError')} /> : null}
+        </Card>
+
+        <Button
+          label={t('nutritionTitle')}
+          variant="ghost"
+          onPress={() => router.push('/nutrition')}
+        />
+        {/* ATL-ONB-002: rever o tour é uma entrada permanente, não um easter
+            egg. Quem pulou no primeiro acesso precisa de um caminho de volta. */}
+        <Button
+          label={t('tourReplay')}
+          variant="ghost"
+          onPress={() => router.push('/(auth)/tour')}
+        />
         <Button label={t('plansCompare')} variant="ghost" onPress={() => router.push('/paywall')} />
       </ScrollView>
     </Screen>
   );
 }
+/** Rótulos fora do componente: mapa estável, não recriado a cada render. */
+const sexLabel: Record<BiologicalSex, Parameters<typeof t>[0]> = {
+  male: 'sexMale',
+  female: 'sexFemale',
+  unspecified: 'sexUnspecified',
+};
+
+const activityLabel: Record<ActivityLevel, Parameters<typeof t>[0]> = {
+  sedentary: 'activitySedentary',
+  light: 'activityLight',
+  moderate: 'activityModerate',
+  high: 'activityHigh',
+  athlete: 'activityAthlete',
+};
+
 const styles = StyleSheet.create({
   content: { padding: layout.pageInset, paddingBottom: spacing.huge * 2, gap: layout.sectionGap },
-  hero: { gap: spacing.md },
+  // Sem altura fixa: o hero do perfil cresce com o conteúdo (nome longo,
+  // e-mail longo) em vez de recortar a identidade do usuário.
+  hero: {},
+  heroBody: { padding: spacing.xl, gap: spacing.md },
   header: { alignItems: 'center', gap: spacing.sm, paddingBottom: spacing.md },
   avatarPressed: { opacity: opacity.pressed },
   options: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },

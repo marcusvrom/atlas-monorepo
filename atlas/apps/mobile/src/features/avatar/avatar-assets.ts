@@ -1,39 +1,85 @@
 import { palette, avatarSkinTones } from '@atlas/design-tokens';
 import type { AvatarConfig, Feature } from '@atlas/contracts';
+import { accessories, avatarFaces, basePaths, hairStyles, outfits } from './avatar-parts';
+
+export * from './avatar-parts';
+export * from './avatar-presets';
+
+/**
+ * ATL-AVT-003 — catálogo de peças.
+ *
+ * A geometria vive em `avatar-parts.ts` (sem React, para poder ser pré-
+ * visualizada fora do app); aqui ficam os itens, as paletas e as regras de
+ * direito.
+ *
+ * **Modelo de direito:** montar o avatar peça por peça é Pro. O usuário
+ * gratuito escolhe entre dois modelos prontos (ver `avatar-presets.ts`) e pode
+ * trocar o tom de pele à vontade — cor de pele nunca fica atrás de paywall.
+ */
 export const avatarCategories = [
-  'base',
   'skinTone',
+  'base',
   'hair',
   'face',
   'outfit',
   'accessory',
-  'frame',
   'background',
+  'frame',
 ] as const;
 export type AvatarCategory = (typeof avatarCategories)[number];
-const counts = {
-  base: 4,
-  skinTone: 6,
-  hair: 8,
-  face: 6,
-  outfit: 8,
-  accessory: 6,
-  frame: 6,
+
+/** Categorias em que a cor é escolhida separadamente da forma. */
+export const colorableCategories = ['hair', 'outfit', 'background'] as const;
+export type ColorableCategory = (typeof colorableCategories)[number];
+
+/** A única categoria que o plano gratuito pode alterar livremente. */
+export const FREE_CATEGORY: AvatarCategory = 'skinTone';
+
+export interface AvatarItem {
+  id: string;
+  index: number;
+  /** `null` quando a peça é gratuita. */
+  requiredFeature: Feature | null;
+  /** `true` na opção "sem peça" (acessório e moldura). */
+  isNone: boolean;
+}
+
+/** Quantas peças cada categoria oferece. Derivado da geometria real. */
+const counts: Record<AvatarCategory, number> = {
+  skinTone: avatarSkinTones.length,
+  base: basePaths.length,
+  hair: hairStyles.length,
+  face: avatarFaces.length,
+  outfit: outfits.length,
+  accessory: accessories.length,
   background: 6,
+  frame: 5,
 };
-export function avatarItems(category: AvatarCategory) {
+
+/** Categorias que aceitam "nenhum" — o contrato já as declara anuláveis. */
+const nullable: readonly AvatarCategory[] = ['accessory', 'frame'];
+
+export function avatarItems(category: AvatarCategory): AvatarItem[] {
+  const requiredFeature: Feature | null = category === FREE_CATEGORY ? null : 'premiumAvatarItems';
   return Array.from({ length: counts[category] }, (_, index) => ({
     id: category + '-' + index,
     index,
-    requiredFeature: (index >= counts[category] - 2 && category !== 'skinTone'
-      ? 'premiumAvatarItems'
-      : null) as Feature | null,
-  }));
+    requiredFeature,
+    isNone: false,
+  })).concat(
+    nullable.includes(category) ? [{ id: '', index: -1, requiredFeature, isNone: true }] : [],
+  );
 }
-export function itemIndex(config: AvatarConfig, category: AvatarCategory) {
+
+/**
+ * Índice da peça escolhida, com fallback em 0. O fallback é o que mantém
+ * avatares antigos (ids de outra numeração) renderizáveis em vez de quebrarem.
+ */
+export function itemIndex(config: AvatarConfig, category: AvatarCategory): number {
   const value = config[category];
   return avatarItems(category).find((item) => item.id === value)?.index ?? 0;
 }
+
 export const avatarColors = [
   palette.brand500,
   palette.success,
@@ -44,41 +90,60 @@ export const avatarColors = [
   palette.danger,
   palette.ink200,
 ];
+
+/** Tons de cabelo — escala própria, porque roxo de marca não serve de cabelo. */
+export const hairColors = [
+  '#2B2119',
+  '#5A3A22',
+  '#8C5A2B',
+  '#C79A4B',
+  '#E0D3C0',
+  '#9B9B9B',
+  palette.brand500,
+  palette.danger,
+];
+
+/** Fundos: tons profundos das pranchas de marca, para o retrato saltar. */
+export const backgroundColors = [
+  '#4A306D',
+  '#7A2F6A',
+  '#501F5B',
+  '#29264C',
+  '#1D0F30',
+  '#2F4C86',
+  '#6E3482',
+  '#2A1140',
+];
+
 export const skinColors = avatarSkinTones;
-export const basePaths = [
-  'M 34 118 Q 34 80 64 80 Q 94 80 94 118 Z',
-  'M 26 118 Q 28 80 64 80 Q 100 80 102 118 Z',
-  'M 38 118 Q 30 84 64 80 Q 98 84 90 118 Z',
-  'M 30 118 Q 40 84 64 82 Q 88 84 98 118 Z',
-];
-export const hairPaths = [
-  'M 41 48 Q 37 17 64 18 Q 91 17 87 48 L 80 34 Q 65 38 49 32 Z',
-  'M 39 73 L 38 36 Q 43 14 64 16 Q 90 17 90 40 L 91 73 L 82 70 L 81 34 Q 66 44 46 34 L 46 72 Z',
-  'M 41 44 Q 35 31 43 27 Q 39 17 51 20 Q 52 8 64 17 Q 77 7 79 21 Q 94 18 90 33 L 85 44 L 79 34 L 47 35 Z',
-  'M 40 40 Q 43 18 62 19 Q 84 18 89 42 Q 68 24 40 40 Z',
-  'M 40 51 L 39 25 Q 53 12 74 18 L 90 34 L 83 47 L 78 30 L 50 31 Z',
-  'M 39 50 Q 38 15 64 18 Q 92 13 91 52 L 82 41 Q 57 48 48 30 L 46 53 Z',
-  'M 41 40 Q 38 19 57 20 Q 67 9 80 21 L 91 38 L 80 34 L 67 27 L 51 38 Z',
-  'M 40 67 Q 27 18 58 16 Q 100 12 90 69 L 84 63 L 83 33 Q 60 43 46 31 L 46 64 Z',
-];
-export const mouthPaths = [
-  'M 55 66 Q 64 73 73 66',
-  'M 56 68 L 72 68',
-  'M 56 65 Q 64 78 72 65 Z',
-  'M 57 67 Q 64 70 71 66',
-  'M 57 68 Q 64 64 71 68',
-  'M 55 64 Q 64 73 73 64',
-];
-export const outfitPaths = Array.from({ length: 8 }, (_, i) =>
-  i % 2
-    ? 'M 26 118 L 35 92 L 51 83 Q 64 101 77 83 L 93 92 L 102 118 Z'
-    : 'M 34 118 L 41 88 L 52 82 Q 64 94 76 82 L 87 88 L 94 118 Z',
-);
-export const accessoryPaths = [
-  '',
-  'M 44 48 L 60 48 L 60 58 L 44 58 Z M 68 48 L 84 48 L 84 58 L 68 58 Z M 60 52 L 68 52',
-  'M 53 84 Q 64 106 75 84',
-  'M 38 49 L 38 63 M 90 49 L 90 63',
-  'M 47 90 L 47 112 L 81 112 L 81 90',
-  'M 53 37 L 75 37 L 75 43 L 53 43 Z',
-];
+
+/** Paleta oferecida por categoria colorível. */
+export const paletteFor: Record<ColorableCategory, readonly string[]> = {
+  hair: hairColors,
+  outfit: avatarColors,
+  background: backgroundColors,
+};
+
+/**
+ * Cor efetiva de uma categoria colorível: a escolha explícita quando existe,
+ * senão a cor derivada do índice da peça — que é exatamente como o avatar se
+ * comportava antes do campo existir. É o que faz um avatar já salvo continuar
+ * idêntico depois da migração.
+ */
+export function colorFor(config: AvatarConfig, category: ColorableCategory): string {
+  const explicit = config[`${category}Color` as const];
+  const options = paletteFor[category];
+  if (explicit && options.includes(explicit)) return explicit;
+  return options[itemIndex(config, category) % options.length]!;
+}
+
+/** Escurece um hex — sombra do pescoço, contorno da boca, forro da jaqueta. */
+export function shade(hex: string, factor = 0.78): string {
+  const parsed = /^#([0-9a-f]{6})$/i.exec(hex);
+  if (!parsed) return hex;
+  const value = parseInt(parsed[1]!, 16);
+  const channels = [(value >> 16) & 255, (value >> 8) & 255, value & 255].map((channel) =>
+    Math.max(0, Math.min(255, Math.round(channel * factor))),
+  );
+  return '#' + channels.map((c) => c.toString(16).padStart(2, '0')).join('');
+}

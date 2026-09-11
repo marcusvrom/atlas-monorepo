@@ -32,10 +32,15 @@ export function RatingChoices({
       <Text weight="semibold">
         {t(kind === 'quality' ? 'checkInSleepQuality' : 'checkInEnergy')}
       </Text>
-      <View style={styles.options}>
+      <View
+        style={styles.options}
+        accessibilityRole="radiogroup"
+        accessibilityLabel={t(kind === 'quality' ? 'checkInSleepQuality' : 'checkInEnergy')}
+      >
         {[1, 2, 3, 4, 5].map((score) => (
           <Chip
             key={score}
+            accessibilityRole="radio"
             label={score + ' · ' + t(labels[kind][score - 1]!)}
             selected={score === value}
             onPress={() => onChange(score)}

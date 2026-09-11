@@ -1,3 +1,4 @@
+import { formatWeight } from '../../lib/format-weight';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { UserId } from '@atlas/contracts';
 import { FlashList } from '@shopify/flash-list';
@@ -56,7 +57,7 @@ export function ClientScreen() {
           text:
             new Date(entry.takenAt).toLocaleDateString('pt-BR') +
             ' · ' +
-            (entry.weightKg ?? '—') +
+            formatWeight(entry.weightKg) +
             ' kg',
         })) ?? [])
       : []),
@@ -96,12 +97,12 @@ export function ClientScreen() {
               <View style={styles.metrics}>
                 <MetricTile
                   label={t('clientMeasurementChange')}
-                  value={(detail.overview.weightDelta30dKg ?? '—') + ' kg'}
+                  value={formatWeight(detail.overview.weightDelta30dKg) + ' kg'}
                   accent="strength"
                 />
                 <MetricTile
                   label={t('leanMassLabel')}
-                  value={(detail.overview.leanMassDelta30dKg ?? '—') + ' kg'}
+                  value={formatWeight(detail.overview.leanMassDelta30dKg) + ' kg'}
                   accent="primary"
                 />
               </View>

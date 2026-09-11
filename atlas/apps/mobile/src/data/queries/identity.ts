@@ -1,5 +1,5 @@
 import { readOnboarding, saveOnboarding } from '../onboarding-storage';
-import { CurrentGoal, AvatarConfig, type Feature } from '@atlas/contracts';
+import { CurrentGoal, AvatarConfig, UpdateProfileInput, type Feature } from '@atlas/contracts';
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { useApi } from '../api-provider';
 import { queryKeys } from '../query-keys';
@@ -44,6 +44,9 @@ export function useUpdateGoal() {
       void cache.invalidateQueries({ queryKey: queryKeys.insights.all });
       void cache.invalidateQueries({ queryKey: queryKeys.session.all });
       void cache.invalidateQueries({ queryKey: queryKeys.programming.today });
+      // O objetivo define o ajuste calórico da estimativa (ver
+      // GOAL_ENERGY_ADJUSTMENT em @atlas/domain).
+      void cache.invalidateQueries({ queryKey: queryKeys.nutrition.all });
     },
   });
 }
@@ -54,5 +57,24 @@ export function useUpdateAvatar() {
   return useMutation({
     mutationFn: (avatar: AvatarConfig) => api.identity.updateAvatar(AvatarConfig.parse(avatar)),
     onSuccess: () => cache.invalidateQueries({ queryKey: queryKeys.me }),
+  });
+}
+
+/**
+ * ATL-NUT-001 — edição dos dados básicos, incluindo as entradas da estimativa
+ * metabólica. Invalida `nutrition` junto com `me`: mudar peso-alvo, sexo
+ * biológico ou nível de atividade muda a meta calórica, e a tela de metas não
+ * pode continuar mostrando o número anterior.
+ */
+export function useUpdateProfile() {
+  const api = useApi(),
+    cache = useQueryClient();
+  return useMutation({
+    mutationFn: (input: UpdateProfileInput) =>
+      api.identity.updateProfile(UpdateProfileInput.parse(input)),
+    onSuccess: () => {
+      void cache.invalidateQueries({ queryKey: queryKeys.me });
+      void cache.invalidateQueries({ queryKey: queryKeys.nutrition.all });
+    },
   });
 }

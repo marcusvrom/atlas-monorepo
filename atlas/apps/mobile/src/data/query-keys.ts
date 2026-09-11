@@ -42,6 +42,12 @@ export const queryKeys = {
     progression: (exerciseId: ExerciseId) => ['insights', 'progression', exerciseId] as const,
   },
 
+  nutrition: {
+    all: ['nutrition'] as const,
+    dailyTargets: ['nutrition', 'dailyTargets'] as const,
+    hydration: (date: string) => ['nutrition', 'hydration', date] as const,
+  },
+
   coaching: {
     all: ['coaching'] as const,
     professionals: (filter: unknown) => ['coaching', 'professionals', filter] as const,

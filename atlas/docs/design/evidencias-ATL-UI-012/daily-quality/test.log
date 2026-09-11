@@ -1,0 +1,69 @@
+pnpm test
+exit=1
+
+> atlas-platform@0.1.0 test E:\projects\Atlas\atlas-monorepo\atlas
+> pnpm test:unit && pnpm test:e2e
+
+
+> atlas-platform@0.1.0 test:unit E:\projects\Atlas\atlas-monorepo\atlas
+> vitest run
+
+
+ RUN  v3.2.7 E:/projects/Atlas/atlas-monorepo/atlas
+
+ ✓ apps/mobile/src/design/media/cover-art.test.ts (7 tests) 44ms
+ ✓ packages/api-client/src/wellbeing.test.ts (4 tests) 145ms
+ ✓ packages/api-client/src/programming.test.ts (4 tests) 210ms
+ ✓ packages/api-client/src/mock-runtime.test.ts (1 test) 55ms
+ ✓ packages/api-client/src/coaching.test.ts (3 tests) 106ms
+ ✓ packages/api-client/src/billing.test.ts (1 test) 129ms
+ ✓ apps/mobile/src/data/restore-onboarding.test.ts (2 tests) 131ms
+ ✓ packages/api-client/src/contract.test.ts (12 tests) 229ms
+ ✓ apps/mobile/src/data/session-pending.test.ts (4 tests) 214ms
+ ✓ apps/mobile/src/features/plans/editor-state.test.ts (1 test) 35ms
+ ✓ apps/mobile/src/lib/format-weight.test.ts (13 tests) 32ms
+ ✓ packages/api-client/src/catalog.test.ts (3 tests) 963ms
+   ✓ expanded catalog > paginates all 60 unique exercises and validates their muscle weights  948ms
+ ✓ packages/domain/src/metabolism.test.ts (26 tests) 14ms
+ ✓ apps/mobile/src/features/session/session-records.test.ts (9 tests) 14ms
+ ✓ apps/mobile/src/features/progress/dashboard-math.test.ts (5 tests) 18ms
+ ✓ apps/mobile/src/features/progress/progress.test.ts (4 tests) 14ms
+ ✓ apps/mobile/src/components/body-paths.test.ts (2 tests) 13ms
+ ✓ apps/mobile/src/features/avatar/avatar-assets.test.ts (19 tests) 18ms
+ ✓ apps/mobile/src/features/progress/activity-buckets.test.ts (1 test) 17ms
+ ✓ apps/mobile/src/features/today/prescription-summary.test.ts (3 tests) 11ms
+ ✓ apps/mobile/src/features/onboarding/feature-tour.test.ts (8 tests) 8ms
+ ✓ apps/mobile/src/data/session-history.test.ts (2 tests) 12ms
+ ✓ apps/mobile/src/dev/demo-settings.test.ts (2 tests) 6ms
+ ✓ apps/mobile/src/data/paywall-events.test.ts (1 test) 6ms
+ ✓ packages/domain/src/calculations.test.ts (10 tests) 7ms
+ ✓ apps/mobile/src/i18n/plural.test.ts (3 tests) 6ms
+ ✓ apps/mobile/src/design/media/initials.test.ts (4 tests) 4ms
+ ✓ apps/mobile/src/design/components/components.test.ts (6 tests) 7ms
+ ✓ apps/mobile/src/design/tests/contrast.test.ts (2 tests) 5ms
+ ✓ apps/mobile/src/design/glass/resolve-capability.test.ts (6 tests) 4ms
+ ✓ apps/mobile/src/offline/sync-engine.test.ts (4 tests) 5502ms
+   ✓ ATL-SES-004 mesma suíte via mock > retoma o SQLite e sincroniza aceitos, duplicados e rejeitados sem travar a fila  301ms
+   ✓ ATL-SES-004 mesma suíte via http > retoma o SQLite e sincroniza aceitos, duplicados e rejeitados sem travar a fila  440ms
+   ✓ 10k operações usam lotes de até 50 e consumo de memória limitado no host  4760ms
+
+ Test Files  31 passed (31)
+      Tests  172 passed (172)
+   Start at  14:14:09
+   Duration  7.55s (transform 3.05s, setup 0ms, collect 14.44s, tests 7.98s, environment 8ms, prepare 10.02s)
+
+
+> atlas-platform@0.1.0 test:e2e E:\projects\Atlas\atlas-monorepo\atlas
+> pnpm --filter @atlas/mobile test
+
+
+> @atlas/mobile@0.1.0 test E:\projects\Atlas\atlas-monorepo\atlas\apps\mobile
+> maestro test .maestro
+
+'maestro' n�o � reconhecido como um comando interno
+ou externo, um programa oper�vel ou um arquivo em lotes.
+E:\projects\Atlas\atlas-monorepo\atlas\apps\mobile:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @atlas/mobile@0.1.0 test: `maestro test .maestro`
+Exit status 1
+ ELIFECYCLE  Command failed with exit code 1.
+ ELIFECYCLE  Test failed. See above for more details.

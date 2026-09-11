@@ -2,6 +2,7 @@ import type { WellbeingPort } from './wellbeing.port.js';
 import type { CatalogPort } from './catalog.port.js';
 import type { CoachingPort } from './coaching.port.js';
 import type { IdentityPort } from './identity.port.js';
+import type { NutritionPort } from './nutrition.port.js';
 import type { InsightsPort } from './insights.port.js';
 import type { MeasurementPort } from './measurement.port.js';
 import type { ProgrammingPort } from './programming.port.js';
@@ -15,6 +16,7 @@ export type { MeasurementPort } from './measurement.port.js';
 export type { InsightsPort } from './insights.port.js';
 export type { CoachingPort } from './coaching.port.js';
 export type { IdentityPort } from './identity.port.js';
+export type { NutritionPort } from './nutrition.port.js';
 
 /** Superfície completa consumida pelo app. Injetada uma única vez na árvore React. */
 export interface ApiClient {
@@ -27,4 +29,5 @@ export interface ApiClient {
   readonly insights: InsightsPort;
   readonly coaching: CoachingPort;
   readonly identity: IdentityPort;
+  readonly nutrition: NutritionPort;
 }

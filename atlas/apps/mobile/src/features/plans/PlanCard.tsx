@@ -1,43 +1,54 @@
 import type { WorkoutPlanSummary } from '@atlas/contracts';
-import { Pressable, StyleSheet, View } from 'react-native';
-import { spacing, opacity } from '@atlas/design-tokens';
-import { Badge, Card, Icon, Text } from '../../design/components';
+import { StyleSheet, View } from 'react-native';
+import { layout, spacing } from '@atlas/design-tokens';
+import { Badge, CoverCard, MetaChip, MetaChipRow } from '../../design/components';
 import { t } from '../../i18n';
+
+/**
+ * Ficha na lista de fichas.
+ *
+ * Virou card de capa de largura cheia — a ficha é a unidade que o usuário
+ * escolhe, então merece o mesmo peso visual que as referências dão aos cards
+ * de programa. A capa é semeada pelo id da ficha, o que dá a cada ficha uma
+ * identidade de cor que se repete no detalhe e em "Hoje".
+ *
+ * O selo de ficha ativa fica no canto superior, fora do rodapé de texto: é
+ * estado, não descrição, e precisa ser visto antes do nome ser lido.
+ */
 export function PlanCard({ plan, onPress }: { plan: WorkoutPlanSummary; onPress: () => void }) {
   return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={plan.name}
-      accessibilityHint={t('planOpenHint')}
-      onPress={onPress}
-      style={({ pressed }) => [styles.root, pressed && styles.pressed]}
-    >
-      <Card>
-        <View style={styles.row}>
-          <Icon name="dumbbell" />
-          {plan.isActive ? <Badge label={t('planActive')} tone="success" /> : null}
+    <View style={styles.root}>
+      <CoverCard
+        seed={plan.id}
+        glyph="barbell"
+        height={layout.coverCard}
+        eyebrow={t(plan.goal)}
+        title={plan.name}
+        accessibilityLabel={plan.name + ', ' + t('planOpenHint')}
+        meta={
+          <MetaChipRow>
+            <MetaChip
+              onCover
+              icon="calendar"
+              label={
+                plan.dayCount + ' ' + t(plan.dayCount === 1 ? 'planDaySingular' : 'planDaysShort')
+              }
+            />
+            <MetaChip onCover icon="layers" label={t('version') + ' ' + plan.version} />
+          </MetaChipRow>
+        }
+        onPress={onPress}
+      />
+      {plan.isActive ? (
+        <View style={styles.badge}>
+          <Badge label={t('planActive')} tone="success" />
         </View>
-        <Text variant="title2" weight="bold">
-          {plan.name}
-        </Text>
-        <View style={styles.row}>
-          <Text variant="subhead" tone="secondary" style={styles.meta}>
-            {plan.dayCount} {t('planDays')} · {t('version')} {plan.version}
-          </Text>
-          <Icon name="arrow" />
-        </View>
-      </Card>
-    </Pressable>
+      ) : null}
+    </View>
   );
 }
+
 const styles = StyleSheet.create({
-  root: { paddingBottom: spacing.lg },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: spacing.md,
-  },
-  meta: { flex: 1 },
-  pressed: { opacity: opacity.pressed },
+  root: { paddingBottom: spacing.md },
+  badge: { pointerEvents: 'none', position: 'absolute', top: spacing.md, right: spacing.md },
 });

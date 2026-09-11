@@ -1,78 +1,101 @@
 import type { WorkoutPlanId } from '@atlas/contracts';
-import { ScrollView, StyleSheet, View, Pressable } from 'react-native';
-import { spacing } from '@atlas/design-tokens';
+import { StyleSheet, View } from 'react-native';
+import { layout, spacing } from '@atlas/design-tokens';
 import { useRouter } from 'expo-router';
 import { usePlan } from '../../data/queries/plans';
-import { Card, Text, Icon, LoadingState, ErrorState, EmptyState } from '../../design/components';
+import {
+  Carousel,
+  CoverCard,
+  EmptyState,
+  ErrorState,
+  LoadingState,
+  MetaChip,
+  MetaChipRow,
+  SectionHeader,
+} from '../../design/components';
 import { t } from '../../i18n';
+
+/**
+ * A semana da ficha ativa, como trilho de capas.
+ *
+ * Cada dia tem cor própria e estável — a capa é semeada pelo `day.id`, então o
+ * "Push" é sempre o mesmo roxo e o "Legs" sempre o mesmo azul, em qualquer
+ * tela que mostre aquele dia. É a mesma ideia das grades coloridas das
+ * referências, só que a cor sai do dado em vez de ser escolhida à mão.
+ */
 export function WeeklyPlan({ planId }: { planId: WorkoutPlanId }) {
   const plan = usePlan(planId),
     router = useRouter();
+
+  const weekday = (slot: number) =>
+    new Date(2026, 0, 4 + slot)
+      .toLocaleDateString('pt-BR', { weekday: 'short' })
+      .replace('.', '')
+      .toUpperCase();
+
   return (
     <View style={styles.root}>
-      <Text variant="title2" weight="bold">
-        {t('dashboardPlanWeek')}
-      </Text>
-      <Text variant="footnote" tone="secondary">
-        {t('dashboardPlanWeekHint')}
-      </Text>
+      <View style={styles.header}>
+        <SectionHeader title={t('dashboardPlanWeek')} subtitle={t('dashboardPlanWeekHint')} />
+      </View>
       {plan.isPending ? (
-        <LoadingState />
+        <View style={styles.header}>
+          <LoadingState />
+        </View>
       ) : plan.isError ? (
-        <ErrorState message={t('planLoadError')} onRetry={() => void plan.refetch()} />
+        <View style={styles.header}>
+          <ErrorState message={t('planLoadError')} onRetry={() => void plan.refetch()} />
+        </View>
       ) : !plan.data.days.length ? (
-        <EmptyState
-          title={t('planEmptyDay')}
-          description={t('planEmptyDayDescription')}
-          actionLabel={t('edit')}
-          onAction={() => router.push({ pathname: '/plan/[id]/edit', params: { id: planId } })}
-        />
+        <View style={styles.header}>
+          <EmptyState
+            title={t('planEmptyDay')}
+            description={t('planEmptyDayDescription')}
+            actionLabel={t('edit')}
+            onAction={() => router.push({ pathname: '/plan/[id]/edit', params: { id: planId } })}
+          />
+        </View>
       ) : (
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.days}
-        >
+        <Carousel itemWidth={layout.carouselItem} label={t('dashboardPlanWeek')}>
           {plan.data.days.slice(0, 7).map((day) => (
-            <Pressable
+            <CoverCard
               key={day.id}
-              style={styles.day}
-              accessibilityRole="button"
-              accessibilityLabel={day.label}
+              seed={day.id}
+              glyph="barbell"
+              height={layout.coverCard}
+              style={styles.card}
+              eyebrow={day.slot === null ? t('dashboardUnscheduled') : weekday(day.slot)}
+              title={day.label}
+              meta={
+                <MetaChipRow>
+                  <MetaChip
+                    onCover
+                    icon="clock"
+                    label={day.estimatedMinutes + ' ' + t('minutesShort')}
+                  />
+                  <MetaChip
+                    onCover
+                    icon="layers"
+                    label={day.exercises.length + ' ' + t('planExercises')}
+                  />
+                </MetaChipRow>
+              }
               onPress={() =>
                 router.push({
                   pathname: '/plan/[id]/day/[dayId]',
                   params: { id: planId, dayId: day.id },
                 })
               }
-            >
-              <Card>
-                <Text variant="caption" tone="brand" weight="bold">
-                  {day.slot === null
-                    ? t('dashboardUnscheduled')
-                    : new Date(2026, 0, 4 + day.slot)
-                        .toLocaleDateString('pt-BR', { weekday: 'short' })
-                        .replace('.', '')
-                        .toUpperCase()}
-                </Text>
-                <Text variant="title2" weight="bold">
-                  {day.label}
-                </Text>
-                <Text variant="footnote" tone="secondary">
-                  {day.estimatedMinutes} {t('minutesShort')} · {day.exercises.length}{' '}
-                  {t('planExercises')}
-                </Text>
-                <Icon name="arrow" />
-              </Card>
-            </Pressable>
+            />
           ))}
-        </ScrollView>
+        </Carousel>
       )}
     </View>
   );
 }
+
 const styles = StyleSheet.create({
   root: { gap: spacing.md },
-  days: { gap: spacing.md },
-  day: { width: spacing.huge * 3 },
+  header: { paddingHorizontal: layout.pageInset },
+  card: { width: layout.carouselItem },
 });

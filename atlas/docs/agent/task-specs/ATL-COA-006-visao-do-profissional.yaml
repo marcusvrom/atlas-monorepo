@@ -1,0 +1,78 @@
+id: ATL-COA-006
+stage: mock-first
+title: Visão do profissional enriquecida — painel de clientes e detalhe acionável
+authorization: Pedido do usuário em 11/09/2026 — "adicione ao planejamento também
+  uma melhoria em nossos Dashboard e também na visão de profissionais que atendem
+  alunos, eles precisam de sua visão enriquecida o máximo possível e são os
+  principais usuários do nosso principal produto diferencial".
+references:
+  - docs/roadmap-produto.md
+  - docs/specs/00-produto-e-dominio.md
+  - docs/specs/13-mapa-de-navegacao.md
+  - docs/specs/14-onboarding-e-tour.md
+  - docs/agent/AGENTS.md
+scope:
+  - apps/mobile/src/features/coaching/ClientPanel.tsx
+  - apps/mobile/src/features/coaching/ClientScreen.tsx
+  - apps/mobile/src/features/coaching/ClientRow.tsx
+  - apps/mobile/src/features/coaching/TriageBar.tsx
+  - apps/mobile/src/features/coaching/client-triage.ts
+  - packages/domain/src/coaching.ts
+  - apps/mobile/src/features/onboarding/feature-tour.ts
+
+goal: >
+  O profissional abre o app e a tela já responde "com quem eu falo agora?".
+  Hoje ela responde "estes são seus clientes" e nada mais: ClientOverview
+  entrega oito sinais por cliente e o painel renderiza dois (nome e objetivo),
+  usando riskScore apenas como filtro binário. O salto não depende de contrato
+  novo — depende de compor o que já chega.
+
+acceptance_criteria:
+  - Lista de clientes ordenada por riskScore decrescente por padrão, não por ordem de chegada.
+  - Cada linha exibe aderência 7d e 30d, dias desde a última sessão, delta de peso
+    e de massa magra com sinal explícito, metas em risco e mensagens não lidas.
+  - Delta nulo (cliente sem medida no período) renderiza estado vazio próprio, nunca "0 kg".
+  - Faixa de triagem no topo com contadores clicáveis (em risco, inativos 7d+,
+    mensagens pendentes); cada contador aplica o filtro correspondente.
+  - A classificação de risco e inatividade mora em packages/domain como função
+    pura e testada; nenhuma tela recalcula limiar (R1).
+  - ClientScreen deixa de ser lista achatada: notas, sessões e medidas viram
+    seções com cabeçalho dito uma vez, na linha do que foi feito em ExerciseSteps.
+  - Detalhe do cliente traz gráfico de aderência e de carga no período, não só tiles.
+  - Detalhe oferece ao menos uma ação (registrar nota) com escrita idempotente
+    via clientGeneratedId (R7).
+  - ShareScopeControls continua respeitado: escopo negado esconde a seção inteira,
+    não exibe seção vazia.
+  - Nenhum valor de estilo fora de tokens (R5); mock e HTTP em paridade (R3).
+  - A feature entra no registro de feature-tour.ts com entitlement de profissional,
+    ou o gate check-tour-coverage falha.
+
+out_of_scope:
+  - Mensageria real (thread de conversa). O badge de não lidas é indicador, não link.
+  - Edição de prescrição pelo profissional (Tier 2, depende de versionamento de plano).
+  - Exportação de relatório em PDF.
+  - Notificação push de cliente em risco.
+
+risks:
+  - id: densidade-vira-ruido
+    description: >
+      Oito sinais por linha podem transformar a lista num painel ilegível — o erro
+      oposto ao atual. Densidade sem hierarquia é tão ruim quanto ausência de dado.
+    mitigation: >
+      Hierarquia fixa por linha: nome e risco em primeiro nível; aderência e
+      inatividade em segundo; deltas em terceiro. Verificação por screenshot em
+      420 px antes de fechar.
+  - id: limiar-arbitrario
+    description: >
+      riskScore >= 0.7 e "inativo há 7 dias" são escolhas de produto sem medição
+      por trás. Errar o limiar produz uma lista sempre vermelha ou sempre verde.
+    mitigation: >
+      Limiar único em packages/domain, nomeado e testado, para ser ajustado em um
+      lugar quando houver dado de uso.
+  - id: escopo-de-compartilhamento
+    description: >
+      Enriquecer a visão aumenta a superfície de exposição de dado do atleta ao
+      profissional sem consentimento correspondente.
+    mitigation: >
+      Todo campo novo passa por ShareScopeControls; nenhum dado aparece fora do
+      escopo concedido. Sem dado sensível em log (R8).

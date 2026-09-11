@@ -7,7 +7,7 @@ import { scheduleOnRN } from 'react-native-worklets';
 import { motion, spacing } from '@atlas/design-tokens';
 import type { ExercisePrescription } from '@atlas/contracts';
 import { Button, Card, Text } from '../../design/components';
-import { t } from '../../i18n';
+import { plural, t } from '../../i18n';
 export function PlanExerciseRow({
   exercise,
   index,
@@ -64,7 +64,7 @@ export function PlanExerciseRow({
             {exercise.order}. {exercise.exerciseName}
           </Text>
           <Text>
-            {exercise.sets.length} {t('planSets')} ·{' '}
+            {exercise.sets.length} {plural(exercise.sets.length, 'planSetsOne', 'planSets')} ·{' '}
             {t(
               exercise.technique === 'superset'
                 ? 'techniqueSuperset'

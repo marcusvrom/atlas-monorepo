@@ -1,0 +1,6 @@
+pnpm lint
+exit=0
+
+> atlas-platform@0.1.0 lint E:\projects\Atlas\atlas-monorepo\atlas
+> eslint apps/mobile packages scripts --max-warnings 0
+

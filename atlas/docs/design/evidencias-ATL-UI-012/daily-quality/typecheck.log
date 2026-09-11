@@ -1,0 +1,42 @@
+pnpm typecheck
+exit=0
+
+> atlas-platform@0.1.0 typecheck E:\projects\Atlas\atlas-monorepo\atlas
+> turbo run typecheck
+
+• turbo 2.10.12
+
+   • Packages in scope: @atlas/api-client, @atlas/contracts, @atlas/design-tokens, @atlas/domain, @atlas/mobile
+   • Running typecheck in 5 packages
+   • Remote caching disabled
+
+@atlas/contracts:typecheck: cache hit, replaying logs b43b036fe9525999
+@atlas/design-tokens:typecheck: cache hit, replaying logs 9aab0c1d320b050e
+@atlas/contracts:typecheck: 
+@atlas/contracts:typecheck: > @atlas/contracts@0.1.0 typecheck E:\projects\Atlas\atlas-monorepo\atlas\packages\contracts
+@atlas/contracts:typecheck: > tsc --noEmit
+@atlas/contracts:typecheck: 
+@atlas/design-tokens:typecheck: 
+@atlas/design-tokens:typecheck: > @atlas/design-tokens@0.1.0 typecheck E:\projects\Atlas\atlas-monorepo\atlas\packages\design-tokens
+@atlas/design-tokens:typecheck: > tsc --noEmit
+@atlas/design-tokens:typecheck: 
+@atlas/domain:typecheck: cache hit, replaying logs e1820198e3cb2cad
+@atlas/mobile:typecheck: cache miss, executing 1ccfa2b977ea4030
+@atlas/domain:typecheck: 
+@atlas/domain:typecheck: > @atlas/domain@0.1.0 typecheck E:\projects\Atlas\atlas-monorepo\atlas\packages\domain
+@atlas/domain:typecheck: > tsc --noEmit
+@atlas/domain:typecheck: 
+@atlas/api-client:typecheck: cache hit, replaying logs 62ae17624d5634a5
+@atlas/api-client:typecheck: 
+@atlas/api-client:typecheck: > @atlas/api-client@0.1.0 typecheck E:\projects\Atlas\atlas-monorepo\atlas\packages\api-client
+@atlas/api-client:typecheck: > tsc --noEmit
+@atlas/api-client:typecheck: 
+@atlas/mobile:typecheck: 
+@atlas/mobile:typecheck: > @atlas/mobile@0.1.0 typecheck E:\projects\Atlas\atlas-monorepo\atlas\apps\mobile
+@atlas/mobile:typecheck: > tsc --noEmit
+@atlas/mobile:typecheck: 
+
+ Tasks:    5 successful, 5 total
+Cached:    4 cached, 5 total
+  Time:    11.873s 
+

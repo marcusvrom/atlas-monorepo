@@ -1,44 +1,104 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useRouter } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
-import { spacing } from '@atlas/design-tokens';
-import { Button, ProgressRing, Screen, Text } from '../../design/components';
+import { glass, layout, radius, spacing } from '@atlas/design-tokens';
+import { Button, Screen, Text } from '../../design/components';
+import { CoverArt, CoverScrim, type CoverGlyph } from '../../design/media';
+import { useTheme } from '../../design/theme-provider';
 import { t } from '../../i18n';
+
+/**
+ * Boas-vindas.
+ *
+ * Reconstruída no formato das telas de entrada das referências: capa sangrando
+ * do topo até pouco além da metade, texto e ação assentados embaixo. O anel de
+ * progresso que marcava a página saiu — ele media uma tarefa que o usuário não
+ * está executando, e a mesma informação cabe em três pontos, que é o que as
+ * referências usam.
+ *
+ * Cada página tem sua própria semente, então trocar de página troca a cor da
+ * capa inteira: é o que dá sensação de avanço sem animação de transição.
+ */
+const PAGES = [
+  { title: 'welcomeTitle', body: 'welcomeBody', seed: 'onboarding-train', glyph: 'dumbbell' },
+  {
+    title: 'welcomeProgressTitle',
+    body: 'welcomeProgressBody',
+    seed: 'onboarding-progress',
+    glyph: 'pulse',
+  },
+  {
+    title: 'welcomeCoachTitle',
+    body: 'welcomeCoachBody',
+    seed: 'onboarding-coach',
+    glyph: 'rings',
+  },
+] as const satisfies readonly {
+  title: Parameters<typeof t>[0];
+  body: Parameters<typeof t>[0];
+  seed: string;
+  glyph: CoverGlyph;
+}[];
+
 export function WelcomeScreen() {
   const router = useRouter();
+  const { colors } = useTheme();
   const [page, setPage] = useState(0);
-  const title =
-    page === 0
-      ? t('welcomeTitle')
-      : page === 1
-        ? t('welcomeProgressTitle')
-        : t('welcomeCoachTitle');
+  const current = PAGES[page]!;
+  const last = page === PAGES.length - 1;
+
+  const styles = useMemo(
+    () =>
+      StyleSheet.create({
+        root: { flex: 1 },
+        cover: { flex: 1.15, overflow: 'hidden' },
+        body: {
+          flex: 1,
+          padding: layout.pageInset,
+          gap: spacing.lg,
+          justifyContent: 'center',
+        },
+        dots: { flexDirection: 'row', gap: spacing.sm },
+        dot: {
+          height: spacing.sm,
+          width: spacing.sm,
+          borderRadius: radius.pill,
+          backgroundColor: colors.border,
+          borderWidth: glass.borderWidth,
+          borderColor: colors.borderStrong,
+        },
+        dotActive: { width: spacing.xl, backgroundColor: colors.brand },
+      }),
+    [colors],
+  );
+
   return (
-    <Screen>
-      <View style={styles.content}>
-        <ProgressRing
-          value={(page + 1) / 3}
-          label={title}
-          accent={page === 0 ? 'activity' : page === 1 ? 'strength' : 'primary'}
-        />
-        <Text variant="title1" weight="bold">
-          {title}
-        </Text>
-        <Text>
-          {page === 0
-            ? t('welcomeBody')
-            : page === 1
-              ? t('welcomeProgressBody')
-              : t('welcomeCoachBody')}
-        </Text>
-        <Button
-          label={page === 2 ? t('start') : t('next')}
-          onPress={() => (page === 2 ? router.push('/(auth)/sign-in') : setPage(page + 1))}
-        />
+    <Screen edges={['bottom']}>
+      <View style={styles.root}>
+        <View style={styles.cover}>
+          <CoverArt seed={current.seed} glyph={current.glyph} />
+          <CoverScrim />
+        </View>
+        <View style={styles.body}>
+          <View style={styles.dots} accessibilityRole="progressbar">
+            {PAGES.map((item, index) => (
+              <View
+                key={item.seed}
+                style={[styles.dot, index === page && styles.dotActive]}
+                accessibilityElementsHidden
+              />
+            ))}
+          </View>
+          <Text variant="display" weight="bold">
+            {t(current.title)}
+          </Text>
+          <Text tone="secondary">{t(current.body)}</Text>
+          <Button
+            label={last ? t('start') : t('next')}
+            onPress={() => (last ? router.push('/(auth)/sign-in') : setPage(page + 1))}
+          />
+        </View>
       </View>
     </Screen>
   );
 }
-const styles = StyleSheet.create({
-  content: { flex: 1, padding: spacing.xl, gap: spacing.xl, justifyContent: 'center' },
-});

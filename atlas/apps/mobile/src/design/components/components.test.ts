@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { nextStep } from './numeric-step';
-import { sparklinePath } from './sparkline-path';
+import { sparklineArea, sparklineHead, sparklinePath } from './sparkline-path';
 import { dismissToast, getToasts, showToast } from './toast-store';
 afterEach(() => {
   for (const item of getToasts()) dismissToast(item.id);
@@ -17,6 +17,14 @@ describe('sparkline', () => {
   it('avoids invalid geometry for empty and constant series', () => {
     expect(sparklinePath([], 100, 40, 4)).toBe('');
     expect(sparklinePath([4, 4], 100, 40, 4)).toBe('M4 20 L96 20');
+  });
+  it('fecha a área contra a base sem inventar ponto', () => {
+    expect(sparklineArea([], 100, 40, 4)).toBe('');
+    expect(sparklineArea([4, 4], 100, 40, 4)).toBe('M4 36 L4 20 L96 20 L96 36 Z');
+  });
+  it('ancora o marcador no último valor, ou em nada quando não há série', () => {
+    expect(sparklineHead([], 100, 40, 4)).toBeNull();
+    expect(sparklineHead([0, 10], 100, 40, 4)).toEqual({ x: 96, y: 4 });
   });
 });
 it('dismisses the head without discarding queued toast messages', () => {

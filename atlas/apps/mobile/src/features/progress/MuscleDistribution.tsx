@@ -1,3 +1,4 @@
+import { formatWeight } from '../../lib/format-weight';
 import type { MuscleVolume } from '@atlas/contracts';
 import { useState } from 'react';
 import { StyleSheet, View, Pressable } from 'react-native';
@@ -16,7 +17,7 @@ import {
 import { useMuscleVolume } from './hooks';
 import { MuscleVolumeRow } from './MuscleVolumeRow';
 import { VolumeSection } from './VolumeSection';
-import { t } from '../../i18n';
+import { plural, t } from '../../i18n';
 export function MuscleDistribution({ days }: { days: 7 | 30 | 90 }) {
   const query = useMuscleVolume(days),
     router = useRouter();
@@ -66,10 +67,15 @@ export function MuscleDistribution({ days }: { days: 7 | 30 | 90 }) {
         {selected ? (
           <View style={styles.details}>
             <Text variant="display" weight="bold">
-              {selected.weightedVolumeKg.toLocaleString('pt-BR')} {t('kilogramsShort')}
+              {formatWeight(selected.weightedVolumeKg)} {t('kilogramsShort')}
             </Text>
             <Text>
-              {selected.effectiveSets} {t('dashboardEffectiveSets')}
+              {selected.effectiveSets}{' '}
+              {plural(
+                selected.effectiveSets,
+                'dashboardEffectiveSetsOne',
+                'dashboardEffectiveSets',
+              )}
             </Text>
             <Text tone="secondary">{t('muscleEffectiveHint')}</Text>
             <Text tone="secondary">{t('muscleRelative')}</Text>

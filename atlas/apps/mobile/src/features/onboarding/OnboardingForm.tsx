@@ -1,3 +1,4 @@
+import { formatWeight } from '../../lib/format-weight';
 import { useMemo, useState } from 'react';
 import {
   CurrentGoal,
@@ -99,7 +100,9 @@ export function OnboardingForm({ initial }: { initial: OnboardingDraft }) {
       {
         onSuccess: () => {
           setStep(next);
-          if (next === 'complete') router.replace('/(tabs)');
+          // ATL-ONB-002: o onboarding coleta dados; o tour apresenta o app.
+          // São coisas diferentes e ficam em telas diferentes.
+          if (next === 'complete') router.replace('/(auth)/tour');
         },
       },
     );
@@ -172,7 +175,7 @@ export function OnboardingForm({ initial }: { initial: OnboardingDraft }) {
                     ? t('guardrailRate')
                     : t('guardrailTime')}
                 {violation.suggestion?.targetWeightKg != null
-                  ? ` ${t('targetWeight')}: ${violation.suggestion.targetWeightKg.toLocaleString('pt-BR')}`
+                  ? ` ${t('targetWeight')}: ${formatWeight(violation.suggestion.targetWeightKg)}`
                   : ''}
                 {violation.suggestion?.targetDateIso
                   ? ` ${t('targetDate')}: ${new Date(violation.suggestion.targetDateIso).toLocaleDateString('pt-BR')}`

@@ -169,6 +169,12 @@ export const motion = {
    * é atmosfera. Desligado quando "Reduzir movimento" está ativo.
    */
   ambient: { drift: 16000, driftSlow: 26000 },
+  /**
+   * Escala do toque. Um único valor para botão, card de capa e linha tocável:
+   * é a diferença entre "o app responde" e "cada componente responde de um
+   * jeito". Recuo discreto de propósito — 3 % é sentido, 10 % é notado.
+   */
+  pressScale: 0.97,
 } as const;
 
 export const zIndex = {
@@ -212,5 +218,128 @@ export const layout = {
   thumbnail: 64,
   anatomyWidth: 176,
   heroArt: 104,
+
+  /**
+   * ATL-UI-013 — alturas de capa. Escala fixa em vez de proporção livre: três
+   * alturas fazem telas diferentes rimarem entre si, enquanto `aspectRatio`
+   * por tela produziria um card levemente diferente em cada lugar.
+   */
+  coverHero: 212,
+  coverCard: 164,
+  coverRow: 84,
+  /** Largura do card dentro de um `<Carousel>`. */
+  carouselItem: 232,
+
+  /**
+   * ATL-SES-005 — alvo de toque de um controle redondo. 44 é o mínimo das HIG
+   * da Apple e do Material; o stepper vive numa tela usada com a mão suada e
+   * o braço estendido, então não é lugar de economizar área.
+   */
+  controlSize: 44,
+  /**
+   * Largura reservada ao valor do stepper. Fixa de propósito: com largura
+   * automática os botões dançam horizontalmente quando o número passa de 9
+   * para 10, e o polegar erra o alvo que estava mirando.
+   */
+  stepperValue: 88,
 } as const;
 export const opacity = { pressed: 0.72, decorative: 0.16, subtle: 0.06 } as const;
+
+/**
+ * ATL-UI-013 — paletas de capa.
+ *
+ * O produto não tem banco de fotos próprio e os `thumbnailUrl` do catálogo
+ * apontam para um CDN que só existirá na fase de integração. Em vez de deixar
+ * buracos cinza nas telas (ou depender de rede numa demo), o app **gera** a
+ * arte de capa: cada capa é um gradiente de malha determinístico derivado de
+ * uma semente estável (id do exercício, do plano, código do músculo).
+ *
+ * Os tons vêm das pranchas de marca em `ui-examples/` (rampas "Pomp Power" e
+ * "Purple", mais os nomeados Twilight Gaze / Midnight Whisper / Violet Spell /
+ * Enchanted Amethyst), então a arte gerada pertence à mesma família visual das
+ * referências em vez de inventar cor. Cada entrada é `[base, meio, luz]`:
+ * `base` pinta o fundo, `meio` a banda diagonal e `luz` os focos radiais.
+ *
+ * Seis paletas é proposital: o suficiente para uma lista rolada não repetir
+ * visivelmente, pouco o bastante para o conjunto ainda ler como um sistema.
+ */
+export const coverPalettes = [
+  { name: 'twilight', colors: ['#1D0F30', '#4A306D', '#A167A5'] },
+  { name: 'amethyst', colors: ['#29264C', '#5B4A93', '#8F7AB8'] },
+  { name: 'spell', colors: ['#2A1140', '#6E3482', '#A56ABD'] },
+  { name: 'gaze', colors: ['#180A22', '#501F5B', '#B89AC9'] },
+  { name: 'tide', colors: ['#0F1B33', '#2F4C86', '#5BA8C9'] },
+  { name: 'ember', colors: ['#2B1330', '#7A2F6A', '#C97BA0'] },
+] as const;
+
+export type CoverPaletteName = (typeof coverPalettes)[number]['name'];
+
+/**
+ * Geometria e opacidades da arte de capa. Ficam em token (R5) porque a mesma
+ * composição é usada por `CoverArt` em tamanhos diferentes — do thumbnail de
+ * 64 px ao hero de tela cheia — e precisa escalar por proporção, não por
+ * número mágico repetido em cada tela.
+ */
+export const cover = {
+  /** Lado do viewBox quadrado em que a arte é desenhada. */
+  canvas: 100,
+  /**
+   * Focos radiais. Raio e opacidade são contidos de propósito: um foco largo
+   * e forte lava a cor da base e a capa vira uma mancha acinzentada — o tom
+   * da paleta precisa continuar sendo o que identifica o card.
+   */
+  glowRadius: 0.46,
+  glowOpacity: 0.72,
+  /** Banda diagonal que dá estrutura à composição. */
+  bandOpacity: 0.17,
+  bandWidth: 0.42,
+  /**
+   * Glifo. Ancorado no quadrante superior direito, **não** no centro: é o lado
+   * oposto ao texto do rodapé, o mesmo lugar onde as referências põem a foto do
+   * equipamento. Centralizado, ele sumia sob o véu de contraste.
+   */
+  glyphOpacity: 0.26,
+  glyphScale: 0.46,
+  glyphAnchor: { x: 0.7, y: 0.31 },
+  /**
+   * Véu escuro sob o texto sobreposto — garante contraste AA no rodapé mesmo
+   * quando o foco de luz cai no canto inferior. Vem em `rgba` já pronto porque
+   * o degradê precisa terminar transparente **na mesma matiz** (um preto puro
+   * esverdearia a borda contra o violeta); `scrimStart` é onde ele começa a
+   * escurecer, em fração da altura.
+   */
+  /**
+   * Superfícies sobrepostas à capa (chips de metadado, botão de reprodução).
+   *
+   * **Não** vêm do tema, de propósito: a arte de capa é escura nos dois temas,
+   * então a superfície de vidro do tema claro (branca a 82 %) sumiria sobre ela
+   * e levaria junto o texto claro por cima. Contraste sobre a capa é problema
+   * da capa, não do tema.
+   */
+  onCoverSurface: 'rgba(11,9,18,0.55)',
+  onCoverBorder: 'rgba(249,246,255,0.30)',
+
+  scrim: ['rgba(11,9,18,0)', 'rgba(11,9,18,0.18)', 'rgba(11,9,18,0.94)'],
+  /**
+   * Posições das três paradas. A última é quase opaca **na cor do fundo do
+   * tema escuro**: é isso que faz a capa se dissolver na página em vez de
+   * terminar numa linha reta, e é o que sustenta AA para o texto do rodapé.
+   */
+  scrimStops: [0, 0.45, 1],
+} as const;
+
+/**
+ * Parâmetros dos gráficos. A área sob a linha ganha preenchimento em gradiente
+ * (referência "Travel Stats" / "Weight Dynamics" em `ui-examples/`), que só
+ * funciona se as opacidades forem consistentes entre sparkline, gráfico de
+ * métrica e barras.
+ */
+export const chart = {
+  areaOpacityTop: 0.34,
+  areaOpacityBottom: 0.02,
+  lineWidth: 2.5,
+  dotRadius: 3.5,
+  gridOpacity: 0.12,
+  /** Barra não selecionada de um gráfico de atividade. */
+  barIdleOpacity: 0.42,
+} as const;

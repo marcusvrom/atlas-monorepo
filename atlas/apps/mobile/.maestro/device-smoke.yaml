@@ -1,0 +1,114 @@
+# Smoke test de APARELHO — Tier 0.
+#
+# Cobre exatamente o que a prévia web NÃO consegue exercitar. Cada bloco aqui
+# existe porque usa um caminho de código diferente no nativo:
+#
+#   vidro nativo        expo-glass-effect só resolve no iOS 26; a web cai no
+#                       fallback sempre, então o caminho `native` nunca rodou
+#   NativeTabs          a web usa (tabs)/_layout.web.tsx, outro componente
+#   SQLite              a web roda com o patch de pool; o nativo, não
+#   haptics             no-op na web
+#   image picker        API completamente diferente
+#   Reanimated          worklets rodam na UI thread só no nativo
+#
+# Executar com dev build e Metro ativo:
+#   maestro test apps/mobile/.maestro/device-smoke.yaml
+appId: app.atlas.mobile
+---
+- launchApp:
+    clearState: true
+
+# ── Primeiro acesso completo ────────────────────────────────────────────────
+# Exercita SQLite nativo (rascunho de onboarding) e a transição entre telas.
+- assertVisible: 'Treine com um plano para você'
+- tapOn: 'Continuar'
+- tapOn: 'Continuar'
+- tapOn: 'Começar'
+- assertVisible: '.*Apple.*'
+- tapOn: '.*Apple.*'
+
+# Formulário de onboarding: teclado nativo e persistência local.
+- extendedWaitUntil:
+    visible: 'Seu ponto de partida'
+    timeout: 10000
+- tapOn: 'Peso atual.*'
+- inputText: '78'
+- hideKeyboard
+- tapOn: 'Continuar'
+
+# ── Tour de features ────────────────────────────────────────────────────────
+# ScrollView paginada com gesto real — a rolagem por arrasto não é testável na
+# prévia; aqui confere que o paginado prende de fato.
+- extendedWaitUntil:
+    visible: 'Seu treino, já aberto'
+    timeout: 10000
+- swipe:
+    direction: LEFT
+- assertVisible: '.*'
+- tapOn: 'Pular'
+
+# ── Tab bar NATIVA ──────────────────────────────────────────────────────────
+# No iOS 26 é a tab bar de vidro do sistema, renderizada pelo UIKit.
+- extendedWaitUntil:
+    visible: 'Hoje'
+    timeout: 10000
+- tapOn: 'Fichas'
+- assertVisible: 'Fichas'
+- tapOn: 'Progresso'
+- assertVisible: 'Progresso'
+- tapOn: 'Coach'
+- tapOn: 'Perfil'
+- assertVisible: 'Objetivo atual'
+- tapOn: 'Hoje'
+
+# ── Sessão de treino ────────────────────────────────────────────────────────
+# Haptic no registro de série, Reanimated no anel/timer, escrita em SQLite.
+- tapOn: 'Iniciar treino'
+- extendedWaitUntil:
+    visible: 'Concluir série'
+    timeout: 15000
+- tapOn:
+    id: 'session-load-increase'
+- tapOn: 'Concluir série'
+# O descanso é um timer animado: se o worklet não rodar, ele fica parado.
+- assertVisible: 'Descanso'
+- tapOn: 'Concluir série'
+- back
+
+# ── Hidratação ──────────────────────────────────────────────────────────────
+# Escrita idempotente com id gerado no device (expo-crypto no nativo).
+- scrollUntilVisible:
+    element: 'Hidratação'
+    direction: DOWN
+- tapOn: '\+250 ml'
+- assertVisible: '250 de .*'
+
+# ── Avatar ──────────────────────────────────────────────────────────────────
+# O picker de foto é o caminho mais provável de crash: permissão + módulo
+# nativo. NÃO abrimos a galeria aqui (o simulador pode não ter uma), mas
+# confirmamos que a tela monta e que a grade de SVG renderiza.
+- tapOn: 'Perfil'
+- tapOn: 'Editar avatar'
+- extendedWaitUntil:
+    visible: 'Modelos'
+    timeout: 10000
+- tapOn: 'Personalizar'
+- assertVisible: 'Tom de pele'
+- tapOn: 'Voltar'
+
+# ── Material de vidro nos três modos ────────────────────────────────────────
+# O motivo original deste arquivo existir. Em iOS < 26 ou Android, "Nativo"
+# precisa degradar sem quebrar.
+- tapOn: 'Abrir demonstração'
+- assertVisible: 'Demonstração'
+- tapOn: 'Sólido'
+- assertVisible: 'Prévia do vidro'
+- tapOn: 'Desfoque'
+- assertVisible: 'Prévia do vidro'
+- tapOn: 'Nativo .*'
+- assertVisible: 'Prévia do vidro'
+- tapOn: 'Claro'
+- assertVisible: 'Demonstração'
+- tapOn: 'Escuro'
+- tapOn: 'Voltar'
+- assertVisible: 'Hoje'

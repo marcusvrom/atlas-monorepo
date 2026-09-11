@@ -1,12 +1,32 @@
-import { useReducer } from 'react';
-import { StyleSheet, View, ScrollView } from 'react-native';
+import { formatWeight } from '../../lib/format-weight';
+import { useMemo, useReducer } from 'react';
+import { StyleSheet, View } from 'react-native';
+import * as Haptics from 'expo-haptics';
 import { PerformedSet, type ExercisePrescription, type TrainingSession } from '@atlas/contracts';
+import { estimateOneRepMax } from '@atlas/domain';
 import { spacing } from '@atlas/design-tokens';
-import { NumericStepper } from '../../design/components';
+import { ErrorState, MetaChip, MetaChipRow, NumericStepper, Text } from '../../design/components';
 import { newId } from '../../lib/id';
-import { t } from '../../i18n';
+import { showToast } from '../../design/components/toast-store';
+import { plural, t } from '../../i18n';
 import { useLogSets } from './hooks';
 import { SessionControls } from './SessionControls';
+import { previousBestOneRepMax } from './session-summary';
+
+/**
+ * ATL-SES-005 — registro de uma série.
+ *
+ * Duas mudanças além do layout:
+ *
+ * 1. **A referência da última vez aparece.** O dado já era carregado (`previous`
+ *    alimentava os valores iniciais dos campos), mas nunca era mostrado — o
+ *    usuário via "90 kg" pré-preenchido sem saber se era o alvo prescrito ou o
+ *    que ele levantou da última vez. São coisas diferentes e agora estão
+ *    rotuladas como tal.
+ * 2. **O recorde é anunciado no momento.** Se a série registrada supera a melhor
+ *    marca anterior, sai toast + haptic de sucesso. Antes isso só aparecia como
+ *    um número no resumo, depois do treino inteiro.
+ */
 export function SetRecorder({
   session,
   exercise,
@@ -14,7 +34,8 @@ export function SetRecorder({
   onRest,
   onPrevious,
   onNext,
-  onFinish,
+  canPrevious,
+  canNext,
 }: {
   session: TrainingSession;
   exercise: ExercisePrescription;
@@ -22,13 +43,15 @@ export function SetRecorder({
   onRest: (seconds: number) => void;
   onPrevious: () => void;
   onNext: () => void;
-  onFinish: () => void;
+  canPrevious: boolean;
+  canNext: boolean;
 }) {
   const completed = session.sets.filter((set) => set.exerciseId === exercise.exerciseId);
   const target = exercise.sets[Math.min(completed.length, exercise.sets.length - 1)]!;
   const last = previous?.sets
     .filter((set) => set.exerciseId === exercise.exerciseId)
     .at(Math.min(completed.length, exercise.sets.length - 1));
+
   const [input, change] = useReducer(
     (
       state: { weight: number; reps: number; rir: number; duration: number },
@@ -41,70 +64,160 @@ export function SetRecorder({
       duration: target.targetDurationSeconds ?? last?.durationSeconds ?? 0,
     },
   );
+
   const log = useLogSets(session.id);
+  const byTime = target.targetDurationSeconds !== null;
+
   const record = () => {
+    if (log.isPending) return;
     const set = PerformedSet.parse({
       clientGeneratedId: newId(),
       exerciseId: exercise.exerciseId,
       order: completed.length + 1,
       weightKg: input.weight,
-      reps: target.targetDurationSeconds === null ? input.reps : null,
-      durationSeconds: target.targetDurationSeconds === null ? null : input.duration,
+      reps: byTime ? null : input.reps,
+      durationSeconds: byTime ? input.duration : null,
       rpe: null,
       rir: input.rir,
       isWarmup: target.isWarmup,
       painLevel: null,
       performedAt: new Date().toISOString(),
     });
-    log.mutate([set]);
-    onRest(target.restSeconds);
+
+    // O recorde é avaliado ANTES de a série entrar na sessão: depois ela já faz
+    // parte da base de comparação e nunca se superaria.
+    const best = previousBestOneRepMax(previous, exercise.exerciseId);
+    const beatsRecord =
+      !target.isWarmup && !byTime && best > 0 && estimateOneRepMax(input.weight, input.reps) > best;
+
+    log.mutate([set], {
+      onSuccess: () => {
+        if (beatsRecord) {
+          showToast(t('sessionNewRecord') + ' · ' + exercise.exerciseName);
+          void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        } else {
+          void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        }
+        const next = exercise.sets[Math.min(completed.length + 1, exercise.sets.length - 1)]!;
+        change({
+          weight: next.targetWeightKg ?? input.weight,
+          reps: next.targetReps ?? input.reps,
+          rir: next.targetRir ?? input.rir,
+          duration: next.targetDurationSeconds ?? input.duration,
+        });
+        onRest(target.restSeconds);
+      },
+    });
   };
+
+  const styles = useMemo(
+    () =>
+      StyleSheet.create({
+        root: { gap: spacing.md },
+        reference: { gap: spacing.sm },
+        // Um campo por linha. Com o stepper redondo cada linha custa ~56 pt, e
+        // os três campos cabem acima da dobra junto com o cabeçalho — que é o
+        // que permite registrar uma série sem rolar a tela.
+        fields: { gap: spacing.lg },
+      }),
+    [],
+  );
+
   return (
     <View style={styles.root}>
-      <ScrollView contentContainerStyle={styles.form} keyboardShouldPersistTaps="handled">
+      <View style={styles.reference}>
+        <MetaChipRow>
+          <MetaChip
+            icon="target"
+            label={
+              t('sessionTargetLabel') +
+              ': ' +
+              (byTime
+                ? (target.targetDurationSeconds ?? 0) + ' ' + t('secondsShort')
+                : (target.targetReps ?? '—') +
+                  (target.targetRepsMax ? '–' + target.targetRepsMax : '') +
+                  ' ' +
+                  t('repsShort'))
+            }
+          />
+          {last ? (
+            <MetaChip
+              icon="clock"
+              label={
+                t('sessionLastTime') +
+                ': ' +
+                formatWeight(last.weightKg) +
+                ' kg × ' +
+                (last.reps ?? last.durationSeconds ?? 0)
+              }
+            />
+          ) : (
+            <MetaChip icon="sparkles" label={t('sessionNoBaseline')} />
+          )}
+        </MetaChipRow>
+        {completed.length ? (
+          <Text variant="caption" tone="tertiary">
+            {completed.length} {plural(completed.length, 'sessionSetDone', 'sessionSetsDone')}
+          </Text>
+        ) : null}
+      </View>
+
+      <View style={styles.fields}>
         <NumericStepper
-          label={t('planWeight')}
+          disabled={log.isPending}
+          testID="session-load"
+          label={t('sessionLoad')}
+          unit={t('unitKg')}
           value={input.weight}
           step={0.5}
           min={0}
           onChange={(weight) => change({ weight })}
         />
-        {target.targetDurationSeconds === null ? (
+        {byTime ? (
           <NumericStepper
+            disabled={log.isPending}
+            label={t('sessionSeconds')}
+            unit={t('secondsShort')}
+            value={input.duration}
+            min={0}
+            onChange={(duration) => change({ duration })}
+          />
+        ) : (
+          <NumericStepper
+            disabled={log.isPending}
             label={t('sessionReps')}
             value={input.reps}
             min={0}
             onChange={(reps) => change({ reps })}
           />
-        ) : (
-          <NumericStepper
-            label={t('sessionSeconds')}
-            value={input.duration}
-            min={0}
-            onChange={(duration) => change({ duration })}
-          />
         )}
         <NumericStepper
-          label={t('planRir')}
+          disabled={log.isPending}
+          label={t('sessionRir')}
           value={input.rir}
           min={0}
           max={10}
           onChange={(rir) => change({ rir })}
         />
-      </ScrollView>
-      <View style={styles.floating}>
-        <SessionControls
-          onRecord={record}
-          onPrevious={onPrevious}
-          onNext={onNext}
-          onFinish={onFinish}
-        />
       </View>
+
+      <Text variant="footnote" tone="secondary">
+        {t('dailySetHint')}
+      </Text>
+      {log.isError ? (
+        <ErrorState
+          message={t('dailySetError')}
+          onRetry={() => log.variables && log.mutate(log.variables)}
+        />
+      ) : null}
+      <SessionControls
+        busy={log.isPending}
+        onRecord={record}
+        onPrevious={onPrevious}
+        onNext={onNext}
+        canPrevious={canPrevious}
+        canNext={canNext}
+      />
     </View>
   );
 }
-const styles = StyleSheet.create({
-  root: { flex: 1 },
-  form: { gap: spacing.md, paddingBottom: spacing.huge * 2 + spacing.xxl },
-  floating: { position: 'absolute', left: spacing.none, right: spacing.none, bottom: spacing.none },
-});

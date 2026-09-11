@@ -13,6 +13,7 @@
 | 7 | [`specs/30-contrato-de-integracao.md`](specs/30-contrato-de-integracao.md) | Ports, erros, paginação, evolução de contrato |
 | 8 | [`adr/`](adr/) | Decisões e trade-offs aceitos |
 | 9 | [`agent/task-specs/`](agent/task-specs/) | Unidades de trabalho executáveis |
+| 10 | [`roadmap-produto.md`](roadmap-produto.md) | Ordem do trabalho até a demo, e por que essa ordem |
 
 ## Convenção
 

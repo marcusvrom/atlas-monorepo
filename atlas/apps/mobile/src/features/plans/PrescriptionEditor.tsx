@@ -79,6 +79,7 @@ export function PrescriptionEditor({
       />
       <NumericStepper
         label={t('planWeight')}
+        unit={t('unitKg')}
         value={selected.targetWeightKg ?? 0}
         min={0}
         step={0.5}

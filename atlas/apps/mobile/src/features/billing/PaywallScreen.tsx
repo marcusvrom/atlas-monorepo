@@ -1,8 +1,17 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Feature } from '@atlas/contracts';
 import { Alert, ScrollView, StyleSheet, View } from 'react-native';
-import { spacing } from '@atlas/design-tokens';
-import { Badge, Button, Card, GradientSurface, Screen, Text } from '../../design/components';
+import { layout, spacing } from '@atlas/design-tokens';
+import {
+  Badge,
+  Button,
+  Card,
+  CoverImage,
+  GradientSurface,
+  Screen,
+  Text,
+} from '../../design/components';
+import { CoverScrim } from '../../design/media';
 import { usePaywallEvent } from '../../data/queries/paywall';
 import { t } from '../../i18n';
 export function PaywallScreen() {
@@ -14,16 +23,23 @@ export function PaywallScreen() {
   return (
     <Screen>
       <ScrollView contentContainerStyle={styles.content}>
-        {/* Hero da feature bloqueada: foco no benefício. */}
-        <GradientSurface name="slate" radius="xxl" level="lg" style={styles.hero}>
-          <Badge label={t('pro')} tone="brand" />
-          <Text tone="onAccent" variant="display" weight="bold">
-            {t(feature)}
-          </Text>
-          <Text tone="onAccent" variant="subhead">
-            {t((feature + 'Description') as Parameters<typeof t>[0])}
-          </Text>
-        </GradientSurface>
+        {/* Hero da feature bloqueada: foco no benefício. A capa é semeada pela
+            própria feature, então cada porta de entrada do paywall tem uma
+            identidade visual própria em vez de um bloco genérico. */}
+        <CoverImage seed={'paywall-' + feature} glyph="trophy" radius="xxl" style={styles.hero}>
+          <CoverScrim />
+          <View style={styles.heroBody}>
+            <Text tone="onAccent" variant="caption" weight="bold">
+              {t('paywallHeroEyebrow')}
+            </Text>
+            <Text tone="onAccent" variant="display" weight="bold">
+              {t(feature)}
+            </Text>
+            <Text tone="onAccent" variant="subhead">
+              {t((feature + 'Description') as Parameters<typeof t>[0])}
+            </Text>
+          </View>
+        </CoverImage>
         <Text tone="secondary">{t('paywallNoTransaction')}</Text>
         <View style={styles.plans}>
           <Card>
@@ -57,7 +73,8 @@ export function PaywallScreen() {
 }
 const styles = StyleSheet.create({
   content: { padding: spacing.xl, paddingBottom: spacing.huge, gap: spacing.lg },
-  hero: { gap: spacing.sm, alignItems: 'flex-start' },
+  hero: { height: layout.coverHero },
+  heroBody: { flex: 1, justifyContent: 'flex-end', padding: spacing.lg, gap: spacing.xs },
   plans: { gap: spacing.md },
   proCard: { gap: spacing.sm },
   proHead: {

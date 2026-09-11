@@ -99,8 +99,10 @@ export function ProgressRing({
           strokeLinecap="round"
         />
       </Svg>
-      <View style={styles.center} pointerEvents="none">
-        <Text variant="title1" weight="bold">
+      <View style={styles.center}>
+        {/* O valor acompanha o diâmetro: fixo em `title1`, ele encostava no
+            traço nos anéis pequenos (os de card) e sobrava nos grandes. */}
+        <Text variant={size >= spacing.huge * 2 ? 'title1' : 'title3'} weight="bold">
           {Math.round(progress * 100).toLocaleString('pt-BR')}
           {'%'}
         </Text>
@@ -112,6 +114,7 @@ export function ProgressRing({
 const styles = StyleSheet.create({
   root: { alignItems: 'center', justifyContent: 'center' },
   center: {
+    pointerEvents: 'none',
     position: 'absolute',
     top: 0,
     left: 0,

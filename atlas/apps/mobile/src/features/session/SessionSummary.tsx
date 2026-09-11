@@ -1,8 +1,10 @@
+import { formatWeight } from '../../lib/format-weight';
 import { StyleSheet, View } from 'react-native';
 import type { TrainingSession } from '@atlas/contracts';
-import { spacing } from '@atlas/design-tokens';
-import { Button, GradientSurface, MetricTile, Text } from '../../design/components';
-import { t } from '../../i18n';
+import { layout, spacing } from '@atlas/design-tokens';
+import { Button, CoverImage, MetricTile, Text } from '../../design/components';
+import { CoverScrim } from '../../design/media';
+import { plural, t } from '../../i18n';
 import { sessionRecords } from './session-summary';
 import { useSessionQueue } from './hooks';
 export function SessionSummary({
@@ -18,18 +20,23 @@ export function SessionSummary({
   const delta = previous ? session.totalVolumeKg - previous.totalVolumeKg : null;
   return (
     <View style={styles.root}>
-      {/* Hero de conclusão: momento de celebração, destaque total. */}
-      <GradientSurface name="slate" radius="xxl" level="lg" style={styles.hero}>
-        <Text tone="onAccent" variant="footnote" weight="semibold">
-          {t('sessionFinished')}
-        </Text>
-        <Text tone="onAccent" variant="display" weight="bold">
-          {session.totalVolumeKg.toLocaleString('pt-BR')} kg
-        </Text>
-        <Text tone="onAccent" variant="subhead">
-          {t('sessionVolume')}
-        </Text>
-      </GradientSurface>
+      {/* Hero de conclusão: momento de celebração, destaque total. A capa é
+          semeada pela própria sessão, então cada treino concluído tem a sua —
+          duas sessões seguidas não se parecem, e a tela não vira um carimbo. */}
+      <CoverImage seed={session.id} glyph="trophy" radius="xxl" style={styles.hero}>
+        <CoverScrim />
+        <View style={styles.heroBody}>
+          <Text tone="onAccent" variant="footnote" weight="semibold">
+            {t('sessionFinished')}
+          </Text>
+          <Text tone="onAccent" variant="display" weight="bold">
+            {formatWeight(session.totalVolumeKg)} kg
+          </Text>
+          <Text tone="onAccent" variant="subhead">
+            {t('sessionVolume')}
+          </Text>
+        </View>
+      </CoverImage>
       <View style={styles.metrics}>
         <MetricTile
           label={t('sessionDuration')}
@@ -43,13 +50,13 @@ export function SessionSummary({
         />
         <MetricTile
           label={t('sessionComparison')}
-          value={delta === null ? t('sessionFirstHistory') : delta.toLocaleString('pt-BR') + ' kg'}
+          value={delta === null ? t('sessionFirstHistory') : formatWeight(delta) + ' kg'}
           accent="energy"
         />
       </View>
       {queue.pending ? (
         <Text accessibilityLiveRegion="polite">
-          {queue.pending} {t('sessionPending')}
+          {queue.pending} {plural(queue.pending, 'sessionPendingOne', 'sessionPending')}
         </Text>
       ) : null}
       <Button label={t('sessionExit')} onPress={onClose} />
@@ -58,6 +65,7 @@ export function SessionSummary({
 }
 const styles = StyleSheet.create({
   root: { padding: spacing.lg, gap: spacing.lg },
-  hero: { gap: spacing.xs, alignItems: 'flex-start' },
+  hero: { height: layout.coverHero },
+  heroBody: { flex: 1, justifyContent: 'flex-end', padding: spacing.lg, gap: spacing.xs },
   metrics: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.md },
 });

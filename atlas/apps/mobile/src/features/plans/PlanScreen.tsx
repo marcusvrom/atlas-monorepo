@@ -2,17 +2,21 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { WorkoutPlanId } from '@atlas/contracts';
 import { FlashList } from '@shopify/flash-list';
 import { StyleSheet, View } from 'react-native';
-import { spacing } from '@atlas/design-tokens';
+import { layout, spacing } from '@atlas/design-tokens';
 import {
   Button,
-  Card,
+  CoverCard,
+  CoverImage,
   EmptyState,
   ErrorState,
-  GradientSurface,
+  IconButton,
   LoadingState,
+  MetaChip,
+  MetaChipRow,
   Screen,
   Text,
 } from '../../design/components';
+import { CoverScrim } from '../../design/media';
 import { t } from '../../i18n';
 import { usePlan, usePlanActions } from './hooks';
 export function PlanScreen() {
@@ -48,15 +52,37 @@ export function PlanScreen() {
         contentContainerStyle={styles.content}
         ListHeaderComponent={
           <View style={styles.header}>
-            <Button label={t('back')} variant="ghost" onPress={() => router.back()} />
-            <GradientSurface name="slate" radius="xxl" level="lg" style={styles.hero}>
-              <Text tone="onAccent" variant="title1" weight="bold">
-                {value.name}
-              </Text>
-              <Text tone="onAccent" variant="subhead">
-                {t(value.goal)} · {t('version')} {value.version}
-              </Text>
-            </GradientSurface>
+            {/* Mesma capa que identifica a ficha na lista — a cor faz a ponte
+                entre as duas telas sem precisar de rótulo. */}
+            <View>
+              <CoverImage seed={value.id} glyph="barbell" radius="xxl" style={styles.hero}>
+                <CoverScrim />
+                <View style={styles.heroBody}>
+                  <Text tone="onAccent" variant="caption" weight="bold">
+                    {t('planCoverEyebrow')}
+                  </Text>
+                  <Text tone="onAccent" variant="title1" weight="bold">
+                    {value.name}
+                  </Text>
+                  <MetaChipRow>
+                    <MetaChip onCover icon="target" label={t(value.goal)} />
+                    <MetaChip
+                      onCover
+                      icon="calendar"
+                      label={
+                        value.days.length +
+                        ' ' +
+                        t(value.days.length === 1 ? 'planDaySingular' : 'planDaysShort')
+                      }
+                    />
+                    <MetaChip onCover icon="layers" label={t('version') + ' ' + value.version} />
+                  </MetaChipRow>
+                </View>
+              </CoverImage>
+              <View style={styles.heroBack}>
+                <IconButton icon="back" label={t('back')} onPress={() => router.back()} />
+              </View>
+            </View>
             {value.status === 'draft' ? (
               <Button
                 label={t('edit')}
@@ -99,21 +125,32 @@ export function PlanScreen() {
         }
         renderItem={({ item }) => (
           <View style={styles.day}>
-            <Card>
-              <Text variant="title3" weight="bold">
-                {item.label}
-              </Text>
-              <Text tone="secondary">
-                {item.exercises.length} {t('planExercises')}
-              </Text>
-              <Button
-                label={t('edit')}
-                variant="ghost"
-                onPress={() =>
-                  router.push({ pathname: '/plan/[id]/edit', params: { id: value.id } })
-                }
-              />
-            </Card>
+            <CoverCard
+              seed={item.id}
+              glyph="dumbbell"
+              height={layout.coverCard}
+              title={item.label}
+              meta={
+                <MetaChipRow>
+                  <MetaChip
+                    onCover
+                    icon="layers"
+                    label={item.exercises.length + ' ' + t('planExercises')}
+                  />
+                  <MetaChip
+                    onCover
+                    icon="clock"
+                    label={item.estimatedMinutes + ' ' + t('minutesShort')}
+                  />
+                </MetaChipRow>
+              }
+              onPress={() =>
+                router.push({
+                  pathname: '/plan/[id]/day/[dayId]',
+                  params: { id: value.id, dayId: item.id },
+                })
+              }
+            />
           </View>
         )}
       />
@@ -123,6 +160,8 @@ export function PlanScreen() {
 const styles = StyleSheet.create({
   content: { padding: spacing.lg, paddingBottom: spacing.huge },
   header: { gap: spacing.md },
-  hero: { gap: spacing.xs },
+  hero: { height: layout.coverHero },
+  heroBody: { flex: 1, justifyContent: 'flex-end', padding: spacing.lg, gap: spacing.sm },
+  heroBack: { position: 'absolute', top: spacing.md, left: spacing.md },
   day: { paddingTop: spacing.md },
 });
