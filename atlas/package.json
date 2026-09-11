@@ -1,0 +1,38 @@
+{
+  "name": "atlas-platform",
+  "private": true,
+  "version": "0.1.0",
+  "packageManager": "pnpm@10.15.0",
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "scripts": {
+    "mobile": "pnpm --filter @atlas/mobile start",
+    "mobile:ios": "pnpm --filter @atlas/mobile ios",
+    "mobile:android": "pnpm --filter @atlas/mobile android",
+    "build": "turbo run build",
+    "typecheck": "turbo run typecheck",
+    "lint": "eslint apps/mobile packages scripts --max-warnings 0",
+    "test": "pnpm test:unit && pnpm test:e2e",
+    "contracts:generate": "openapi-typescript contracts/openapi.v1.yaml -o packages/api-client/src/http/generated/schema.d.ts",
+    "clean": "turbo run clean && rm -rf node_modules",
+    "format:check": "prettier --check apps/mobile package.json eslint.config.cjs .prettierrc.json packages/api-client/src/index.ts packages/api-client/src/contract.test.ts packages/api-client/src/mock-runtime.test.ts packages/api-client/src/ports/index.ts",
+    "test:unit": "vitest run",
+    "test:e2e": "pnpm --filter @atlas/mobile test"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.0",
+    "eslint": "^9.39.0",
+    "eslint-config-expo": "~57.0.2",
+    "openapi-typescript": "^7.6.0",
+    "prettier": "^3.4.2",
+    "turbo": "^2.5.0",
+    "typescript": "~5.9.2",
+    "vitest": "^3.1.0"
+  },
+  "pnpm": {
+    "patchedDependencies": {
+      "expo-sqlite": "patches/expo-sqlite.patch"
+    }
+  }
+}

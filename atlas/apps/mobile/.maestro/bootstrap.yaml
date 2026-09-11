@@ -1,0 +1,17 @@
+# PR 0: executar com build de desenvolvimento e Metro ativo.
+appId: app.atlas.mobile
+---
+- launchApp
+- tapOn: 'Abrir demonstração'
+- assertVisible: 'Demonstração'
+- tapOn: 'Sólido'
+- assertVisible: 'Prévia do vidro'
+- tapOn: 'Desfoque'
+- assertVisible: 'Prévia do vidro'
+- tapOn: 'Nativo .*'
+- assertVisible: 'Prévia do vidro'
+- tapOn: 'Claro'
+- assertVisible: 'Demonstração'
+- tapOn: 'Escuro'
+- tapOn: 'Voltar'
+- assertVisible: 'Abrir demonstração'

@@ -1,0 +1,38 @@
+spec_id: ATL-UI-001
+title: Casca do app, navegação e design system Liquid Glass
+phase: mock-first
+context_module: apps/mobile
+depends_on: []
+adr_refs: [ADR-0007, ADR-0015]
+
+goal: >
+  Entregar a casca navegável do app com tabs nativas de vidro, tema, fundo de
+  profundidade e os componentes base do design system, de forma que qualquer
+  tela nova nasça visualmente consistente sem tocar em token ou em vidro.
+
+deliverables:
+  - app/_layout.tsx com providers na ordem correta
+  - app/(tabs)/_layout.tsx usando NativeTabs
+  - src/design/glass/{useGlassCapability,GlassSurface}
+  - src/design/theme-provider.tsx
+  - src/design/components/{Screen,Card,Text,GlassButton,DepthBackground,StateViews}
+
+design_rules:
+  - Vidro APENAS em elementos que flutuam sobre conteúdo rolável
+  - Nunca vidro sobre vidro
+  - Toda tela tem DepthBackground — vidro sobre cinza chapado parece cinza chapado
+  - Cards de conteúdo usam superfície sólida elevada, não vidro
+
+acceptance_criteria:
+  - As 5 tabs navegam e preservam estado independente
+  - Em iOS 26 a tab bar exibe o material de vidro do SISTEMA (não imitação)
+  - Em Android e iOS < 26 o app renderiza o fallback blur sem erro visual
+  - Com "Reduzir Transparência" ativo, TODA superfície de vidro vira sólida
+  - Nenhum arquivo fora de src/design/glass/ importa expo-glass-effect
+  - Nenhum hex, spacing ou radius literal em componente
+  - Texto sobre superfície clear mantém contraste >= 4.5:1 no pior caso do fundo
+  - enableFreeze(true) ativo e verificado — tab fora de foco não re-renderiza
+
+out_of_scope:
+  - Conteúdo real das telas (ATL-UI-002+)
+  - Animação de transição entre telas (ATL-UI-006)

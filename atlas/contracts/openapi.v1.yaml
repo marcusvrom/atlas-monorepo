@@ -1,0 +1,3647 @@
+openapi: 3.1.0
+info:
+  title: Atlas API
+  version: 1.0.0
+  description: |
+    Contrato HTTP da plataforma Atlas.
+
+    Este arquivo é a FONTE DE VERDADE do transporte. Ele deve permanecer em
+    paridade com os ports em `packages/api-client/src/ports/` — o CI compara os
+    paths declarados aqui com os métodos dos ports. Divergência é erro de build.
+
+    Regra de evolução (spec 30 §6): adicionar campo opcional ou endpoint é
+    permitido; remover, renomear ou estreitar tipo exige /api/v2 e 90 dias de
+    convivência. Apps móveis não atualizam sincronizadamente.
+servers:
+  - url: https://api.atlas.app
+    description: Produção
+  - url: http://localhost:5080
+    description: Desenvolvimento
+security:
+  - bearerAuth: []
+tags:
+  - name: Catalog
+  - name: Programming
+  - name: Session
+  - name: Measurement
+  - name: Insights
+  - name: Marketplace
+  - name: Identity
+paths:
+  /api/v1/me:
+    get:
+      tags:
+        - Identity
+      operationId: getMe
+      summary: Perfil do usuário autenticado
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+    patch:
+      tags:
+        - Identity
+      operationId: updateProfile
+      summary: Atualizar dados básicos do perfil
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateProfileInput"
+      responses:
+        "200":
+          description: Perfil atualizado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+  /api/v1/me/entitlements:
+    get:
+      tags:
+        - Identity
+      operationId: listEntitlements
+      summary: Direitos de acesso do usuário
+      description: |
+        Fonte da verdade do paywall no client. Nenhuma tela infere plano —
+        ela consulta direito de acesso. Ver spec 00 §4.8.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Entitlement"
+  /api/v1/exercises:
+    get:
+      tags:
+        - Catalog
+      operationId: listExercises
+      parameters:
+        - name: q
+          in: query
+          schema:
+            type: string
+        - name: muscle
+          in: query
+          schema:
+            type: string
+        - name: equipment
+          in: query
+          schema:
+            $ref: "#/components/schemas/Equipment"
+        - name: difficulty
+          in: query
+          schema:
+            $ref: "#/components/schemas/Difficulty"
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 20
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - items
+                  - nextCursor
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/ExerciseSummary"
+                  nextCursor:
+                    type:
+                      - string
+                      - "null"
+  /api/v1/exercises/{id}:
+    get:
+      tags:
+        - Catalog
+      operationId: getExercise
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExerciseDetail"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /api/v1/muscle-groups:
+    get:
+      tags:
+        - Catalog
+      operationId: listMuscleGroups
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MuscleGroup"
+  /api/v1/workout-plans:
+    get:
+      tags:
+        - Programming
+      operationId: listPlans
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum:
+              - draft
+              - published
+              - archived
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - items
+                  - nextCursor
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/WorkoutPlanSummary"
+                  nextCursor:
+                    type:
+                      - string
+                      - "null"
+    post:
+      tags:
+        - Programming
+      operationId: createPlan
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - goal
+              properties:
+                name:
+                  type: string
+                  minLength: 3
+                  maxLength: 80
+                goal:
+                  $ref: "#/components/schemas/GoalType"
+      responses:
+        "201":
+          description: Criado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkoutPlan"
+        "402":
+          $ref: "#/components/responses/QuotaExceeded"
+  /api/v1/workout-plans/today:
+    get:
+      tags:
+        - Programming
+      operationId: getTodayWorkout
+      summary: Treino do dia
+      description: |
+        Agregação orientada a CASO DE USO, não a recurso. A tela "Hoje" pede
+        isto, não três endpoints. Ver ADR-0014.
+      responses:
+        "200":
+          description: OK (null quando não há ficha ativa)
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/TodayWorkout"
+                  - type: "null"
+  /api/v1/sessions:
+    post:
+      tags:
+        - Session
+      operationId: startSession
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - clientGeneratedId
+                - planId
+                - dayId
+              properties:
+                clientGeneratedId:
+                  type: string
+                  format: uuid
+                planId:
+                  type:
+                    - string
+                    - "null"
+                  format: uuid
+                dayId:
+                  type:
+                    - string
+                    - "null"
+                  format: uuid
+      responses:
+        "201":
+          description: Criada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TrainingSession"
+  /api/v1/sessions/{id}/sets:batch:
+    post:
+      tags:
+        - Session
+      operationId: logSets
+      summary: Sincronização em lote de séries executadas
+      description: |
+        Idempotente por `clientGeneratedId`. Devolve **207** com resultado
+        PARTICIONADO: um item inválido nunca invalida o lote inteiro, o que
+        evita travar a fila de sync do device para sempre. Ver spec 00 §9.2.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - sets
+              properties:
+                sets:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/PerformedSet"
+      responses:
+        "207":
+          description: Resultado particionado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LogSetsResult"
+  /api/v1/insights/muscle-volume:
+    get:
+      tags:
+        - Insights
+      operationId: getMuscleVolume
+      parameters:
+        - name: periodDays
+          in: query
+          schema:
+            type: integer
+            enum:
+              - 7
+              - 30
+              - 90
+            default: 7
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MuscleVolume"
+  /api/v1/professionals/search:
+    get:
+      tags:
+        - Marketplace
+      operationId: searchProfessionals
+      parameters:
+        - name: lat
+          in: query
+          schema:
+            type: number
+        - name: lng
+          in: query
+          schema:
+            type: number
+        - name: radiusKm
+          in: query
+          schema:
+            type: number
+            default: 15
+        - name: specialty
+          in: query
+          schema:
+            type: string
+        - name: modality
+          in: query
+          schema:
+            type: string
+            enum:
+              - online
+              - inPerson
+              - hybrid
+        - name: cursor
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - items
+                  - nextCursor
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/ProfessionalSummary"
+                  nextCursor:
+                    type:
+                      - string
+                      - "null"
+  /api/v1/coach/clients:
+    get:
+      tags:
+        - Marketplace
+      operationId: listClients
+      summary: Painel do profissional
+      description: Read model denormalizado. Uma query, N alunos. Ver spec 00 §11.5.
+      parameters:
+        - name: sort
+          in: query
+          schema:
+            type: string
+            enum:
+              - risk
+              - name
+              - lastSession
+            default: risk
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ClientOverview"
+  /api/v1/workout-plans/{id}:
+    get:
+      tags:
+        - Programming
+      operationId: getPlan
+      parameters:
+        - &a1
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200": &a2
+          description: Ficha de treino
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkoutPlan"
+    put:
+      tags:
+        - Programming
+      operationId: updatePlan
+      parameters:
+        - *a1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdatePlanInput"
+      responses:
+        "200": *a2
+        "409":
+          description: Ficha publicada exige revisão
+  /api/v1/workout-plans/{id}/publish:
+    post:
+      tags:
+        - Programming
+      operationId: publishPlan
+      parameters:
+        - *a1
+      responses:
+        "200": *a2
+        "422":
+          description: Ficha sem dias ou com dia vazio
+  /api/v1/workout-plans/{id}/activate:
+    post:
+      tags:
+        - Programming
+      operationId: activatePlan
+      parameters:
+        - *a1
+      responses:
+        "204":
+          description: Ficha ativada
+  /api/v1/workout-plans/{id}/revisions:
+    post:
+      tags:
+        - Programming
+      operationId: revisePlan
+      parameters:
+        - *a1
+      responses:
+        "201": *a2
+        "409":
+          description: Origem deve estar publicada
+  /api/v1/professionals/{id}:
+    get:
+      tags:
+        - Marketplace
+      operationId: getProfessionalDetail
+      parameters:
+        - *a1
+      responses:
+        "200":
+          description: Detalhe validado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProfessionalDetail"
+  /api/v1/coach/clients/{id}:
+    get:
+      tags:
+        - Marketplace
+      operationId: getClientDetail
+      parameters:
+        - *a1
+      responses:
+        "200":
+          description: Detalhe validado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClientDetail"
+  /api/v1/check-ins:
+    get:
+      tags:
+        - Wellbeing
+      operationId: listCheckIns
+      parameters:
+        - name: fromDate
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: toDate
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        "200":
+          description: Autorrelatos no intervalo inclusivo, do mais recente ao mais antigo.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CheckInList"
+  /api/v1/check-ins/{date}:
+    put:
+      tags:
+        - Wellbeing
+      operationId: upsertCheckIn
+      description: Uma entrada por data. Reenvio do mesmo clientGeneratedId é no-op.
+        Rascunhos admitem campos nulos; conclusão exige sono e energia.
+      parameters:
+        - name: date
+          in: path
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CheckInInput"
+      responses:
+        "200":
+          description: Check-in salvo
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CheckInEntry"
+        "422":
+          description: Escalas inválidas ou conclusão incompleta
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: false
+      schema:
+        type: string
+        maxLength: 200
+  responses:
+    NotFound:
+      description: Recurso não encontrado
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    QuotaExceeded:
+      description: |
+        Limite do plano atingido. O corpo carrega o necessário para o client
+        renderizar o paywall CONTEXTUAL sem hardcodar regra de plano.
+      content:
+        application/problem+json:
+          schema:
+            allOf:
+              - $ref: "#/components/schemas/Problem"
+              - type: object
+                properties:
+                  feature:
+                    type: string
+                  limit:
+                    type: integer
+                  currentPlan:
+                    type: string
+                  suggestedUpgrade:
+                    type: string
+  schemas:
+    Problem:
+      type: object
+      description: RFC 9457
+      properties:
+        type:
+          type: string
+        title:
+          type: string
+        status:
+          type: integer
+        detail:
+          type: string
+        instance:
+          type: string
+    GoalType:
+      type: string
+      enum:
+        - hypertrophy
+        - fatLoss
+        - strength
+        - endurance
+        - rehabilitation
+        - generalHealth
+    Equipment:
+      type: string
+      enum:
+        - barbell
+        - dumbbell
+        - machine
+        - cable
+        - bodyweight
+        - kettlebell
+        - band
+        - ball
+        - none
+    Difficulty:
+      type: string
+      enum:
+        - beginner
+        - intermediate
+        - advanced
+    MuscleRole:
+      type: string
+      enum:
+        - primary
+        - secondary
+        - stabilizer
+    MuscleGroup:
+      type: object
+      required:
+        - id
+        - code
+        - displayName
+        - svgPathId
+        - view
+        - parentId
+      properties:
+        id:
+          type: integer
+        code:
+          type: string
+        displayName:
+          type: string
+        svgPathId:
+          type: string
+          description: Liga o dado ao <path> do SVG anatômico. Ver spec 11 §3.
+        view:
+          type: string
+          enum:
+            - anterior
+            - posterior
+            - both
+        parentId:
+          type:
+            - integer
+            - "null"
+    MuscleActivation:
+      type: object
+      required:
+        - muscleGroupId
+        - muscleCode
+        - role
+        - activationWeight
+      properties:
+        muscleGroupId:
+          type: integer
+        muscleCode:
+          type: string
+        role:
+          $ref: "#/components/schemas/MuscleRole"
+        activationWeight:
+          type: number
+          minimum: 0
+          maximum: 1
+          description: Multiplicador do volume ponderado que alimenta o heatmap.
+    ExerciseSummary:
+      type: object
+      required:
+        - id
+        - name
+        - primaryMuscleCode
+        - equipment
+        - difficulty
+        - thumbnailUrl
+        - isCustom
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        primaryMuscleCode:
+          type: string
+        equipment:
+          $ref: "#/components/schemas/Equipment"
+        difficulty:
+          $ref: "#/components/schemas/Difficulty"
+        thumbnailUrl:
+          type:
+            - string
+            - "null"
+        isCustom:
+          type: boolean
+    ExerciseDetail:
+      allOf:
+        - $ref: "#/components/schemas/ExerciseSummary"
+        - type: object
+          required:
+            - description
+            - media
+            - activations
+            - executionCues
+            - commonMistakes
+          properties:
+            description:
+              type: string
+            media:
+              type: array
+              items:
+                type: object
+                required:
+                  - kind
+                  - url
+                properties:
+                  kind:
+                    type: string
+                    enum:
+                      - loop
+                      - video
+                      - image
+                  url:
+                    type: string
+                    format: uri
+                  angle:
+                    type: string
+                    enum:
+                      - front
+                      - side
+                      - rear
+                  durationMs:
+                    type: integer
+            activations:
+              type: array
+              minItems: 1
+              items:
+                $ref: "#/components/schemas/MuscleActivation"
+            executionCues:
+              type: array
+              items:
+                type: string
+            commonMistakes:
+              type: array
+              items:
+                type: string
+    SetPrescription:
+      type: object
+      properties:
+        order:
+          type: integer
+          minimum: 1
+          maximum: 9007199254740991
+        targetReps:
+          anyOf:
+            - type: integer
+              minimum: 1
+              maximum: 9007199254740991
+            - type: "null"
+        targetRepsMax:
+          anyOf:
+            - type: integer
+              minimum: 1
+              maximum: 9007199254740991
+            - type: "null"
+        targetDurationSeconds:
+          anyOf:
+            - type: integer
+              minimum: 1
+              maximum: 9007199254740991
+            - type: "null"
+        targetWeightKg:
+          anyOf:
+            - type: number
+              minimum: 0
+            - type: "null"
+        targetRir:
+          anyOf:
+            - type: integer
+              minimum: 0
+              maximum: 10
+            - type: "null"
+        targetRpe:
+          anyOf:
+            - type: number
+              minimum: 1
+              maximum: 10
+            - type: "null"
+        restSeconds:
+          type: integer
+          minimum: 0
+          maximum: 9007199254740991
+        isWarmup:
+          default: false
+          type: boolean
+      required:
+        - order
+        - targetReps
+        - targetRepsMax
+        - targetDurationSeconds
+        - targetWeightKg
+        - targetRir
+        - targetRpe
+        - restSeconds
+    ExercisePrescription:
+      type: object
+      properties:
+        order:
+          type: integer
+          minimum: 1
+          maximum: 9007199254740991
+        exerciseId:
+          type: string
+          format: uuid
+          pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+        exerciseName:
+          type: string
+          minLength: 1
+        thumbnailUrl:
+          anyOf:
+            - type: string
+              format: uri
+            - type: "null"
+        technique:
+          default: straight
+          type: string
+          enum:
+            - straight
+            - superset
+            - dropset
+            - restPause
+            - cluster
+            - amrap
+            - emom
+            - isometric
+        supersetGroup:
+          type:
+            - string
+            - "null"
+        notes:
+          type:
+            - string
+            - "null"
+        sets:
+          minItems: 1
+          type: array
+          items:
+            type: object
+            properties:
+              order:
+                type: integer
+                minimum: 1
+                maximum: 9007199254740991
+              targetReps:
+                anyOf:
+                  - type: integer
+                    minimum: 1
+                    maximum: 9007199254740991
+                  - type: "null"
+              targetRepsMax:
+                anyOf:
+                  - type: integer
+                    minimum: 1
+                    maximum: 9007199254740991
+                  - type: "null"
+              targetDurationSeconds:
+                anyOf:
+                  - type: integer
+                    minimum: 1
+                    maximum: 9007199254740991
+                  - type: "null"
+              targetWeightKg:
+                anyOf:
+                  - type: number
+                    minimum: 0
+                  - type: "null"
+              targetRir:
+                anyOf:
+                  - type: integer
+                    minimum: 0
+                    maximum: 10
+                  - type: "null"
+              targetRpe:
+                anyOf:
+                  - type: number
+                    minimum: 1
+                    maximum: 10
+                  - type: "null"
+              restSeconds:
+                type: integer
+                minimum: 0
+                maximum: 9007199254740991
+              isWarmup:
+                default: false
+                type: boolean
+            required:
+              - order
+              - targetReps
+              - targetRepsMax
+              - targetDurationSeconds
+              - targetWeightKg
+              - targetRir
+              - targetRpe
+              - restSeconds
+      required:
+        - order
+        - exerciseId
+        - exerciseName
+        - thumbnailUrl
+        - supersetGroup
+        - notes
+        - sets
+    WorkoutDay:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+        label:
+          type: string
+          minLength: 1
+        slot:
+          anyOf:
+            - type: integer
+              minimum: 0
+              maximum: 6
+            - type: "null"
+        estimatedMinutes:
+          type: integer
+          minimum: 0
+          maximum: 9007199254740991
+        exercises:
+          type: array
+          items:
+            type: object
+            properties:
+              order:
+                type: integer
+                minimum: 1
+                maximum: 9007199254740991
+              exerciseId:
+                type: string
+                format: uuid
+                pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+              exerciseName:
+                type: string
+                minLength: 1
+              thumbnailUrl:
+                anyOf:
+                  - type: string
+                    format: uri
+                  - type: "null"
+              technique:
+                default: straight
+                type: string
+                enum:
+                  - straight
+                  - superset
+                  - dropset
+                  - restPause
+                  - cluster
+                  - amrap
+                  - emom
+                  - isometric
+              supersetGroup:
+                type:
+                  - string
+                  - "null"
+              notes:
+                type:
+                  - string
+                  - "null"
+              sets:
+                minItems: 1
+                type: array
+                items:
+                  type: object
+                  properties:
+                    order:
+                      type: integer
+                      minimum: 1
+                      maximum: 9007199254740991
+                    targetReps:
+                      anyOf:
+                        - type: integer
+                          minimum: 1
+                          maximum: 9007199254740991
+                        - type: "null"
+                    targetRepsMax:
+                      anyOf:
+                        - type: integer
+                          minimum: 1
+                          maximum: 9007199254740991
+                        - type: "null"
+                    targetDurationSeconds:
+                      anyOf:
+                        - type: integer
+                          minimum: 1
+                          maximum: 9007199254740991
+                        - type: "null"
+                    targetWeightKg:
+                      anyOf:
+                        - type: number
+                          minimum: 0
+                        - type: "null"
+                    targetRir:
+                      anyOf:
+                        - type: integer
+                          minimum: 0
+                          maximum: 10
+                        - type: "null"
+                    targetRpe:
+                      anyOf:
+                        - type: number
+                          minimum: 1
+                          maximum: 10
+                        - type: "null"
+                    restSeconds:
+                      type: integer
+                      minimum: 0
+                      maximum: 9007199254740991
+                    isWarmup:
+                      default: false
+                      type: boolean
+                  required:
+                    - order
+                    - targetReps
+                    - targetRepsMax
+                    - targetDurationSeconds
+                    - targetWeightKg
+                    - targetRir
+                    - targetRpe
+                    - restSeconds
+            required:
+              - order
+              - exerciseId
+              - exerciseName
+              - thumbnailUrl
+              - supersetGroup
+              - notes
+              - sets
+      required:
+        - id
+        - label
+        - slot
+        - estimatedMinutes
+        - exercises
+    WorkoutPlanSummary:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+        name:
+          type: string
+          minLength: 1
+        goal:
+          type: string
+          enum:
+            - hypertrophy
+            - fatLoss
+            - strength
+            - endurance
+            - rehabilitation
+            - generalHealth
+        status:
+          type: string
+          enum:
+            - draft
+            - published
+            - archived
+        origin:
+          type: string
+          enum:
+            - selfCreated
+            - fromTemplate
+            - prescribed
+        version:
+          type: integer
+          minimum: 1
+          maximum: 9007199254740991
+        dayCount:
+          type: integer
+          minimum: 0
+          maximum: 9007199254740991
+        prescribedByName:
+          type:
+            - string
+            - "null"
+        isActive:
+          type: boolean
+      required:
+        - id
+        - name
+        - goal
+        - status
+        - origin
+        - version
+        - dayCount
+        - prescribedByName
+        - isActive
+    WorkoutPlan:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+        name:
+          type: string
+          minLength: 1
+        goal:
+          type: string
+          enum:
+            - hypertrophy
+            - fatLoss
+            - strength
+            - endurance
+            - rehabilitation
+            - generalHealth
+        status:
+          type: string
+          enum:
+            - draft
+            - published
+            - archived
+        origin:
+          type: string
+          enum:
+            - selfCreated
+            - fromTemplate
+            - prescribed
+        version:
+          type: integer
+          minimum: 1
+          maximum: 9007199254740991
+        dayCount:
+          type: integer
+          minimum: 0
+          maximum: 9007199254740991
+        prescribedByName:
+          type:
+            - string
+            - "null"
+        isActive:
+          type: boolean
+        ownerId:
+          type: string
+          format: uuid
+          pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+        days:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                format: uuid
+                pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+              label:
+                type: string
+                minLength: 1
+              slot:
+                anyOf:
+                  - type: integer
+                    minimum: 0
+                    maximum: 6
+                  - type: "null"
+              estimatedMinutes:
+                type: integer
+                minimum: 0
+                maximum: 9007199254740991
+              exercises:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    order:
+                      type: integer
+                      minimum: 1
+                      maximum: 9007199254740991
+                    exerciseId:
+                      type: string
+                      format: uuid
+                      pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                    exerciseName:
+                      type: string
+                      minLength: 1
+                    thumbnailUrl:
+                      anyOf:
+                        - type: string
+                          format: uri
+                        - type: "null"
+                    technique:
+                      default: straight
+                      type: string
+                      enum:
+                        - straight
+                        - superset
+                        - dropset
+                        - restPause
+                        - cluster
+                        - amrap
+                        - emom
+                        - isometric
+                    supersetGroup:
+                      type:
+                        - string
+                        - "null"
+                    notes:
+                      type:
+                        - string
+                        - "null"
+                    sets:
+                      minItems: 1
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          order:
+                            type: integer
+                            minimum: 1
+                            maximum: 9007199254740991
+                          targetReps:
+                            anyOf:
+                              - type: integer
+                                minimum: 1
+                                maximum: 9007199254740991
+                              - type: "null"
+                          targetRepsMax:
+                            anyOf:
+                              - type: integer
+                                minimum: 1
+                                maximum: 9007199254740991
+                              - type: "null"
+                          targetDurationSeconds:
+                            anyOf:
+                              - type: integer
+                                minimum: 1
+                                maximum: 9007199254740991
+                              - type: "null"
+                          targetWeightKg:
+                            anyOf:
+                              - type: number
+                                minimum: 0
+                              - type: "null"
+                          targetRir:
+                            anyOf:
+                              - type: integer
+                                minimum: 0
+                                maximum: 10
+                              - type: "null"
+                          targetRpe:
+                            anyOf:
+                              - type: number
+                                minimum: 1
+                                maximum: 10
+                              - type: "null"
+                          restSeconds:
+                            type: integer
+                            minimum: 0
+                            maximum: 9007199254740991
+                          isWarmup:
+                            default: false
+                            type: boolean
+                        required:
+                          - order
+                          - targetReps
+                          - targetRepsMax
+                          - targetDurationSeconds
+                          - targetWeightKg
+                          - targetRir
+                          - targetRpe
+                          - restSeconds
+                  required:
+                    - order
+                    - exerciseId
+                    - exerciseName
+                    - thumbnailUrl
+                    - supersetGroup
+                    - notes
+                    - sets
+            required:
+              - id
+              - label
+              - slot
+              - estimatedMinutes
+              - exercises
+      required:
+        - id
+        - name
+        - goal
+        - status
+        - origin
+        - version
+        - dayCount
+        - prescribedByName
+        - isActive
+        - ownerId
+        - days
+    TodayWorkout:
+      type: object
+      required:
+        - planId
+        - planName
+        - day
+        - estimatedVolumeKg
+        - lastPerformedAt
+        - inProgressSessionId
+      properties:
+        planId:
+          type: string
+          format: uuid
+        planName:
+          type: string
+        day:
+          $ref: "#/components/schemas/WorkoutDay"
+        estimatedVolumeKg:
+          type: number
+        lastPerformedAt:
+          type:
+            - string
+            - "null"
+          format: date-time
+        inProgressSessionId:
+          type:
+            - string
+            - "null"
+          format: uuid
+    PerformedSet:
+      type: object
+      description: Append-only e idempotente por clientGeneratedId. Ver spec 00 §12.3.
+      required:
+        - clientGeneratedId
+        - exerciseId
+        - order
+        - weightKg
+        - reps
+        - durationSeconds
+        - rpe
+        - rir
+        - isWarmup
+        - painLevel
+        - performedAt
+      properties:
+        clientGeneratedId:
+          type: string
+          format: uuid
+        exerciseId:
+          type: string
+          format: uuid
+        order:
+          type: integer
+        weightKg:
+          type:
+            - number
+            - "null"
+        reps:
+          type:
+            - integer
+            - "null"
+        durationSeconds:
+          type:
+            - integer
+            - "null"
+        rpe:
+          type:
+            - number
+            - "null"
+          minimum: 1
+          maximum: 10
+        rir:
+          type:
+            - integer
+            - "null"
+          minimum: 0
+          maximum: 10
+        isWarmup:
+          type: boolean
+        painLevel:
+          type:
+            - integer
+            - "null"
+          minimum: 0
+          maximum: 10
+          description: Coletado apenas em contexto de reabilitação.
+        performedAt:
+          type: string
+          format: date-time
+    TrainingSession:
+      type: object
+      required:
+        - id
+        - planId
+        - planVersion
+        - dayLabel
+        - status
+        - startedAt
+        - completedAt
+        - sets
+        - totalVolumeKg
+        - durationSeconds
+      properties:
+        id:
+          type: string
+          format: uuid
+        planId:
+          type:
+            - string
+            - "null"
+          format: uuid
+        planVersion:
+          type:
+            - integer
+            - "null"
+        dayLabel:
+          type: string
+        status:
+          type: string
+          enum:
+            - inProgress
+            - completed
+            - abandoned
+        startedAt:
+          type: string
+          format: date-time
+        completedAt:
+          type:
+            - string
+            - "null"
+          format: date-time
+        sets:
+          type: array
+          items:
+            $ref: "#/components/schemas/PerformedSet"
+        totalVolumeKg:
+          type: number
+        durationSeconds:
+          type: integer
+    LogSetsResult:
+      type: object
+      required:
+        - accepted
+        - duplicated
+        - rejected
+      properties:
+        accepted:
+          type: array
+          items:
+            type: string
+            format: uuid
+        duplicated:
+          type: array
+          items:
+            type: string
+            format: uuid
+        rejected:
+          type: array
+          items:
+            type: object
+            required:
+              - clientGeneratedId
+              - reason
+            properties:
+              clientGeneratedId:
+                type: string
+                format: uuid
+              reason:
+                type: string
+    MuscleVolume:
+      type: object
+      required:
+        - muscleGroupId
+        - muscleCode
+        - displayName
+        - weightedVolumeKg
+        - effectiveSets
+        - intensity
+      properties:
+        muscleGroupId:
+          type: integer
+        muscleCode:
+          type: string
+        displayName:
+          type: string
+        weightedVolumeKg:
+          type: number
+        effectiveSets:
+          type: integer
+        intensity:
+          type: number
+          minimum: 0
+          maximum: 1
+    ProfessionalSummary:
+      type: object
+      required:
+        - id
+        - displayName
+        - avatarUrl
+        - headline
+        - credentialLabel
+        - specialties
+        - modality
+        - city
+        - distanceKm
+        - monthlyPriceBrl
+        - rating
+        - reviewCount
+        - responseRate
+        - acceptingClients
+      properties:
+        id:
+          type: string
+          format: uuid
+        displayName:
+          type: string
+        avatarUrl:
+          type:
+            - string
+            - "null"
+        headline:
+          type: string
+        credentialLabel:
+          type: string
+          description: CREF ou CREFITO verificado
+        specialties:
+          type: array
+          items:
+            type: string
+        modality:
+          type: string
+          enum:
+            - online
+            - inPerson
+            - hybrid
+        city:
+          type: string
+        distanceKm:
+          type:
+            - number
+            - "null"
+        monthlyPriceBrl:
+          type: number
+        rating:
+          type: number
+        reviewCount:
+          type: integer
+        responseRate:
+          type: number
+        acceptingClients:
+          type: boolean
+    ClientOverview:
+      type: object
+      required:
+        - athleteId
+        - displayName
+        - avatarUrl
+        - goal
+        - adherence7d
+        - adherence30d
+        - lastSessionAt
+        - weightDelta30dKg
+        - leanMassDelta30dKg
+        - goalsAtRisk
+        - unreadMessages
+        - riskScore
+      properties:
+        athleteId:
+          type: string
+          format: uuid
+        displayName:
+          type: string
+        avatarUrl:
+          type:
+            - string
+            - "null"
+        goal:
+          $ref: "#/components/schemas/GoalType"
+        adherence7d:
+          type: number
+        adherence30d:
+          type: number
+        lastSessionAt:
+          type:
+            - string
+            - "null"
+          format: date-time
+        weightDelta30dKg:
+          type:
+            - number
+            - "null"
+        leanMassDelta30dKg:
+          type:
+            - number
+            - "null"
+        goalsAtRisk:
+          type: integer
+        unreadMessages:
+          type: integer
+        riskScore:
+          type: number
+          minimum: 0
+          maximum: 1
+          description: Ordena a atenção do profissional pelo que mais importa.
+    Entitlement:
+      type: object
+      required:
+        - feature
+        - limit
+        - used
+      properties:
+        feature:
+          type: string
+        limit:
+          type:
+            - integer
+            - "null"
+          description: null = ilimitado; 0 = bloqueado
+        used:
+          type: integer
+    UserProfile:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+        displayName:
+          type: string
+        email:
+          type: string
+          format: email
+          pattern: ^(?:[A-Za-z0-9_'+\-]+\.)*[A-Za-z0-9_'+\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\-]*\.)+[A-Za-z]{2,}$
+        avatar:
+          type: object
+          properties:
+            base:
+              type: string
+            skinTone:
+              type: string
+            hair:
+              type: string
+            face:
+              type: string
+            outfit:
+              type: string
+            accessory:
+              type:
+                - string
+                - "null"
+            frame:
+              type:
+                - string
+                - "null"
+            background:
+              type: string
+          required:
+            - base
+            - skinTone
+            - hair
+            - face
+            - outfit
+            - accessory
+            - frame
+            - background
+        roles:
+          minItems: 1
+          type: array
+          items:
+            type: string
+            enum:
+              - athlete
+              - professional
+              - admin
+        goal:
+          anyOf:
+            - type: object
+              properties:
+                type:
+                  type: string
+                  enum:
+                    - hypertrophy
+                    - fatLoss
+                    - strength
+                    - endurance
+                    - rehabilitation
+                    - generalHealth
+                targetDate:
+                  anyOf:
+                    - type: string
+                      format: date-time
+                      pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z|([+-](?:[01]\d|2[0-3]):[0-5]\d)))$
+                    - type: "null"
+                targetWeightKg:
+                  anyOf:
+                    - type: number
+                      minimum: 20
+                      maximum: 400
+                    - type: "null"
+                targetBodyFatPct:
+                  anyOf:
+                    - type: number
+                      minimum: 5
+                      maximum: 60
+                    - type: "null"
+                weeklySessionTarget:
+                  type: integer
+                  minimum: 1
+                  maximum: 14
+              required:
+                - type
+                - targetDate
+                - targetWeightKg
+                - targetBodyFatPct
+                - weeklySessionTarget
+            - type: "null"
+        heightCm:
+          anyOf:
+            - type: number
+              minimum: 80
+              maximum: 260
+            - type: "null"
+        birthDate:
+          type:
+            - string
+            - "null"
+        planKey:
+          type: string
+          enum:
+            - free
+            - pro
+            - coachStarter
+            - coachPro
+        entitlements:
+          type: array
+          items:
+            type: object
+            properties:
+              feature:
+                type: string
+                enum:
+                  - activeWorkoutPlans
+                  - customExercises
+                  - fullHistory
+                  - advancedInsights
+                  - bodyCompositionTracking
+                  - progressPhotos
+                  - interactiveAnatomy
+                  - premiumAvatarItems
+                  - activeClients
+                  - videoCallHours
+                  - whiteLabelReports
+              limit:
+                anyOf:
+                  - type: integer
+                    minimum: 0
+                    maximum: 9007199254740991
+                  - type: "null"
+              used:
+                type: integer
+                minimum: 0
+                maximum: 9007199254740991
+            required:
+              - feature
+              - limit
+              - used
+        createdAt:
+          type: string
+          format: date-time
+          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z|([+-](?:[01]\d|2[0-3]):[0-5]\d)))$
+      required:
+        - id
+        - displayName
+        - email
+        - avatar
+        - roles
+        - goal
+        - heightCm
+        - birthDate
+        - planKey
+        - entitlements
+        - createdAt
+    UpdateProfileInput:
+      type: object
+      properties:
+        displayName:
+          type: string
+        heightCm:
+          anyOf:
+            - type: number
+              minimum: 80
+              maximum: 260
+            - type: "null"
+        birthDate:
+          type:
+            - string
+            - "null"
+      required:
+        - displayName
+        - heightCm
+        - birthDate
+    CurrentGoal:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - hypertrophy
+            - fatLoss
+            - strength
+            - endurance
+            - rehabilitation
+            - generalHealth
+        targetDate:
+          anyOf:
+            - type: string
+              format: date-time
+              pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z|([+-](?:[01]\d|2[0-3]):[0-5]\d)))$
+            - type: "null"
+        targetWeightKg:
+          anyOf:
+            - type: number
+              minimum: 20
+              maximum: 400
+            - type: "null"
+        targetBodyFatPct:
+          anyOf:
+            - type: number
+              minimum: 5
+              maximum: 60
+            - type: "null"
+        weeklySessionTarget:
+          type: integer
+          minimum: 1
+          maximum: 14
+      required:
+        - type
+        - targetDate
+        - targetWeightKg
+        - targetBodyFatPct
+        - weeklySessionTarget
+    Circumferences:
+      type: object
+      properties:
+        chestCm:
+          anyOf:
+            - type: number
+              exclusiveMinimum: 0
+            - type: "null"
+        waistCm:
+          anyOf:
+            - type: number
+              exclusiveMinimum: 0
+            - type: "null"
+        hipCm:
+          anyOf:
+            - type: number
+              exclusiveMinimum: 0
+            - type: "null"
+        rightArmCm:
+          anyOf:
+            - type: number
+              exclusiveMinimum: 0
+            - type: "null"
+        leftArmCm:
+          anyOf:
+            - type: number
+              exclusiveMinimum: 0
+            - type: "null"
+        rightThighCm:
+          anyOf:
+            - type: number
+              exclusiveMinimum: 0
+            - type: "null"
+        leftThighCm:
+          anyOf:
+            - type: number
+              exclusiveMinimum: 0
+            - type: "null"
+      required:
+        - chestCm
+        - waistCm
+        - hipCm
+        - rightArmCm
+        - leftArmCm
+        - rightThighCm
+        - leftThighCm
+    RecordMeasurementInput:
+      type: object
+      properties:
+        clientGeneratedId:
+          type: string
+          format: uuid
+          pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+        takenAt:
+          type: string
+          format: date-time
+          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z|([+-](?:[01]\d|2[0-3]):[0-5]\d)))$
+        weightKg:
+          anyOf:
+            - type: number
+              minimum: 20
+              maximum: 400
+            - type: "null"
+        bodyFatPct:
+          anyOf:
+            - type: number
+              minimum: 2
+              maximum: 70
+            - type: "null"
+        circumferences:
+          anyOf:
+            - type: object
+              properties:
+                chestCm:
+                  anyOf:
+                    - type: number
+                      exclusiveMinimum: 0
+                    - type: "null"
+                waistCm:
+                  anyOf:
+                    - type: number
+                      exclusiveMinimum: 0
+                    - type: "null"
+                hipCm:
+                  anyOf:
+                    - type: number
+                      exclusiveMinimum: 0
+                    - type: "null"
+                rightArmCm:
+                  anyOf:
+                    - type: number
+                      exclusiveMinimum: 0
+                    - type: "null"
+                leftArmCm:
+                  anyOf:
+                    - type: number
+                      exclusiveMinimum: 0
+                    - type: "null"
+                rightThighCm:
+                  anyOf:
+                    - type: number
+                      exclusiveMinimum: 0
+                    - type: "null"
+                leftThighCm:
+                  anyOf:
+                    - type: number
+                      exclusiveMinimum: 0
+                    - type: "null"
+              required:
+                - chestCm
+                - waistCm
+                - hipCm
+                - rightArmCm
+                - leftArmCm
+                - rightThighCm
+                - leftThighCm
+            - type: "null"
+        notes:
+          anyOf:
+            - type: string
+              maxLength: 500
+            - type: "null"
+      required:
+        - clientGeneratedId
+        - takenAt
+        - weightKg
+        - bodyFatPct
+        - circumferences
+        - notes
+    OnboardingDraft:
+      type: object
+      properties:
+        step:
+          type: string
+          enum:
+            - profile
+            - goal
+            - availability
+            - baseline
+            - complete
+        profile:
+          type: object
+          properties:
+            displayName:
+              type: string
+            heightCm:
+              anyOf:
+                - type: number
+                  minimum: 80
+                  maximum: 260
+                - type: "null"
+            birthDate:
+              type:
+                - string
+                - "null"
+          required:
+            - displayName
+            - heightCm
+            - birthDate
+        goal:
+          anyOf:
+            - type: object
+              properties:
+                type:
+                  type: string
+                  enum:
+                    - hypertrophy
+                    - fatLoss
+                    - strength
+                    - endurance
+                    - rehabilitation
+                    - generalHealth
+                targetDate:
+                  anyOf:
+                    - type: string
+                      format: date-time
+                      pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z|([+-](?:[01]\d|2[0-3]):[0-5]\d)))$
+                    - type: "null"
+                targetWeightKg:
+                  anyOf:
+                    - type: number
+                      minimum: 20
+                      maximum: 400
+                    - type: "null"
+                targetBodyFatPct:
+                  anyOf:
+                    - type: number
+                      minimum: 5
+                      maximum: 60
+                    - type: "null"
+                weeklySessionTarget:
+                  type: integer
+                  minimum: 1
+                  maximum: 14
+              required:
+                - type
+                - targetDate
+                - targetWeightKg
+                - targetBodyFatPct
+                - weeklySessionTarget
+            - type: "null"
+        baseline:
+          anyOf:
+            - type: object
+              properties:
+                clientGeneratedId:
+                  type: string
+                  format: uuid
+                  pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                takenAt:
+                  type: string
+                  format: date-time
+                  pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z|([+-](?:[01]\d|2[0-3]):[0-5]\d)))$
+                weightKg:
+                  anyOf:
+                    - type: number
+                      minimum: 20
+                      maximum: 400
+                    - type: "null"
+                bodyFatPct:
+                  anyOf:
+                    - type: number
+                      minimum: 2
+                      maximum: 70
+                    - type: "null"
+                circumferences:
+                  anyOf:
+                    - type: object
+                      properties:
+                        chestCm:
+                          anyOf:
+                            - type: number
+                              exclusiveMinimum: 0
+                            - type: "null"
+                        waistCm:
+                          anyOf:
+                            - type: number
+                              exclusiveMinimum: 0
+                            - type: "null"
+                        hipCm:
+                          anyOf:
+                            - type: number
+                              exclusiveMinimum: 0
+                            - type: "null"
+                        rightArmCm:
+                          anyOf:
+                            - type: number
+                              exclusiveMinimum: 0
+                            - type: "null"
+                        leftArmCm:
+                          anyOf:
+                            - type: number
+                              exclusiveMinimum: 0
+                            - type: "null"
+                        rightThighCm:
+                          anyOf:
+                            - type: number
+                              exclusiveMinimum: 0
+                            - type: "null"
+                        leftThighCm:
+                          anyOf:
+                            - type: number
+                              exclusiveMinimum: 0
+                            - type: "null"
+                      required:
+                        - chestCm
+                        - waistCm
+                        - hipCm
+                        - rightArmCm
+                        - leftArmCm
+                        - rightThighCm
+                        - leftThighCm
+                    - type: "null"
+                notes:
+                  anyOf:
+                    - type: string
+                      maxLength: 500
+                    - type: "null"
+              required:
+                - clientGeneratedId
+                - takenAt
+                - weightKg
+                - bodyFatPct
+                - circumferences
+                - notes
+            - type: "null"
+      required:
+        - step
+        - profile
+        - goal
+        - baseline
+    AvatarConfig:
+      type: object
+      properties:
+        photoUri:
+          description: URI local da foto do usuário (file://, ph://, content://). Quando
+            presente, tem prioridade sobre o avatar vetorial. Opcional; default
+            null.
+          type:
+            - string
+            - "null"
+        base:
+          type: string
+        skinTone:
+          type: string
+        hair:
+          type: string
+        face:
+          type: string
+        outfit:
+          type: string
+        accessory:
+          type:
+            - string
+            - "null"
+        frame:
+          type:
+            - string
+            - "null"
+        background:
+          type: string
+      required:
+        - base
+        - skinTone
+        - hair
+        - face
+        - outfit
+        - accessory
+        - frame
+        - background
+    CreatePlanInput:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 3
+          maxLength: 80
+        goal:
+          type: string
+          enum:
+            - hypertrophy
+            - fatLoss
+            - strength
+            - endurance
+            - rehabilitation
+            - generalHealth
+      required:
+        - name
+        - goal
+    UpdatePlanInput:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 3
+          maxLength: 80
+        goal:
+          type: string
+          enum:
+            - hypertrophy
+            - fatLoss
+            - strength
+            - endurance
+            - rehabilitation
+            - generalHealth
+        days:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                format: uuid
+                pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+              label:
+                type: string
+                minLength: 1
+              slot:
+                anyOf:
+                  - type: integer
+                    minimum: 0
+                    maximum: 6
+                  - type: "null"
+              estimatedMinutes:
+                type: integer
+                minimum: 0
+                maximum: 9007199254740991
+              exercises:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    order:
+                      type: integer
+                      minimum: 1
+                      maximum: 9007199254740991
+                    exerciseId:
+                      type: string
+                      format: uuid
+                      pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                    exerciseName:
+                      type: string
+                      minLength: 1
+                    thumbnailUrl:
+                      anyOf:
+                        - type: string
+                          format: uri
+                        - type: "null"
+                    technique:
+                      default: straight
+                      type: string
+                      enum:
+                        - straight
+                        - superset
+                        - dropset
+                        - restPause
+                        - cluster
+                        - amrap
+                        - emom
+                        - isometric
+                    supersetGroup:
+                      type:
+                        - string
+                        - "null"
+                    notes:
+                      type:
+                        - string
+                        - "null"
+                    sets:
+                      minItems: 1
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          order:
+                            type: integer
+                            minimum: 1
+                            maximum: 9007199254740991
+                          targetReps:
+                            anyOf:
+                              - type: integer
+                                minimum: 1
+                                maximum: 9007199254740991
+                              - type: "null"
+                          targetRepsMax:
+                            anyOf:
+                              - type: integer
+                                minimum: 1
+                                maximum: 9007199254740991
+                              - type: "null"
+                          targetDurationSeconds:
+                            anyOf:
+                              - type: integer
+                                minimum: 1
+                                maximum: 9007199254740991
+                              - type: "null"
+                          targetWeightKg:
+                            anyOf:
+                              - type: number
+                                minimum: 0
+                              - type: "null"
+                          targetRir:
+                            anyOf:
+                              - type: integer
+                                minimum: 0
+                                maximum: 10
+                              - type: "null"
+                          targetRpe:
+                            anyOf:
+                              - type: number
+                                minimum: 1
+                                maximum: 10
+                              - type: "null"
+                          restSeconds:
+                            type: integer
+                            minimum: 0
+                            maximum: 9007199254740991
+                          isWarmup:
+                            default: false
+                            type: boolean
+                        required:
+                          - order
+                          - targetReps
+                          - targetRepsMax
+                          - targetDurationSeconds
+                          - targetWeightKg
+                          - targetRir
+                          - targetRpe
+                          - restSeconds
+                  required:
+                    - order
+                    - exerciseId
+                    - exerciseName
+                    - thumbnailUrl
+                    - supersetGroup
+                    - notes
+                    - sets
+            required:
+              - id
+              - label
+              - slot
+              - estimatedMinutes
+              - exercises
+      required:
+        - name
+        - goal
+        - days
+    LocalSessionHeader:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+        planId:
+          anyOf:
+            - type: string
+              format: uuid
+              pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+            - type: "null"
+        planVersion:
+          anyOf:
+            - type: integer
+              minimum: 1
+              maximum: 9007199254740991
+            - type: "null"
+        dayLabel:
+          type: string
+        status:
+          type: string
+          enum:
+            - inProgress
+            - completed
+            - abandoned
+        startedAt:
+          type: string
+          format: date-time
+          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z|([+-](?:[01]\d|2[0-3]):[0-5]\d)))$
+        completedAt:
+          anyOf:
+            - type: string
+              format: date-time
+              pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z|([+-](?:[01]\d|2[0-3]):[0-5]\d)))$
+            - type: "null"
+        totalVolumeKg:
+          type: number
+          minimum: 0
+        durationSeconds:
+          type: integer
+          minimum: 0
+          maximum: 9007199254740991
+      required:
+        - id
+        - planId
+        - planVersion
+        - dayLabel
+        - status
+        - startedAt
+        - completedAt
+        - totalVolumeKg
+        - durationSeconds
+    LocalSession:
+      type: object
+      properties:
+        header:
+          type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+              pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+            planId:
+              anyOf:
+                - type: string
+                  format: uuid
+                  pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                - type: "null"
+            planVersion:
+              anyOf:
+                - type: integer
+                  minimum: 1
+                  maximum: 9007199254740991
+                - type: "null"
+            dayLabel:
+              type: string
+            status:
+              type: string
+              enum:
+                - inProgress
+                - completed
+                - abandoned
+            startedAt:
+              type: string
+              format: date-time
+              pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z|([+-](?:[01]\d|2[0-3]):[0-5]\d)))$
+            completedAt:
+              anyOf:
+                - type: string
+                  format: date-time
+                  pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z|([+-](?:[01]\d|2[0-3]):[0-5]\d)))$
+                - type: "null"
+            totalVolumeKg:
+              type: number
+              minimum: 0
+            durationSeconds:
+              type: integer
+              minimum: 0
+              maximum: 9007199254740991
+          required:
+            - id
+            - planId
+            - planVersion
+            - dayLabel
+            - status
+            - startedAt
+            - completedAt
+            - totalVolumeKg
+            - durationSeconds
+        start:
+          type: object
+          properties:
+            clientGeneratedId:
+              type: string
+              format: uuid
+              pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+            planId:
+              anyOf:
+                - type: string
+                  format: uuid
+                  pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                - type: "null"
+            dayId:
+              type:
+                - string
+                - "null"
+          required:
+            - clientGeneratedId
+            - planId
+            - dayId
+        restEndsAt:
+          type: number
+          minimum: 0
+        deviceClockSkewMs:
+          type: number
+      required:
+        - header
+        - start
+        - restEndsAt
+        - deviceClockSkewMs
+    OfflineOperation:
+      oneOf:
+        - type: object
+          properties:
+            kind:
+              type: string
+              const: start
+            id:
+              type: string
+              format: uuid
+              pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+            sessionId:
+              type: string
+              format: uuid
+              pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+            input:
+              type: object
+              properties:
+                clientGeneratedId:
+                  type: string
+                  format: uuid
+                  pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                planId:
+                  anyOf:
+                    - type: string
+                      format: uuid
+                      pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                    - type: "null"
+                dayId:
+                  type:
+                    - string
+                    - "null"
+              required:
+                - clientGeneratedId
+                - planId
+                - dayId
+          required:
+            - kind
+            - id
+            - sessionId
+            - input
+        - type: object
+          properties:
+            kind:
+              type: string
+              const: set
+            id:
+              type: string
+              format: uuid
+              pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+            sessionId:
+              type: string
+              format: uuid
+              pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+            set:
+              type: object
+              properties:
+                clientGeneratedId:
+                  type: string
+                  format: uuid
+                  pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                exerciseId:
+                  type: string
+                  format: uuid
+                  pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                order:
+                  type: integer
+                  minimum: 1
+                  maximum: 9007199254740991
+                weightKg:
+                  anyOf:
+                    - type: number
+                      minimum: 0
+                    - type: "null"
+                reps:
+                  anyOf:
+                    - type: integer
+                      minimum: 0
+                      maximum: 9007199254740991
+                    - type: "null"
+                durationSeconds:
+                  anyOf:
+                    - type: integer
+                      minimum: 0
+                      maximum: 9007199254740991
+                    - type: "null"
+                rpe:
+                  anyOf:
+                    - type: number
+                      minimum: 1
+                      maximum: 10
+                    - type: "null"
+                rir:
+                  anyOf:
+                    - type: integer
+                      minimum: 0
+                      maximum: 10
+                    - type: "null"
+                isWarmup:
+                  default: false
+                  type: boolean
+                painLevel:
+                  anyOf:
+                    - type: integer
+                      minimum: 0
+                      maximum: 10
+                    - type: "null"
+                performedAt:
+                  type: string
+                  format: date-time
+                  pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z|([+-](?:[01]\d|2[0-3]):[0-5]\d)))$
+              required:
+                - clientGeneratedId
+                - exerciseId
+                - order
+                - weightKg
+                - reps
+                - durationSeconds
+                - rpe
+                - rir
+                - painLevel
+                - performedAt
+          required:
+            - kind
+            - id
+            - sessionId
+            - set
+        - type: object
+          properties:
+            kind:
+              type: string
+              const: complete
+            id:
+              type: string
+              format: uuid
+              pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+            sessionId:
+              type: string
+              format: uuid
+              pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+          required:
+            - kind
+            - id
+            - sessionId
+    OutboxRecord:
+      type: object
+      properties:
+        sequence:
+          type: integer
+          minimum: 0
+          maximum: 9007199254740991
+        operation:
+          oneOf:
+            - type: object
+              properties:
+                kind:
+                  type: string
+                  const: start
+                id:
+                  type: string
+                  format: uuid
+                  pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                sessionId:
+                  type: string
+                  format: uuid
+                  pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                input:
+                  type: object
+                  properties:
+                    clientGeneratedId:
+                      type: string
+                      format: uuid
+                      pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                    planId:
+                      anyOf:
+                        - type: string
+                          format: uuid
+                          pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                        - type: "null"
+                    dayId:
+                      type:
+                        - string
+                        - "null"
+                  required:
+                    - clientGeneratedId
+                    - planId
+                    - dayId
+              required:
+                - kind
+                - id
+                - sessionId
+                - input
+            - type: object
+              properties:
+                kind:
+                  type: string
+                  const: set
+                id:
+                  type: string
+                  format: uuid
+                  pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                sessionId:
+                  type: string
+                  format: uuid
+                  pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                set:
+                  type: object
+                  properties:
+                    clientGeneratedId:
+                      type: string
+                      format: uuid
+                      pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                    exerciseId:
+                      type: string
+                      format: uuid
+                      pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                    order:
+                      type: integer
+                      minimum: 1
+                      maximum: 9007199254740991
+                    weightKg:
+                      anyOf:
+                        - type: number
+                          minimum: 0
+                        - type: "null"
+                    reps:
+                      anyOf:
+                        - type: integer
+                          minimum: 0
+                          maximum: 9007199254740991
+                        - type: "null"
+                    durationSeconds:
+                      anyOf:
+                        - type: integer
+                          minimum: 0
+                          maximum: 9007199254740991
+                        - type: "null"
+                    rpe:
+                      anyOf:
+                        - type: number
+                          minimum: 1
+                          maximum: 10
+                        - type: "null"
+                    rir:
+                      anyOf:
+                        - type: integer
+                          minimum: 0
+                          maximum: 10
+                        - type: "null"
+                    isWarmup:
+                      default: false
+                      type: boolean
+                    painLevel:
+                      anyOf:
+                        - type: integer
+                          minimum: 0
+                          maximum: 10
+                        - type: "null"
+                    performedAt:
+                      type: string
+                      format: date-time
+                      pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z|([+-](?:[01]\d|2[0-3]):[0-5]\d)))$
+                  required:
+                    - clientGeneratedId
+                    - exerciseId
+                    - order
+                    - weightKg
+                    - reps
+                    - durationSeconds
+                    - rpe
+                    - rir
+                    - painLevel
+                    - performedAt
+              required:
+                - kind
+                - id
+                - sessionId
+                - set
+            - type: object
+              properties:
+                kind:
+                  type: string
+                  const: complete
+                id:
+                  type: string
+                  format: uuid
+                  pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                sessionId:
+                  type: string
+                  format: uuid
+                  pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+              required:
+                - kind
+                - id
+                - sessionId
+        attempts:
+          type: integer
+          minimum: 0
+          maximum: 9007199254740991
+        nextAttemptAt:
+          type: number
+          minimum: 0
+        status:
+          type: string
+          enum:
+            - pending
+            - rejected
+      required:
+        - sequence
+        - operation
+        - attempts
+        - nextAttemptAt
+        - status
+    ProfessionalReview:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+        displayName:
+          type: string
+        rating:
+          type: number
+          minimum: 0
+          maximum: 5
+        comment:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z|([+-](?:[01]\d|2[0-3]):[0-5]\d)))$
+      required:
+        - id
+        - displayName
+        - rating
+        - comment
+        - createdAt
+    ProfessionalDetail:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+        displayName:
+          type: string
+        avatarUrl:
+          anyOf:
+            - type: string
+              format: uri
+            - type: "null"
+        headline:
+          type: string
+        credentialLabel:
+          type: string
+        specialties:
+          minItems: 1
+          type: array
+          items:
+            type: string
+            enum:
+              - hypertrophy
+              - strength
+              - weightLoss
+              - physiotherapy
+              - postural
+              - sportsPerformance
+              - elderly
+              - prenatal
+        modality:
+          type: string
+          enum:
+            - online
+            - inPerson
+            - hybrid
+        city:
+          type: string
+        distanceKm:
+          anyOf:
+            - type: number
+              minimum: 0
+            - type: "null"
+        monthlyPriceBrl:
+          type: number
+          minimum: 0
+        rating:
+          type: number
+          minimum: 0
+          maximum: 5
+        reviewCount:
+          type: integer
+          minimum: 0
+          maximum: 9007199254740991
+        responseRate:
+          type: number
+          minimum: 0
+          maximum: 1
+        acceptingClients:
+          type: boolean
+        bio:
+          type: string
+        reviews:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                format: uuid
+                pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+              displayName:
+                type: string
+              rating:
+                type: number
+                minimum: 0
+                maximum: 5
+              comment:
+                type: string
+              createdAt:
+                type: string
+                format: date-time
+                pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z|([+-](?:[01]\d|2[0-3]):[0-5]\d)))$
+            required:
+              - id
+              - displayName
+              - rating
+              - comment
+              - createdAt
+        cancellationPolicy:
+          type: string
+      required:
+        - id
+        - displayName
+        - avatarUrl
+        - headline
+        - credentialLabel
+        - specialties
+        - modality
+        - city
+        - distanceKm
+        - monthlyPriceBrl
+        - rating
+        - reviewCount
+        - responseRate
+        - acceptingClients
+        - bio
+        - reviews
+        - cancellationPolicy
+    ClientDetail:
+      type: object
+      properties:
+        overview:
+          type: object
+          properties:
+            athleteId:
+              type: string
+              format: uuid
+              pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+            displayName:
+              type: string
+            avatarUrl:
+              anyOf:
+                - type: string
+                  format: uri
+                - type: "null"
+            goal:
+              type: string
+              enum:
+                - hypertrophy
+                - fatLoss
+                - strength
+                - endurance
+                - rehabilitation
+                - generalHealth
+            adherence7d:
+              type: number
+              minimum: 0
+              maximum: 1
+            adherence30d:
+              type: number
+              minimum: 0
+              maximum: 1
+            lastSessionAt:
+              anyOf:
+                - type: string
+                  format: date-time
+                  pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z|([+-](?:[01]\d|2[0-3]):[0-5]\d)))$
+                - type: "null"
+            weightDelta30dKg:
+              type:
+                - number
+                - "null"
+            leanMassDelta30dKg:
+              type:
+                - number
+                - "null"
+            goalsAtRisk:
+              type: integer
+              minimum: 0
+              maximum: 9007199254740991
+            unreadMessages:
+              type: integer
+              minimum: 0
+              maximum: 9007199254740991
+            riskScore:
+              type: number
+              minimum: 0
+              maximum: 1
+          required:
+            - athleteId
+            - displayName
+            - avatarUrl
+            - goal
+            - adherence7d
+            - adherence30d
+            - lastSessionAt
+            - weightDelta30dKg
+            - leanMassDelta30dKg
+            - goalsAtRisk
+            - unreadMessages
+            - riskScore
+        engagement:
+          type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+              pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+            professionalId:
+              type: string
+              format: uuid
+              pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+            professionalName:
+              type: string
+            athleteId:
+              type: string
+              format: uuid
+              pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+            athleteName:
+              type: string
+            status:
+              type: string
+              enum:
+                - trial
+                - active
+                - paused
+                - ended
+            scope:
+              type: object
+              properties:
+                workouts:
+                  type: boolean
+                measurements:
+                  type: boolean
+                photos:
+                  type: boolean
+                painReports:
+                  type: boolean
+                wearables:
+                  type: boolean
+              required:
+                - workouts
+                - measurements
+                - photos
+                - painReports
+                - wearables
+            startedAt:
+              type: string
+              format: date-time
+              pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z|([+-](?:[01]\d|2[0-3]):[0-5]\d)))$
+            endsAt:
+              anyOf:
+                - type: string
+                  format: date-time
+                  pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z|([+-](?:[01]\d|2[0-3]):[0-5]\d)))$
+                - type: "null"
+          required:
+            - id
+            - professionalId
+            - professionalName
+            - athleteId
+            - athleteName
+            - status
+            - scope
+            - startedAt
+            - endsAt
+        goal:
+          type: object
+          properties:
+            type:
+              type: string
+              enum:
+                - hypertrophy
+                - fatLoss
+                - strength
+                - endurance
+                - rehabilitation
+                - generalHealth
+            targetDate:
+              anyOf:
+                - type: string
+                  format: date-time
+                  pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z|([+-](?:[01]\d|2[0-3]):[0-5]\d)))$
+                - type: "null"
+            targetWeightKg:
+              anyOf:
+                - type: number
+                  minimum: 20
+                  maximum: 400
+                - type: "null"
+            targetBodyFatPct:
+              anyOf:
+                - type: number
+                  minimum: 5
+                  maximum: 60
+                - type: "null"
+            weeklySessionTarget:
+              type: integer
+              minimum: 1
+              maximum: 14
+          required:
+            - type
+            - targetDate
+            - targetWeightKg
+            - targetBodyFatPct
+            - weeklySessionTarget
+        notes:
+          type: array
+          items:
+            type: string
+        sessions:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                format: uuid
+                pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+              planId:
+                anyOf:
+                  - type: string
+                    format: uuid
+                    pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+                  - type: "null"
+              planVersion:
+                anyOf:
+                  - type: integer
+                    minimum: 1
+                    maximum: 9007199254740991
+                  - type: "null"
+              dayLabel:
+                type: string
+              status:
+                type: string
+                enum:
+                  - inProgress
+                  - completed
+                  - abandoned
+              startedAt:
+                type: string
+                format: date-time
+                pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z|([+-](?:[01]\d|2[0-3]):[0-5]\d)))$
+              completedAt:
+                anyOf:
+                  - type: string
+                    format: date-time
+                    pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z|([+-](?:[01]\d|2[0-3]):[0-5]\d)))$
+                  - type: "null"
+              totalVolumeKg:
+                type: number
+                minimum: 0
+              durationSeconds:
+                type: integer
+                minimum: 0
+                maximum: 9007199254740991
+              setCount:
+                type: integer
+                minimum: 0
+                maximum: 9007199254740991
+              exerciseCount:
+                type: integer
+                minimum: 0
+                maximum: 9007199254740991
+            required:
+              - id
+              - planId
+              - planVersion
+              - dayLabel
+              - status
+              - startedAt
+              - completedAt
+              - totalVolumeKg
+              - durationSeconds
+              - setCount
+              - exerciseCount
+        measurements:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                format: uuid
+                pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+              takenAt:
+                type: string
+                format: date-time
+                pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z|([+-](?:[01]\d|2[0-3]):[0-5]\d)))$
+              source:
+                type: string
+                enum:
+                  - manual
+                  - smartScale
+                  - wearable
+                  - professionalAssessment
+              weightKg:
+                anyOf:
+                  - type: number
+                    minimum: 20
+                    maximum: 400
+                  - type: "null"
+              bodyFatPct:
+                anyOf:
+                  - type: number
+                    minimum: 2
+                    maximum: 70
+                  - type: "null"
+              leanMassKg:
+                anyOf:
+                  - type: number
+                    minimum: 0
+                  - type: "null"
+              circumferences:
+                anyOf:
+                  - type: object
+                    properties:
+                      chestCm:
+                        anyOf:
+                          - type: number
+                            exclusiveMinimum: 0
+                          - type: "null"
+                      waistCm:
+                        anyOf:
+                          - type: number
+                            exclusiveMinimum: 0
+                          - type: "null"
+                      hipCm:
+                        anyOf:
+                          - type: number
+                            exclusiveMinimum: 0
+                          - type: "null"
+                      rightArmCm:
+                        anyOf:
+                          - type: number
+                            exclusiveMinimum: 0
+                          - type: "null"
+                      leftArmCm:
+                        anyOf:
+                          - type: number
+                            exclusiveMinimum: 0
+                          - type: "null"
+                      rightThighCm:
+                        anyOf:
+                          - type: number
+                            exclusiveMinimum: 0
+                          - type: "null"
+                      leftThighCm:
+                        anyOf:
+                          - type: number
+                            exclusiveMinimum: 0
+                          - type: "null"
+                    required:
+                      - chestCm
+                      - waistCm
+                      - hipCm
+                      - rightArmCm
+                      - leftArmCm
+                      - rightThighCm
+                      - leftThighCm
+                  - type: "null"
+              notes:
+                type:
+                  - string
+                  - "null"
+              hasPhotos:
+                default: false
+                type: boolean
+            required:
+              - id
+              - takenAt
+              - source
+              - weightKg
+              - bodyFatPct
+              - leanMassKg
+              - circumferences
+              - notes
+      required:
+        - overview
+        - engagement
+        - goal
+        - notes
+    CoachingEngagement:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+        professionalId:
+          type: string
+          format: uuid
+          pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+        professionalName:
+          type: string
+        athleteId:
+          type: string
+          format: uuid
+          pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+        athleteName:
+          type: string
+        status:
+          type: string
+          enum:
+            - trial
+            - active
+            - paused
+            - ended
+        scope:
+          type: object
+          properties:
+            workouts:
+              type: boolean
+            measurements:
+              type: boolean
+            photos:
+              type: boolean
+            painReports:
+              type: boolean
+            wearables:
+              type: boolean
+          required:
+            - workouts
+            - measurements
+            - photos
+            - painReports
+            - wearables
+        startedAt:
+          type: string
+          format: date-time
+          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z|([+-](?:[01]\d|2[0-3]):[0-5]\d)))$
+        endsAt:
+          anyOf:
+            - type: string
+              format: date-time
+              pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z|([+-](?:[01]\d|2[0-3]):[0-5]\d)))$
+            - type: "null"
+      required:
+        - id
+        - professionalId
+        - professionalName
+        - athleteId
+        - athleteName
+        - status
+        - scope
+        - startedAt
+        - endsAt
+    ShareScope:
+      type: object
+      properties:
+        workouts:
+          type: boolean
+        measurements:
+          type: boolean
+        photos:
+          type: boolean
+        painReports:
+          type: boolean
+        wearables:
+          type: boolean
+      required:
+        - workouts
+        - measurements
+        - photos
+        - painReports
+        - wearables
+    CheckInInput:
+      type: object
+      properties:
+        clientGeneratedId:
+          type: string
+          format: uuid
+          pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+        date:
+          type: string
+          format: date
+          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))$
+        sleepHours:
+          anyOf:
+            - type: number
+              minimum: 0
+              maximum: 24
+            - type: "null"
+        sleepQuality:
+          anyOf:
+            - type: integer
+              minimum: 1
+              maximum: 5
+            - type: "null"
+        energy:
+          anyOf:
+            - type: integer
+              minimum: 1
+              maximum: 5
+            - type: "null"
+        painLevel:
+          anyOf:
+            - type: integer
+              minimum: 0
+              maximum: 10
+            - type: "null"
+        status:
+          type: string
+          enum:
+            - draft
+            - completed
+      required:
+        - clientGeneratedId
+        - date
+        - sleepHours
+        - sleepQuality
+        - energy
+        - painLevel
+        - status
+      allOf:
+        - if:
+            properties:
+              status:
+                const: completed
+          then:
+            properties:
+              sleepHours:
+                type: number
+                minimum: 0
+                maximum: 24
+              sleepQuality:
+                type: integer
+                minimum: 1
+                maximum: 5
+              energy:
+                type: integer
+                minimum: 1
+                maximum: 5
+    CheckInEntry:
+      type: object
+      properties:
+        clientGeneratedId:
+          type: string
+          format: uuid
+          pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+        date:
+          type: string
+          format: date
+          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))$
+        sleepHours:
+          anyOf:
+            - type: number
+              minimum: 0
+              maximum: 24
+            - type: "null"
+        sleepQuality:
+          anyOf:
+            - type: integer
+              minimum: 1
+              maximum: 5
+            - type: "null"
+        energy:
+          anyOf:
+            - type: integer
+              minimum: 1
+              maximum: 5
+            - type: "null"
+        painLevel:
+          anyOf:
+            - type: integer
+              minimum: 0
+              maximum: 10
+            - type: "null"
+        status:
+          type: string
+          enum:
+            - draft
+            - completed
+        updatedAt:
+          type: string
+          format: date-time
+          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z|([+-](?:[01]\d|2[0-3]):[0-5]\d)))$
+      required:
+        - clientGeneratedId
+        - date
+        - sleepHours
+        - sleepQuality
+        - energy
+        - painLevel
+        - status
+        - updatedAt
+      allOf:
+        - if:
+            properties:
+              status:
+                const: completed
+          then:
+            properties:
+              sleepHours:
+                type: number
+                minimum: 0
+                maximum: 24
+              sleepQuality:
+                type: integer
+                minimum: 1
+                maximum: 5
+              energy:
+                type: integer
+                minimum: 1
+                maximum: 5
+    CheckInRange:
+      type: object
+      properties:
+        fromDate:
+          type: string
+          format: date
+          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))$
+        toDate:
+          type: string
+          format: date
+          pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))$
+      required:
+        - fromDate
+        - toDate
+    CheckInList:
+      type: array
+      items:
+        type: object
+        properties:
+          clientGeneratedId:
+            type: string
+            format: uuid
+            pattern: ^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$
+          date:
+            type: string
+            format: date
+            pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))$
+          sleepHours:
+            anyOf:
+              - type: number
+                minimum: 0
+                maximum: 24
+              - type: "null"
+          sleepQuality:
+            anyOf:
+              - type: integer
+                minimum: 1
+                maximum: 5
+              - type: "null"
+          energy:
+            anyOf:
+              - type: integer
+                minimum: 1
+                maximum: 5
+              - type: "null"
+          painLevel:
+            anyOf:
+              - type: integer
+                minimum: 0
+                maximum: 10
+              - type: "null"
+          status:
+            type: string
+            enum:
+              - draft
+              - completed
+          updatedAt:
+            type: string
+            format: date-time
+            pattern: ^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))T(?:(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z|([+-](?:[01]\d|2[0-3]):[0-5]\d)))$
+        required:
+          - clientGeneratedId
+          - date
+          - sleepHours
+          - sleepQuality
+          - energy
+          - painLevel
+          - status
+          - updatedAt

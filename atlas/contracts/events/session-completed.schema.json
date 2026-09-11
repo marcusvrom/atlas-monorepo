@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.atlas.app/events/session-completed/v1",
+  "title": "SessionCompleted",
+  "description": "Emitido quando um atleta conclui uma sessão de treino. Consumido por Insights, Coaching, Gamification e Notifications. Publicado via outbox → EventBridge (ADR-0009).",
+  "type": "object",
+  "required": ["eventId", "eventType", "version", "occurredAt", "athleteId", "sessionId", "payload"],
+  "properties": {
+    "eventId": { "type": "string", "format": "uuid" },
+    "eventType": { "const": "atlas.session.completed" },
+    "version": { "const": 1 },
+    "occurredAt": { "type": "string", "format": "date-time" },
+    "athleteId": { "type": "string", "format": "uuid" },
+    "sessionId": { "type": "string", "format": "uuid" },
+    "payload": {
+      "type": "object",
+      "required": ["planId", "planVersion", "totalVolumeKg", "durationSeconds", "setCount", "muscleVolumes"],
+      "properties": {
+        "planId": { "type": ["string", "null"], "format": "uuid" },
+        "planVersion": { "type": ["integer", "null"] },
+        "totalVolumeKg": { "type": "number" },
+        "durationSeconds": { "type": "integer" },
+        "setCount": { "type": "integer" },
+        "muscleVolumes": {
+          "description": "Pré-agregado no publisher: evita que cada consumidor refaça o join com o catálogo.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["muscleGroupId", "weightedVolumeKg", "effectiveSets"],
+            "properties": {
+              "muscleGroupId": { "type": "integer" },
+              "weightedVolumeKg": { "type": "number" },
+              "effectiveSets": { "type": "integer" }
+            }
+          }
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}

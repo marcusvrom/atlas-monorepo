@@ -1,0 +1,62 @@
+{
+  "expo": {
+    "name": "Atlas",
+    "slug": "atlas",
+    "version": "0.1.0",
+    "scheme": "atlas",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "app.atlas.mobile",
+      "deploymentTarget": "18.0",
+      "infoPlist": {
+        "UIViewControllerBasedStatusBarAppearance": true,
+        "NSHealthShareUsageDescription": "Usamos seus dados de saúde para acompanhar sua evolução de treino.",
+        "NSCameraUsageDescription": "Para registrar fotos de progresso e vídeos de execução.",
+        "NSPhotoLibraryUsageDescription": "Para você escolher uma foto de perfil da sua galeria."
+      }
+    },
+    "android": {
+      "package": "app.atlas.mobile",
+      "edgeToEdgeEnabled": true,
+      "adaptiveIcon": {
+        "backgroundColor": "#05070D"
+      }
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#05070D",
+          "resizeMode": "contain"
+        }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "deploymentTarget": "18.0"
+          },
+          "android": {
+            "compileSdkVersion": 36,
+            "targetSdkVersion": 36
+          }
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Para você escolher uma foto de perfil da sua galeria.",
+          "cameraPermission": "Para você tirar uma foto de perfil na hora."
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
+    }
+  }
+}

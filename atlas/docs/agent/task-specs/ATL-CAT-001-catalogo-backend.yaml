@@ -1,0 +1,58 @@
+spec_id: ATL-CAT-001
+title: Catálogo de exercícios com ativação muscular (backend)
+phase: backend
+context_module: apps/api/src/Modules/Catalog
+depends_on: [ATL-INF-001, ATL-IDN-001]
+adr_refs: [ADR-0001, ADR-0003]
+
+goal: >
+  Expor consulta e detalhe de exercícios do catálogo curado, incluindo mídia de
+  execução e mapeamento de ativação muscular ponderada, com cache multicamada.
+
+domain:
+  aggregates: [Exercise, MuscleGroup]
+  invariants:
+    - Todo Exercise tem >= 1 MuscleActivation com role = Primary
+    - Soma dos activationWeight de role = Primary <= 1.0
+    - Exercise custom pertence a um owner e nunca aparece na busca global
+
+api:
+  - method: GET
+    path: /api/v1/exercises
+    query: [q, muscle, equipment, difficulty, cursor, limit]
+    response: CursorPage<ExerciseSummaryDto>
+    cache: { layer: redis, ttl: 3600s, key: "catalog:ex:{hash(query)}" }
+  - method: GET
+    path: /api/v1/exercises/{id}
+    response: ExerciseDetailDto
+    cache: { layer: redis, ttl: 86400s }
+  - method: GET
+    path: /api/v1/muscle-groups
+    response: MuscleGroupDto[]
+    cache: { layer: in-process, ttl: infinite }
+
+persistence:
+  schema: catalog
+  tables: [exercise, muscle_group, muscle_activation, exercise_media, equipment]
+  notes:
+    - Ativação é TABELA, não JSON — precisa ser agregável em GROUP BY para o heatmap
+    - Busca textual com tsvector em português, índice GIN
+    - Paginação keyset por id (sem OFFSET, que degrada linearmente)
+  seed:
+    - 62 grupos musculares mapeados ao svgPathId dos SVGs mestres
+    - 300 exercícios curados
+
+acceptance_criteria:
+  - Busca por "supino" retorna variações ordenadas por relevância em p95 < 150 ms
+  - Busca sem acento encontra resultado com acento
+  - Detalhe monta media, cues, mistakes e activations em UMA ida ao banco (sem N+1)
+  - Exercício custom de OUTRO usuário retorna 404, não 403 (evita enumeração)
+  - Cache invalidado por evento ExerciseUpdated
+  - Resposta valida contra contracts/openapi.v1.yaml
+  - Cobertura >= 80% em Domain e Application
+  - Testes de arquitetura passam (fronteira de módulo intacta)
+
+out_of_scope:
+  - Criação de exercício custom (ATL-CAT-002)
+  - Upload de mídia pelo usuário (ATL-MED-001)
+  - Promoção de custom para curado (ATL-CAT-005)

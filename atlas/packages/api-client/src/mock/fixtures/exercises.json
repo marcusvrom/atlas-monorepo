@@ -1,0 +1,973 @@
+[
+  {
+    "slug": "supino-reto-barra",
+    "name": "Supino reto com barra",
+    "equipment": "barbell",
+    "difficulty": "intermediate",
+    "primary": "pectoralis_major",
+    "activations": [
+      ["pectoralis_major", "primary", 1],
+      ["anterior_deltoid", "secondary", 0.45],
+      ["triceps_brachii", "secondary", 0.4]
+    ],
+    "cues": [
+      "Escápulas retraídas e deprimidas",
+      "Barra desce na linha do mamilo",
+      "Pés firmes no chão, leve arco lombar natural"
+    ],
+    "mistakes": [
+      "Quicar a barra no peito",
+      "Abrir os cotovelos a 90 graus",
+      "Levantar o quadril do banco"
+    ]
+  },
+  {
+    "slug": "supino-inclinado-halteres",
+    "name": "Supino inclinado com halteres",
+    "equipment": "dumbbell",
+    "difficulty": "intermediate",
+    "primary": "pectoralis_major",
+    "activations": [
+      ["pectoralis_major", "primary", 0.9],
+      ["anterior_deltoid", "secondary", 0.55],
+      ["triceps_brachii", "secondary", 0.35]
+    ],
+    "cues": [
+      "Banco entre 30 e 45 graus",
+      "Punhos neutros no topo",
+      "Controle a fase excêntrica em 2 segundos"
+    ],
+    "mistakes": [
+      "Inclinação acima de 45 graus vira exercício de ombro",
+      "Bater os halteres no topo"
+    ]
+  },
+  {
+    "slug": "crucifixo-cabo",
+    "name": "Crucifixo na polia",
+    "equipment": "cable",
+    "difficulty": "beginner",
+    "primary": "pectoralis_major",
+    "activations": [
+      ["pectoralis_major", "primary", 0.85],
+      ["anterior_deltoid", "secondary", 0.3]
+    ],
+    "cues": ["Cotovelo levemente flexionado e fixo", "Junte pelas mãos, não pelos braços"],
+    "mistakes": ["Transformar em supino flexionando o cotovelo"]
+  },
+  {
+    "slug": "barra-fixa-pronada",
+    "name": "Barra fixa pronada",
+    "equipment": "bodyweight",
+    "difficulty": "advanced",
+    "primary": "latissimus_dorsi",
+    "activations": [
+      ["latissimus_dorsi", "primary", 1],
+      ["biceps_brachii", "secondary", 0.5],
+      ["trapezius_middle", "secondary", 0.4],
+      ["rhomboids", "stabilizer", 0.25]
+    ],
+    "cues": [
+      "Inicie deprimindo as escápulas",
+      "Peito em direção à barra",
+      "Evite balanço do quadril"
+    ],
+    "mistakes": ["Amplitude parcial no topo", "Usar impulso de perna sem intenção"]
+  },
+  {
+    "slug": "remada-curvada-barra",
+    "name": "Remada curvada com barra",
+    "equipment": "barbell",
+    "difficulty": "intermediate",
+    "primary": "latissimus_dorsi",
+    "activations": [
+      ["latissimus_dorsi", "primary", 0.9],
+      ["trapezius_middle", "secondary", 0.6],
+      ["rhomboids", "secondary", 0.55],
+      ["erector_spinae", "stabilizer", 0.4],
+      ["biceps_brachii", "secondary", 0.35]
+    ],
+    "cues": [
+      "Tronco entre 30 e 45 graus",
+      "Puxe em direção ao umbigo",
+      "Coluna neutra do início ao fim"
+    ],
+    "mistakes": ["Arredondar a lombar", "Usar impulso de quadril a cada repetição"]
+  },
+  {
+    "slug": "puxada-frontal",
+    "name": "Puxada frontal na polia",
+    "equipment": "cable",
+    "difficulty": "beginner",
+    "primary": "latissimus_dorsi",
+    "activations": [
+      ["latissimus_dorsi", "primary", 0.9],
+      ["biceps_brachii", "secondary", 0.45],
+      ["trapezius_middle", "secondary", 0.35]
+    ],
+    "cues": ["Peito aberto, leve inclinação para trás", "Cotovelos em direção às costelas"],
+    "mistakes": ["Puxar atrás da nuca", "Inclinar demais e virar remada"]
+  },
+  {
+    "slug": "remada-unilateral-halter",
+    "name": "Remada unilateral com halter",
+    "equipment": "dumbbell",
+    "difficulty": "beginner",
+    "primary": "latissimus_dorsi",
+    "activations": [
+      ["latissimus_dorsi", "primary", 0.85],
+      ["rhomboids", "secondary", 0.4],
+      ["posterior_deltoid", "secondary", 0.3]
+    ],
+    "cues": ["Quadril estável, sem rotação de tronco", "Amplitude completa na descida"],
+    "mistakes": ["Rodar o tronco para ganhar amplitude"]
+  },
+  {
+    "slug": "agachamento-livre",
+    "name": "Agachamento livre",
+    "equipment": "barbell",
+    "difficulty": "advanced",
+    "primary": "quadriceps",
+    "activations": [
+      ["quadriceps", "primary", 1],
+      ["gluteus_maximus", "secondary", 0.7],
+      ["erector_spinae", "stabilizer", 0.5],
+      ["adductors", "secondary", 0.35],
+      ["hamstrings", "secondary", 0.3]
+    ],
+    "cues": [
+      "Joelhos acompanham a linha dos pés",
+      "Desça até pelo menos a paralela",
+      "Core firme, respiração em bloco"
+    ],
+    "mistakes": ["Joelho colapsando para dentro", "Elevar o quadril antes do tronco na subida"]
+  },
+  {
+    "slug": "leg-press-45",
+    "name": "Leg press 45°",
+    "equipment": "machine",
+    "difficulty": "beginner",
+    "primary": "quadriceps",
+    "activations": [
+      ["quadriceps", "primary", 0.95],
+      ["gluteus_maximus", "secondary", 0.55],
+      ["adductors", "secondary", 0.3]
+    ],
+    "cues": ["Não trave o joelho no topo", "Lombar colada no encosto"],
+    "mistakes": ["Descer até a lombar descolar do banco"]
+  },
+  {
+    "slug": "cadeira-extensora",
+    "name": "Cadeira extensora",
+    "equipment": "machine",
+    "difficulty": "beginner",
+    "primary": "quadriceps",
+    "activations": [["quadriceps", "primary", 1]],
+    "cues": ["Contração de 1 segundo no topo", "Ajuste o eixo na altura do joelho"],
+    "mistakes": ["Usar impulso de tronco"]
+  },
+  {
+    "slug": "levantamento-terra",
+    "name": "Levantamento terra convencional",
+    "equipment": "barbell",
+    "difficulty": "advanced",
+    "primary": "hamstrings",
+    "activations": [
+      ["hamstrings", "primary", 0.5142],
+      ["gluteus_maximus", "primary", 0.4857],
+      ["erector_spinae", "secondary", 0.7],
+      ["latissimus_dorsi", "stabilizer", 0.35],
+      ["quadriceps", "secondary", 0.3]
+    ],
+    "cues": [
+      "Barra rente à canela",
+      "Empurre o chão em vez de puxar a barra",
+      "Trave quadril e joelho juntos"
+    ],
+    "mistakes": ["Lombar em flexão", "Hiperextender a lombar no topo"]
+  },
+  {
+    "slug": "stiff-halteres",
+    "name": "Stiff com halteres",
+    "equipment": "dumbbell",
+    "difficulty": "intermediate",
+    "primary": "hamstrings",
+    "activations": [
+      ["hamstrings", "primary", 1],
+      ["gluteus_maximus", "secondary", 0.6],
+      ["erector_spinae", "stabilizer", 0.4]
+    ],
+    "cues": ["Joelho levemente flexionado e fixo", "Quadril para trás, não coluna para frente"],
+    "mistakes": ["Flexionar o joelho durante o movimento"]
+  },
+  {
+    "slug": "mesa-flexora",
+    "name": "Mesa flexora",
+    "equipment": "machine",
+    "difficulty": "beginner",
+    "primary": "hamstrings",
+    "activations": [
+      ["hamstrings", "primary", 1],
+      ["gastrocnemius", "secondary", 0.25]
+    ],
+    "cues": ["Quadril colado no apoio", "Controle a volta em 2 segundos"],
+    "mistakes": ["Levantar o quadril para ganhar amplitude"]
+  },
+  {
+    "slug": "elevacao-pelvica",
+    "name": "Elevação pélvica com barra",
+    "equipment": "barbell",
+    "difficulty": "intermediate",
+    "primary": "gluteus_maximus",
+    "activations": [
+      ["gluteus_maximus", "primary", 1],
+      ["hamstrings", "secondary", 0.45],
+      ["quadriceps", "secondary", 0.2]
+    ],
+    "cues": ["Queixo para o peito, costelas fechadas", "Pausa de 1 segundo no topo"],
+    "mistakes": ["Hiperextensão lombar em vez de extensão de quadril"]
+  },
+  {
+    "slug": "desenvolvimento-halteres",
+    "name": "Desenvolvimento com halteres",
+    "equipment": "dumbbell",
+    "difficulty": "intermediate",
+    "primary": "anterior_deltoid",
+    "activations": [
+      ["anterior_deltoid", "primary", 1],
+      ["lateral_deltoid", "secondary", 0.5],
+      ["triceps_brachii", "secondary", 0.45],
+      ["trapezius_upper", "stabilizer", 0.25]
+    ],
+    "cues": [
+      "Costelas fechadas, sem arco lombar",
+      "Cotovelos levemente à frente do plano do corpo"
+    ],
+    "mistakes": ["Transformar em supino inclinado por excesso de arco"]
+  },
+  {
+    "slug": "elevacao-lateral",
+    "name": "Elevação lateral",
+    "equipment": "dumbbell",
+    "difficulty": "beginner",
+    "primary": "lateral_deltoid",
+    "activations": [
+      ["lateral_deltoid", "primary", 1],
+      ["trapezius_upper", "secondary", 0.3]
+    ],
+    "cues": ["Suba até a linha do ombro", "Conduza pelo cotovelo, não pela mão"],
+    "mistakes": ["Usar impulso de tronco", "Elevar acima do ombro recrutando trapézio"]
+  },
+  {
+    "slug": "crucifixo-inverso",
+    "name": "Crucifixo inverso",
+    "equipment": "dumbbell",
+    "difficulty": "beginner",
+    "primary": "posterior_deltoid",
+    "activations": [
+      ["posterior_deltoid", "primary", 1],
+      ["rhomboids", "secondary", 0.45],
+      ["trapezius_middle", "secondary", 0.4]
+    ],
+    "cues": ["Tronco a 45 graus, coluna neutra", "Abra pelos cotovelos"],
+    "mistakes": ["Puxar como remada, recrutando dorsal"]
+  },
+  {
+    "slug": "rosca-direta",
+    "name": "Rosca direta com barra",
+    "equipment": "barbell",
+    "difficulty": "beginner",
+    "primary": "biceps_brachii",
+    "activations": [
+      ["biceps_brachii", "primary", 1],
+      ["brachialis", "secondary", 0.5],
+      ["forearm_flexors", "secondary", 0.3]
+    ],
+    "cues": ["Cotovelo fixo ao lado do tronco", "Sem balanço de quadril"],
+    "mistakes": ["Levar o cotovelo à frente no topo"]
+  },
+  {
+    "slug": "triceps-testa",
+    "name": "Tríceps testa",
+    "equipment": "barbell",
+    "difficulty": "intermediate",
+    "primary": "triceps_brachii",
+    "activations": [["triceps_brachii", "primary", 1]],
+    "cues": ["Cotovelo apontado ao teto", "Amplitude completa atrás da cabeça"],
+    "mistakes": ["Abrir os cotovelos durante a descida"]
+  },
+  {
+    "slug": "triceps-corda",
+    "name": "Tríceps na corda",
+    "equipment": "cable",
+    "difficulty": "beginner",
+    "primary": "triceps_brachii",
+    "activations": [["triceps_brachii", "primary", 0.95]],
+    "cues": ["Abra a corda no final do movimento", "Cotovelo fixo"],
+    "mistakes": ["Inclinar o tronco para empurrar mais carga"]
+  },
+  {
+    "slug": "prancha-isometrica",
+    "name": "Prancha isométrica",
+    "equipment": "bodyweight",
+    "difficulty": "beginner",
+    "primary": "transverse_abdominis",
+    "activations": [
+      ["transverse_abdominis", "primary", 1],
+      ["rectus_abdominis", "secondary", 0.5],
+      ["obliques", "secondary", 0.4],
+      ["erector_spinae", "stabilizer", 0.3]
+    ],
+    "cues": ["Glúteo contraído, pelve neutra", "Respire de forma contínua"],
+    "mistakes": ["Quadril alto demais", "Lombar em hiperextensão"]
+  },
+  {
+    "slug": "abdominal-cabo",
+    "name": "Abdominal na polia alta",
+    "equipment": "cable",
+    "difficulty": "beginner",
+    "primary": "rectus_abdominis",
+    "activations": [
+      ["rectus_abdominis", "primary", 1],
+      ["obliques", "secondary", 0.35]
+    ],
+    "cues": ["Flexione a coluna, não o quadril", "Expire na contração"],
+    "mistakes": ["Puxar com os braços"]
+  },
+  {
+    "slug": "panturrilha-em-pe",
+    "name": "Panturrilha em pé",
+    "equipment": "machine",
+    "difficulty": "beginner",
+    "primary": "gastrocnemius",
+    "activations": [
+      ["gastrocnemius", "primary", 1],
+      ["soleus", "secondary", 0.4]
+    ],
+    "cues": ["Amplitude completa, pausa embaixo", "Joelho estendido para priorizar gastrocnêmio"],
+    "mistakes": ["Repetições rápidas e parciais"]
+  },
+  {
+    "slug": "rotacao-externa-banda",
+    "name": "Rotação externa com banda",
+    "equipment": "band",
+    "difficulty": "beginner",
+    "primary": "rotator_cuff",
+    "activations": [
+      ["rotator_cuff", "primary", 1],
+      ["posterior_deltoid", "secondary", 0.3]
+    ],
+    "cues": ["Cotovelo colado ao tronco, 90 graus", "Movimento lento e sem dor"],
+    "mistakes": [
+      "Afastar o cotovelo do corpo",
+      "Usar carga alta demais em exercício de reabilitação"
+    ]
+  },
+  {
+    "slug": "ponte-glutea-unilateral",
+    "name": "Ponte glútea unilateral",
+    "equipment": "bodyweight",
+    "difficulty": "beginner",
+    "primary": "gluteus_maximus",
+    "activations": [
+      ["gluteus_maximus", "primary", 1],
+      ["hamstrings", "secondary", 0.4],
+      ["transverse_abdominis", "stabilizer", 0.3]
+    ],
+    "cues": ["Pelve nivelada durante todo o movimento", "Suba sem rotacionar o quadril"],
+    "mistakes": ["Deixar o quadril cair para o lado livre"]
+  },
+  {
+    "slug": "abducao-quadril-banda",
+    "name": "Abdução de quadril com banda",
+    "equipment": "band",
+    "difficulty": "beginner",
+    "primary": "gluteus_medius",
+    "activations": [
+      ["gluteus_medius", "primary", 1],
+      ["gluteus_maximus", "secondary", 0.3]
+    ],
+    "cues": ["Tronco estável, sem inclinar", "Movimento controlado nas duas fases"],
+    "mistakes": ["Compensar inclinando o tronco"]
+  },
+  {
+    "slug": "supino-reto-com-halteres",
+    "name": "Supino reto com halteres",
+    "equipment": "dumbbell",
+    "difficulty": "intermediate",
+    "primary": "pectoralis_major",
+    "activations": [
+      ["pectoralis_major", "primary", 1],
+      ["anterior_deltoid", "secondary", 0.45],
+      ["triceps_brachii", "secondary", 0.4]
+    ],
+    "cues": [
+      "Mantenha o movimento controlado.",
+      "Use uma amplitude confortável, sem compensar com o tronco."
+    ],
+    "mistakes": ["Acelerar o movimento e perder o controle da execução."]
+  },
+  {
+    "slug": "supino-reto-na-maquina",
+    "name": "Supino reto na máquina",
+    "equipment": "machine",
+    "difficulty": "intermediate",
+    "primary": "pectoralis_major",
+    "activations": [
+      ["pectoralis_major", "primary", 1],
+      ["anterior_deltoid", "secondary", 0.45],
+      ["triceps_brachii", "secondary", 0.4]
+    ],
+    "cues": [
+      "Mantenha o movimento controlado.",
+      "Use uma amplitude confortável, sem compensar com o tronco."
+    ],
+    "mistakes": ["Acelerar o movimento e perder o controle da execução."]
+  },
+  {
+    "slug": "supino-inclinado-com-barra",
+    "name": "Supino inclinado com barra",
+    "equipment": "barbell",
+    "difficulty": "intermediate",
+    "primary": "pectoralis_major",
+    "activations": [
+      ["pectoralis_major", "primary", 0.9],
+      ["anterior_deltoid", "secondary", 0.55],
+      ["triceps_brachii", "secondary", 0.35]
+    ],
+    "cues": [
+      "Mantenha o movimento controlado.",
+      "Use uma amplitude confortável, sem compensar com o tronco."
+    ],
+    "mistakes": ["Acelerar o movimento e perder o controle da execução."]
+  },
+  {
+    "slug": "flexao-de-bracos",
+    "name": "Flexão de braços",
+    "equipment": "bodyweight",
+    "difficulty": "intermediate",
+    "primary": "pectoralis_major",
+    "activations": [
+      ["pectoralis_major", "primary", 1],
+      ["anterior_deltoid", "secondary", 0.45],
+      ["triceps_brachii", "secondary", 0.4]
+    ],
+    "cues": [
+      "Mantenha o movimento controlado.",
+      "Use uma amplitude confortável, sem compensar com o tronco."
+    ],
+    "mistakes": ["Acelerar o movimento e perder o controle da execução."]
+  },
+  {
+    "slug": "crucifixo-com-halteres",
+    "name": "Crucifixo com halteres",
+    "equipment": "dumbbell",
+    "difficulty": "beginner",
+    "primary": "pectoralis_major",
+    "activations": [
+      ["pectoralis_major", "primary", 0.85],
+      ["anterior_deltoid", "secondary", 0.3]
+    ],
+    "cues": [
+      "Mantenha o movimento controlado.",
+      "Use uma amplitude confortável, sem compensar com o tronco."
+    ],
+    "mistakes": ["Acelerar o movimento e perder o controle da execução."]
+  },
+  {
+    "slug": "crucifixo-na-maquina",
+    "name": "Crucifixo na máquina",
+    "equipment": "machine",
+    "difficulty": "beginner",
+    "primary": "pectoralis_major",
+    "activations": [
+      ["pectoralis_major", "primary", 0.85],
+      ["anterior_deltoid", "secondary", 0.3]
+    ],
+    "cues": [
+      "Mantenha o movimento controlado.",
+      "Use uma amplitude confortável, sem compensar com o tronco."
+    ],
+    "mistakes": ["Acelerar o movimento e perder o controle da execução."]
+  },
+  {
+    "slug": "barra-fixa-supinada",
+    "name": "Barra fixa supinada",
+    "equipment": "bodyweight",
+    "difficulty": "advanced",
+    "primary": "latissimus_dorsi",
+    "activations": [
+      ["latissimus_dorsi", "primary", 1],
+      ["biceps_brachii", "secondary", 0.5],
+      ["trapezius_middle", "secondary", 0.4],
+      ["rhomboids", "stabilizer", 0.25]
+    ],
+    "cues": [
+      "Mantenha o movimento controlado.",
+      "Use uma amplitude confortável, sem compensar com o tronco."
+    ],
+    "mistakes": ["Acelerar o movimento e perder o controle da execução."]
+  },
+  {
+    "slug": "puxada-com-pegada-neutra",
+    "name": "Puxada com pegada neutra",
+    "equipment": "cable",
+    "difficulty": "beginner",
+    "primary": "latissimus_dorsi",
+    "activations": [
+      ["latissimus_dorsi", "primary", 0.9],
+      ["biceps_brachii", "secondary", 0.45],
+      ["trapezius_middle", "secondary", 0.35]
+    ],
+    "cues": [
+      "Mantenha o movimento controlado.",
+      "Use uma amplitude confortável, sem compensar com o tronco."
+    ],
+    "mistakes": ["Acelerar o movimento e perder o controle da execução."]
+  },
+  {
+    "slug": "puxada-unilateral-na-polia",
+    "name": "Puxada unilateral na polia",
+    "equipment": "cable",
+    "difficulty": "beginner",
+    "primary": "latissimus_dorsi",
+    "activations": [
+      ["latissimus_dorsi", "primary", 0.9],
+      ["biceps_brachii", "secondary", 0.45],
+      ["trapezius_middle", "secondary", 0.35]
+    ],
+    "cues": [
+      "Mantenha o movimento controlado.",
+      "Use uma amplitude confortável, sem compensar com o tronco."
+    ],
+    "mistakes": ["Acelerar o movimento e perder o controle da execução."]
+  },
+  {
+    "slug": "remada-com-barra-t",
+    "name": "Remada com barra T",
+    "equipment": "barbell",
+    "difficulty": "intermediate",
+    "primary": "latissimus_dorsi",
+    "activations": [
+      ["latissimus_dorsi", "primary", 0.9],
+      ["trapezius_middle", "secondary", 0.6],
+      ["rhomboids", "secondary", 0.55],
+      ["erector_spinae", "stabilizer", 0.4],
+      ["biceps_brachii", "secondary", 0.35]
+    ],
+    "cues": [
+      "Mantenha o movimento controlado.",
+      "Use uma amplitude confortável, sem compensar com o tronco."
+    ],
+    "mistakes": ["Acelerar o movimento e perder o controle da execução."]
+  },
+  {
+    "slug": "remada-apoiada-com-halteres",
+    "name": "Remada apoiada com halteres",
+    "equipment": "dumbbell",
+    "difficulty": "beginner",
+    "primary": "latissimus_dorsi",
+    "activations": [
+      ["latissimus_dorsi", "primary", 0.85],
+      ["rhomboids", "secondary", 0.4],
+      ["posterior_deltoid", "secondary", 0.3]
+    ],
+    "cues": [
+      "Mantenha o movimento controlado.",
+      "Use uma amplitude confortável, sem compensar com o tronco."
+    ],
+    "mistakes": ["Acelerar o movimento e perder o controle da execução."]
+  },
+  {
+    "slug": "remada-sentada-na-polia",
+    "name": "Remada sentada na polia",
+    "equipment": "cable",
+    "difficulty": "beginner",
+    "primary": "latissimus_dorsi",
+    "activations": [
+      ["latissimus_dorsi", "primary", 0.85],
+      ["rhomboids", "secondary", 0.4],
+      ["posterior_deltoid", "secondary", 0.3]
+    ],
+    "cues": [
+      "Mantenha o movimento controlado.",
+      "Use uma amplitude confortável, sem compensar com o tronco."
+    ],
+    "mistakes": ["Acelerar o movimento e perder o controle da execução."]
+  },
+  {
+    "slug": "remada-na-maquina",
+    "name": "Remada na máquina",
+    "equipment": "machine",
+    "difficulty": "beginner",
+    "primary": "latissimus_dorsi",
+    "activations": [
+      ["latissimus_dorsi", "primary", 0.85],
+      ["rhomboids", "secondary", 0.4],
+      ["posterior_deltoid", "secondary", 0.3]
+    ],
+    "cues": [
+      "Mantenha o movimento controlado.",
+      "Use uma amplitude confortável, sem compensar com o tronco."
+    ],
+    "mistakes": ["Acelerar o movimento e perder o controle da execução."]
+  },
+  {
+    "slug": "agachamento-goblet",
+    "name": "Agachamento goblet",
+    "equipment": "kettlebell",
+    "difficulty": "advanced",
+    "primary": "quadriceps",
+    "activations": [
+      ["quadriceps", "primary", 1],
+      ["gluteus_maximus", "secondary", 0.7],
+      ["erector_spinae", "stabilizer", 0.5],
+      ["adductors", "secondary", 0.35],
+      ["hamstrings", "secondary", 0.3]
+    ],
+    "cues": [
+      "Mantenha o movimento controlado.",
+      "Use uma amplitude confortável, sem compensar com o tronco."
+    ],
+    "mistakes": ["Acelerar o movimento e perder o controle da execução."]
+  },
+  {
+    "slug": "agachamento-frontal",
+    "name": "Agachamento frontal",
+    "equipment": "barbell",
+    "difficulty": "advanced",
+    "primary": "quadriceps",
+    "activations": [
+      ["quadriceps", "primary", 1],
+      ["gluteus_maximus", "secondary", 0.7],
+      ["erector_spinae", "stabilizer", 0.5],
+      ["adductors", "secondary", 0.35],
+      ["hamstrings", "secondary", 0.3]
+    ],
+    "cues": [
+      "Mantenha o movimento controlado.",
+      "Use uma amplitude confortável, sem compensar com o tronco."
+    ],
+    "mistakes": ["Acelerar o movimento e perder o controle da execução."]
+  },
+  {
+    "slug": "agachamento-bulgaro",
+    "name": "Agachamento búlgaro",
+    "equipment": "dumbbell",
+    "difficulty": "advanced",
+    "primary": "quadriceps",
+    "activations": [
+      ["quadriceps", "primary", 1],
+      ["gluteus_maximus", "secondary", 0.7],
+      ["erector_spinae", "stabilizer", 0.5],
+      ["adductors", "secondary", 0.35],
+      ["hamstrings", "secondary", 0.3]
+    ],
+    "cues": [
+      "Mantenha o movimento controlado.",
+      "Use uma amplitude confortável, sem compensar com o tronco."
+    ],
+    "mistakes": ["Acelerar o movimento e perder o controle da execução."]
+  },
+  {
+    "slug": "passada-com-halteres",
+    "name": "Passada com halteres",
+    "equipment": "dumbbell",
+    "difficulty": "advanced",
+    "primary": "quadriceps",
+    "activations": [
+      ["quadriceps", "primary", 1],
+      ["gluteus_maximus", "secondary", 0.7],
+      ["erector_spinae", "stabilizer", 0.5],
+      ["adductors", "secondary", 0.35],
+      ["hamstrings", "secondary", 0.3]
+    ],
+    "cues": [
+      "Mantenha o movimento controlado.",
+      "Use uma amplitude confortável, sem compensar com o tronco."
+    ],
+    "mistakes": ["Acelerar o movimento e perder o controle da execução."]
+  },
+  {
+    "slug": "subida-no-banco",
+    "name": "Subida no banco",
+    "equipment": "bodyweight",
+    "difficulty": "advanced",
+    "primary": "quadriceps",
+    "activations": [
+      ["quadriceps", "primary", 1],
+      ["gluteus_maximus", "secondary", 0.7],
+      ["erector_spinae", "stabilizer", 0.5],
+      ["adductors", "secondary", 0.35],
+      ["hamstrings", "secondary", 0.3]
+    ],
+    "cues": [
+      "Mantenha o movimento controlado.",
+      "Use uma amplitude confortável, sem compensar com o tronco."
+    ],
+    "mistakes": ["Acelerar o movimento e perder o controle da execução."]
+  },
+  {
+    "slug": "agachamento-hack",
+    "name": "Agachamento hack",
+    "equipment": "machine",
+    "difficulty": "beginner",
+    "primary": "quadriceps",
+    "activations": [
+      ["quadriceps", "primary", 0.95],
+      ["gluteus_maximus", "secondary", 0.55],
+      ["adductors", "secondary", 0.3]
+    ],
+    "cues": [
+      "Mantenha o movimento controlado.",
+      "Use uma amplitude confortável, sem compensar com o tronco."
+    ],
+    "mistakes": ["Acelerar o movimento e perder o controle da execução."]
+  },
+  {
+    "slug": "levantamento-terra-romeno",
+    "name": "Levantamento terra romeno",
+    "equipment": "barbell",
+    "difficulty": "intermediate",
+    "primary": "hamstrings",
+    "activations": [
+      ["hamstrings", "primary", 1],
+      ["gluteus_maximus", "secondary", 0.6],
+      ["erector_spinae", "stabilizer", 0.4]
+    ],
+    "cues": [
+      "Mantenha o movimento controlado.",
+      "Use uma amplitude confortável, sem compensar com o tronco."
+    ],
+    "mistakes": ["Acelerar o movimento e perder o controle da execução."]
+  },
+  {
+    "slug": "stiff-unilateral",
+    "name": "Stiff unilateral",
+    "equipment": "dumbbell",
+    "difficulty": "intermediate",
+    "primary": "hamstrings",
+    "activations": [
+      ["hamstrings", "primary", 1],
+      ["gluteus_maximus", "secondary", 0.6],
+      ["erector_spinae", "stabilizer", 0.4]
+    ],
+    "cues": [
+      "Mantenha o movimento controlado.",
+      "Use uma amplitude confortável, sem compensar com o tronco."
+    ],
+    "mistakes": ["Acelerar o movimento e perder o controle da execução."]
+  },
+  {
+    "slug": "flexao-de-joelho-sentada",
+    "name": "Flexão de joelho sentada",
+    "equipment": "machine",
+    "difficulty": "beginner",
+    "primary": "hamstrings",
+    "activations": [
+      ["hamstrings", "primary", 1],
+      ["gastrocnemius", "secondary", 0.25]
+    ],
+    "cues": [
+      "Mantenha o movimento controlado.",
+      "Use uma amplitude confortável, sem compensar com o tronco."
+    ],
+    "mistakes": ["Acelerar o movimento e perder o controle da execução."]
+  },
+  {
+    "slug": "elevacao-pelvica-na-maquina",
+    "name": "Elevação pélvica na máquina",
+    "equipment": "machine",
+    "difficulty": "intermediate",
+    "primary": "gluteus_maximus",
+    "activations": [
+      ["gluteus_maximus", "primary", 1],
+      ["hamstrings", "secondary", 0.45],
+      ["quadriceps", "secondary", 0.2]
+    ],
+    "cues": [
+      "Mantenha o movimento controlado.",
+      "Use uma amplitude confortável, sem compensar com o tronco."
+    ],
+    "mistakes": ["Acelerar o movimento e perder o controle da execução."]
+  },
+  {
+    "slug": "desenvolvimento-com-barra",
+    "name": "Desenvolvimento com barra",
+    "equipment": "barbell",
+    "difficulty": "intermediate",
+    "primary": "anterior_deltoid",
+    "activations": [
+      ["anterior_deltoid", "primary", 1],
+      ["lateral_deltoid", "secondary", 0.5],
+      ["triceps_brachii", "secondary", 0.45],
+      ["trapezius_upper", "stabilizer", 0.25]
+    ],
+    "cues": [
+      "Mantenha o movimento controlado.",
+      "Use uma amplitude confortável, sem compensar com o tronco."
+    ],
+    "mistakes": ["Acelerar o movimento e perder o controle da execução."]
+  },
+  {
+    "slug": "desenvolvimento-na-maquina",
+    "name": "Desenvolvimento na máquina",
+    "equipment": "machine",
+    "difficulty": "intermediate",
+    "primary": "anterior_deltoid",
+    "activations": [
+      ["anterior_deltoid", "primary", 1],
+      ["lateral_deltoid", "secondary", 0.5],
+      ["triceps_brachii", "secondary", 0.45],
+      ["trapezius_upper", "stabilizer", 0.25]
+    ],
+    "cues": [
+      "Mantenha o movimento controlado.",
+      "Use uma amplitude confortável, sem compensar com o tronco."
+    ],
+    "mistakes": ["Acelerar o movimento e perder o controle da execução."]
+  },
+  {
+    "slug": "elevacao-lateral-na-polia",
+    "name": "Elevação lateral na polia",
+    "equipment": "cable",
+    "difficulty": "beginner",
+    "primary": "lateral_deltoid",
+    "activations": [
+      ["lateral_deltoid", "primary", 1],
+      ["trapezius_upper", "secondary", 0.3]
+    ],
+    "cues": [
+      "Mantenha o movimento controlado.",
+      "Use uma amplitude confortável, sem compensar com o tronco."
+    ],
+    "mistakes": ["Acelerar o movimento e perder o controle da execução."]
+  },
+  {
+    "slug": "crucifixo-inverso-na-maquina",
+    "name": "Crucifixo inverso na máquina",
+    "equipment": "machine",
+    "difficulty": "beginner",
+    "primary": "posterior_deltoid",
+    "activations": [
+      ["posterior_deltoid", "primary", 1],
+      ["rhomboids", "secondary", 0.45],
+      ["trapezius_middle", "secondary", 0.4]
+    ],
+    "cues": [
+      "Mantenha o movimento controlado.",
+      "Use uma amplitude confortável, sem compensar com o tronco."
+    ],
+    "mistakes": ["Acelerar o movimento e perder o controle da execução."]
+  },
+  {
+    "slug": "rosca-alternada",
+    "name": "Rosca alternada",
+    "equipment": "dumbbell",
+    "difficulty": "beginner",
+    "primary": "biceps_brachii",
+    "activations": [
+      ["biceps_brachii", "primary", 1],
+      ["brachialis", "secondary", 0.5],
+      ["forearm_flexors", "secondary", 0.3]
+    ],
+    "cues": [
+      "Mantenha o movimento controlado.",
+      "Use uma amplitude confortável, sem compensar com o tronco."
+    ],
+    "mistakes": ["Acelerar o movimento e perder o controle da execução."]
+  },
+  {
+    "slug": "rosca-na-polia-baixa",
+    "name": "Rosca na polia baixa",
+    "equipment": "cable",
+    "difficulty": "beginner",
+    "primary": "biceps_brachii",
+    "activations": [
+      ["biceps_brachii", "primary", 1],
+      ["brachialis", "secondary", 0.5],
+      ["forearm_flexors", "secondary", 0.3]
+    ],
+    "cues": [
+      "Mantenha o movimento controlado.",
+      "Use uma amplitude confortável, sem compensar com o tronco."
+    ],
+    "mistakes": ["Acelerar o movimento e perder o controle da execução."]
+  },
+  {
+    "slug": "rosca-martelo",
+    "name": "Rosca martelo",
+    "equipment": "dumbbell",
+    "difficulty": "beginner",
+    "primary": "brachialis",
+    "activations": [
+      ["brachialis", "primary", 0.8],
+      ["biceps_brachii", "secondary", 0.5],
+      ["forearm_flexors", "secondary", 0.4]
+    ],
+    "cues": [
+      "Mantenha o movimento controlado.",
+      "Use uma amplitude confortável, sem compensar com o tronco."
+    ],
+    "mistakes": ["Acelerar o movimento e perder o controle da execução."]
+  },
+  {
+    "slug": "extensao-de-triceps-com-halter",
+    "name": "Extensão de tríceps com halter",
+    "equipment": "dumbbell",
+    "difficulty": "intermediate",
+    "primary": "triceps_brachii",
+    "activations": [["triceps_brachii", "primary", 1]],
+    "cues": [
+      "Mantenha o movimento controlado.",
+      "Use uma amplitude confortável, sem compensar com o tronco."
+    ],
+    "mistakes": ["Acelerar o movimento e perder o controle da execução."]
+  },
+  {
+    "slug": "extensao-de-triceps-com-barra-na-polia",
+    "name": "Extensão de tríceps com barra na polia",
+    "equipment": "cable",
+    "difficulty": "beginner",
+    "primary": "triceps_brachii",
+    "activations": [["triceps_brachii", "primary", 0.95]],
+    "cues": [
+      "Mantenha o movimento controlado.",
+      "Use uma amplitude confortável, sem compensar com o tronco."
+    ],
+    "mistakes": ["Acelerar o movimento e perder o controle da execução."]
+  },
+  {
+    "slug": "panturrilha-sentada",
+    "name": "Panturrilha sentada",
+    "equipment": "machine",
+    "difficulty": "beginner",
+    "primary": "gastrocnemius",
+    "activations": [
+      ["gastrocnemius", "primary", 1],
+      ["soleus", "secondary", 0.4]
+    ],
+    "cues": [
+      "Mantenha o movimento controlado.",
+      "Use uma amplitude confortável, sem compensar com o tronco."
+    ],
+    "mistakes": ["Acelerar o movimento e perder o controle da execução."]
+  },
+  {
+    "slug": "prancha-lateral",
+    "name": "Prancha lateral",
+    "equipment": "bodyweight",
+    "difficulty": "beginner",
+    "primary": "obliques",
+    "activations": [
+      ["obliques", "primary", 0.8],
+      ["transverse_abdominis", "stabilizer", 0.4]
+    ],
+    "cues": [
+      "Mantenha o movimento controlado.",
+      "Use uma amplitude confortável, sem compensar com o tronco."
+    ],
+    "mistakes": ["Acelerar o movimento e perder o controle da execução."]
+  }
+]
+

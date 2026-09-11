@@ -1,0 +1,40 @@
+spec_id: ATL-CAT-003
+title: Asset e componente do modelo anatômico
+phase: mock-first
+context_module: apps/mobile + design
+depends_on: [ATL-UI-001]
+adr_refs: [ADR-0011]
+
+goal: >
+  Produzir os dois SVGs mestres do corpo humano e o componente que os renderiza,
+  de modo que UM único asset sirva os três modos do produto trocando apenas a
+  escala de cor.
+
+asset_requirements:
+  - Duas vistas (anterior, posterior), viewBox "0 0 240 560", mesmo enquadramento
+  - Um <path> por grupo muscular, SEM grupos aninhados
+  - id de cada path idêntico ao campo MuscleGroup.svgPathId do contrato
+  - Sem fill nem stroke embutidos — cor aplicada em runtime
+  - 62 grupos no total
+  - Peso combinado <= 90 KB (é o argumento contra usar modelo 3D)
+
+rendering_modes:
+  - exercise:       primário forte, secundário médio, estabilizador em contorno
+  - volume_heatmap: escala de cor por volume ponderado normalizado 0..1
+  - pain_map:       sobreposição de nível de dor por região (reabilitação)
+
+accessibility:
+  - Cada path tem accessibilityRole="image" e label com nome + intensidade descrita
+  - Escala de cor varia LUMINÂNCIA junto com matiz (legível em daltonismo)
+  - Nenhuma informação transmitida apenas por cor
+
+acceptance_criteria:
+  - Substituir body-paths.ts pelo asset final NÃO exige mudança em componente
+  - Todos os 62 svgPathId da fixture têm path correspondente
+  - Renderizar as duas vistas mantém 60 fps ao alternar
+  - VoiceOver e TalkBack anunciam cada região com o volume descrito em pt-BR
+  - Heatmap continua interpretável em simulação de deuteranopia
+
+out_of_scope:
+  - Modelo 3D ou rotação livre (rejeitado em ADR-0011)
+  - Animação de contração muscular

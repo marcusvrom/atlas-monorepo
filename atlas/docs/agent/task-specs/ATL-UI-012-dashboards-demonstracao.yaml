@@ -1,0 +1,37 @@
+id: ATL-UI-012
+stage: mock-first
+title: Dashboards e acompanhamento para demonstração
+authorization: Pedido do usuário em 10/09/2026 e aprovação explícita dos campos de check-in.
+references:
+  - docs/specs/00-produto-e-dominio.md
+  - docs/specs/13-mapa-de-navegacao.md
+  - docs/adr/0014-camada-de-dados-ports-adapters.md
+  - docs/adr/0015-abstracao-de-liquid-glass.md
+scope:
+  - apps/mobile
+  - packages/design-tokens
+  - packages/api-client
+  - packages/contracts
+  - contracts/openapi.v1.yaml
+acceptance_criteria:
+  - Paleta roxa centralizada em tokens, com contraste verificado.
+  - Modelo anatômico estilizado mantém 26 regiões, frente/costas e seleção acessível.
+  - Gráfico de atividade permite alternar volume/minutos/séries e selecionar intervalo para detalhes.
+  - Distribuição muscular permite selecionar região e consultar seus indicadores.
+  - Fundo com gradiente simples, adotando paleta roxa por solicitação de 11/09/2026 e preservando o hero aprovado.
+  - Resumo de treinos concluídos, minutos, séries e volume em 7/30/90 dias, com comparação ao período anterior.
+  - Calendário semanal distingue dia sem registro e treino concluído; mais de uma sessão no dia não duplica dias ativos.
+  - Semana mostra os dias reais da ficha ativa e abre a prescrição do dia escolhido.
+  - Exercícios do dia exibem séries, repetições/tempo, RIR e descanso prescritos e acesso ao guia existente.
+  - Volume por músculo apresenta barras, unidades, período e detalhe anatômico sem inventar metas ideais.
+  - Peso mostra média móvel, tendência, datas e unidade, sem reforço negativo.
+  - Histórico paginado abre sessões registradas; resumo não é limitado à primeira página.
+  - Check-in registra sono em horas e qualidade 1–5, energia 1–5 e dor 0–10 apenas para reabilitação.
+  - Check-in permite rascunho, retomada e histórico de sete dias, sem logs sensíveis.
+  - Toda seção nova apresenta loading, vazio, erro recuperável e sucesso.
+  - Contratos do check-in têm validação Zod, adapters mock/HTTP e OpenAPI alinhados.
+  - Verificações automatizadas executadas; limitações nativas declaradas explicitamente.
+exclusions:
+  - Backend, integração real, pagamentos e coleta de wearables.
+  - Copiar orientações clínicas individuais do exemplo como prescrição geral.
+  - Usar imagens de referência como mídia final de exercícios.

@@ -1,0 +1,6 @@
+
+> atlas-platform@0.1.0 format:check E:\projects\Atlas\atlas-monorepo\atlas
+> prettier --check apps/mobile package.json eslint.config.cjs .prettierrc.json packages/api-client/src/index.ts packages/api-client/src/contract.test.ts packages/api-client/src/mock-runtime.test.ts packages/api-client/src/ports/index.ts
+
+Checking formatting...
+All matched files use Prettier code style!

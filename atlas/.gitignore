@@ -1,0 +1,32 @@
+node_modules/
+dist/
+.turbo/
+*.tsbuildinfo
+
+# Expo
+.expo/
+.expo-shared/
+apps/mobile/ios/
+apps/mobile/android/
+*.jks
+*.p8
+*.p12
+*.mobileprovision
+
+# .NET
+bin/
+obj/
+*.user
+
+# Ambiente
+.env
+.env.local
+!.env.example
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+.terraform.lock.hcl
+
+.DS_Store

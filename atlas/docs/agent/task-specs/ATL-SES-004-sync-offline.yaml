@@ -1,0 +1,35 @@
+spec_id: ATL-SES-004
+title: Sync engine offline-first
+phase: mock-first
+context_module: apps/mobile/src/offline
+depends_on: [ATL-UI-003]
+adr_refs: [ADR-0012, ADR-0013]
+
+goal: >
+  Implementar persistência local e fila de sincronização, exercitando toda a
+  lógica de reconciliação CONTRA O MOCK. O objetivo é que o sync esteja testado
+  na Fase 0 e não seja descoberto na integração.
+
+architecture:
+  - expo-sqlite com as mesmas entidades do contrato
+  - outbox_queue: fila de operações pendentes, persistente entre reinícios
+  - triggers de sync: retorno de conectividade, foreground, fim de sessão
+  - lotes de 50 com Idempotency-Key
+  - backoff exponencial com jitter, teto de 5 min
+
+conflict_rules:
+  - performed_set é append-only e NUNCA conflita por design
+  - demais entidades: last-write-wins por campo
+  - reconciliação de relógio via deviceClockSkewMs
+
+acceptance_criteria:
+  - Modo avião durante treino inteiro: nenhuma série perdida ao reconectar
+  - Matar o app com fila pendente: fila sobrevive ao restart
+  - Reenvio de lote já aceito resulta em duplicated, não em duplicação real
+  - Item rejeitado no lote não bloqueia os demais nem trava a fila
+  - 10k operações enfileiradas sincronizam sem estourar memória
+  - A mesma suíte de teste roda contra mock e contra HTTP sem alteração
+
+out_of_scope:
+  - Resolução de conflito com interação do usuário (Fase 3)
+  - Sync de mídia (ATL-MED-002)

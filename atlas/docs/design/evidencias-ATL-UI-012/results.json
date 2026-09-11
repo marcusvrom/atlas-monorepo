@@ -1,0 +1,30 @@
+[
+  {
+    "name": "typecheck",
+    "exit": 0
+  },
+  {
+    "name": "lint",
+    "exit": 0
+  },
+  {
+    "name": "test",
+    "exit": 1
+  },
+  {
+    "name": "adapter-parity",
+    "exit": 0
+  },
+  {
+    "name": "contract-parity",
+    "exit": 0
+  },
+  {
+    "name": "export-ios",
+    "exit": 0
+  },
+  {
+    "name": "export-android",
+    "exit": 0
+  }
+]

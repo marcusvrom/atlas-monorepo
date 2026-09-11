@@ -1,0 +1,37 @@
+spec_id: ATL-UI-003
+title: Tela de execução de treino
+phase: mock-first
+context_module: apps/mobile
+depends_on: [ATL-UI-001, ATL-CAT-002, ATL-PRG-002]
+adr_refs: [ADR-0014, ADR-0015]
+
+goal: >
+  A tela mais importante do produto: registrar séries durante o treino com
+  feedback instantâneo, funcionando com a tela molhada, o celular apoiado no
+  banco e o sinal ruim da academia.
+
+interaction_rules:
+  - Feedback visual do registro de série em <= 16 ms — atualização otimista, sem aguardar adapter
+  - Barra de controle FLUTUANTE em vidro fixada ao rodapé (caso canônico do material)
+  - Alvo de toque de "concluir série" >= 56x56 pt — o usuário está com a barra na mão
+  - Timer de descanso roda em worklet e sobrevive ao app em background
+  - Gesto de voltar desabilitado: sair do treino é ação explícita
+  - Tab bar oculta (rota full-screen)
+
+data_rules:
+  - Cada PerformedSet carrega clientGeneratedId UUID gerado no device
+  - Reenvio do mesmo conjunto é no-op (verificar com o mock)
+  - Erro de rede NÃO descarta a série: ela vai para a fila e a UI mostra o estado
+
+acceptance_criteria:
+  - Registrar 25 séries seguidas sem queda de frame abaixo de 58 fps
+  - Com EXPO_PUBLIC_MOCK_ERROR_RATE=1, nenhuma série registrada é perdida da UI
+  - Com EXPO_PUBLIC_MOCK_LATENCY_MS=3000, o feedback continua instantâneo
+  - Reenviar o mesmo lote duas vezes resulta em 1 série, não 2
+  - Volume total da sessão atualiza a cada série registrada
+  - Concluir a sessão invalida as queries de insights e do treino de hoje
+
+out_of_scope:
+  - Sync engine com SQLite (ATL-SES-004 — nesta task a fila é em memória)
+  - Edição de série já registrada (ATL-SES-003)
+  - Registro de dor/EVA (ATL-BDY-004)
