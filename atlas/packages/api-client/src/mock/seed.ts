@@ -20,6 +20,7 @@ import { leanMass } from '@atlas/domain';
 import muscleGroupsFixture from './fixtures/muscle-groups.json' with { type: 'json' };
 import exercisesFixture from './fixtures/exercises.json' with { type: 'json' };
 import { uuidV4From } from './runtime.js';
+import { exerciseImageUrl, exerciseMediaIds } from './exercise-media.js';
 
 /**
  * Geração determinística do dataset de demonstração.
@@ -31,8 +32,6 @@ import { uuidV4From } from './runtime.js';
  */
 
 const HISTORY_WEEKS = 14;
-const CDN = 'https://cdn.atlas.example/exercises';
-
 interface RawExercise {
   slug: string;
   name: string;
@@ -59,28 +58,31 @@ export function buildSeedData(random: () => number): SeedData {
   const muscleGroups = muscleGroupsFixture as MuscleGroup[];
   const muscleIdByCode = new Map(muscleGroups.map((m) => [m.code, m.id]));
 
-  const exercises: ExerciseDetail[] = (exercisesFixture as RawExercise[]).map((raw) => ({
-    id: uuidV4From(random) as ExerciseId,
-    name: raw.name,
-    primaryMuscleCode: raw.primary,
-    equipment: raw.equipment as ExerciseDetail['equipment'],
-    difficulty: raw.difficulty as ExerciseDetail['difficulty'],
-    thumbnailUrl: `${CDN}/${raw.slug}/thumb.webp`,
-    isCustom: false,
-    description: `Execução padrão de ${raw.name.toLowerCase()}.`,
-    media: [
-      { kind: 'loop', url: `${CDN}/${raw.slug}/front.mp4`, angle: 'front', durationMs: 8000 },
-      { kind: 'loop', url: `${CDN}/${raw.slug}/side.mp4`, angle: 'side', durationMs: 8000 },
-    ],
-    activations: raw.activations.map(([code, role, weight]) => ({
-      muscleGroupId: muscleIdByCode.get(code) ?? 0,
-      muscleCode: code,
-      role: role as MuscleRole,
-      activationWeight: weight,
-    })),
-    executionCues: raw.cues,
-    commonMistakes: raw.mistakes,
-  }));
+  const exercises: ExerciseDetail[] = (exercisesFixture as RawExercise[]).map((raw) => {
+    const slug = raw.slug as keyof typeof exerciseMediaIds;
+    return {
+      id: uuidV4From(random) as ExerciseId,
+      name: raw.name,
+      primaryMuscleCode: raw.primary,
+      equipment: raw.equipment as ExerciseDetail['equipment'],
+      difficulty: raw.difficulty as ExerciseDetail['difficulty'],
+      thumbnailUrl: exerciseImageUrl(slug, 0),
+      isCustom: false,
+      description: `Execução padrão de ${raw.name.toLowerCase()}.`,
+      media: [
+        { kind: 'image', url: exerciseImageUrl(slug, 0), angle: 'front' },
+        { kind: 'image', url: exerciseImageUrl(slug, 1), angle: 'side' },
+      ],
+      activations: raw.activations.map(([code, role, weight]) => ({
+        muscleGroupId: muscleIdByCode.get(code) ?? 0,
+        muscleCode: code,
+        role: role as MuscleRole,
+        activationWeight: weight,
+      })),
+      executionCues: raw.cues,
+      commonMistakes: raw.mistakes,
+    };
+  });
 
   const byName = (name: string): ExerciseDetail => {
     const found = exercises.find((e) => e.name === name);

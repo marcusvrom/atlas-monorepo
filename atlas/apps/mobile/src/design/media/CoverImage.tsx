@@ -18,6 +18,7 @@ import type { CoverGlyph } from './cover-art';
 export function CoverImage({
   seed,
   uri,
+  asset,
   glyph,
   scrim = false,
   radius = 'lg',
@@ -27,6 +28,8 @@ export function CoverImage({
   /** Identificador de domínio estável — ver `cover-art.ts`. */
   seed: string;
   uri?: string | null;
+  /** Asset empacotado para capas editoriais da marca. Tem prioridade sobre URL. */
+  asset?: number;
   glyph?: CoverGlyph;
   scrim?: boolean;
   radius?: keyof typeof radiusTokens;
@@ -47,9 +50,9 @@ export function CoverImage({
   return (
     <View style={[styles.root, style]}>
       <CoverArt seed={seed} glyph={glyph} />
-      {remote && !failed ? (
+      {(asset !== undefined || remote) && !failed ? (
         <Image
-          source={{ uri: remote }}
+          source={asset ?? { uri: remote! }}
           style={StyleSheet.absoluteFill}
           contentFit="cover"
           transition={motion.duration.base}

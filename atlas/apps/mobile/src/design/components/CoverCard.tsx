@@ -34,6 +34,7 @@ export function CoverCard({
   subtitle,
   glyph,
   uri,
+  asset,
   height,
   showPlay = false,
   meta,
@@ -49,6 +50,7 @@ export function CoverCard({
   subtitle?: string;
   glyph?: CoverGlyph;
   uri?: string | null;
+  asset?: number;
   height: number;
   /** Selo de reprodução, para conteúdo com vídeo/execução. */
   showPlay?: boolean;
@@ -107,7 +109,15 @@ export function CoverCard({
   );
 
   const content = (
-    <CoverImage seed={seed} uri={uri} glyph={glyph} scrim radius="xl" style={styles.cover}>
+    <CoverImage
+      seed={seed}
+      uri={uri}
+      asset={asset}
+      glyph={glyph}
+      scrim
+      radius="xl"
+      style={styles.cover}
+    >
       {showPlay ? (
         <View style={styles.play}>
           <Icon name="play" color={palette.ink900} filled />
