@@ -26,3 +26,10 @@ export { ScreenHeader } from './ScreenHeader';
 export { InlineMetric } from './InlineMetric';
 
 export { ProgressBar } from './ProgressBar';
+
+/** ATL-UI-013 — composição das telas de referência. */
+export { CoverCard } from './CoverCard';
+export { Carousel } from './Carousel';
+export { MetaChip, MetaChipRow } from './MetaChip';
+export { SectionHeader } from './SectionHeader';
+export { CoverArt, CoverImage, CoverScrim, PersonAvatar } from '../media';

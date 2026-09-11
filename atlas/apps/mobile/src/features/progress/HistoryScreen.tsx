@@ -1,4 +1,4 @@
-import { StyleSheet, View, Pressable } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import { useRouter } from 'expo-router';
 import { layout, spacing } from '@atlas/design-tokens';
@@ -6,13 +6,12 @@ import {
   Screen,
   ScreenHeader,
   IconButton,
-  Card,
-  Text,
   LoadingState,
   ErrorState,
   EmptyState,
   Button,
 } from '../../design/components';
+import { HistoryRow } from './HistoryRow';
 import { useHistoryPages } from '../../data/queries/dashboard';
 import { t } from '../../i18n';
 export function HistoryScreen() {
@@ -62,41 +61,12 @@ export function HistoryScreen() {
             ) : null
           }
           renderItem={({ item }) => (
-            <Pressable
-              style={styles.item}
-              accessibilityRole="button"
-              accessibilityLabel={
-                item.dayLabel + ' ' + new Date(item.startedAt).toLocaleDateString('pt-BR')
-              }
-              onPress={() => router.push({ pathname: '/session/[id]', params: { id: item.id } })}
-            >
-              <Card>
-                <Text variant="footnote" tone="secondary">
-                  {new Date(item.startedAt).toLocaleDateString('pt-BR', {
-                    weekday: 'short',
-                    day: 'numeric',
-                    month: 'short',
-                  })}
-                </Text>
-                <Text variant="caption" tone="secondary">
-                  {t(
-                    item.status === 'completed'
-                      ? 'historyCompleted'
-                      : item.status === 'inProgress'
-                        ? 'historyInProgress'
-                        : 'historyAbandoned',
-                  )}
-                </Text>
-                <Text variant="title2" weight="bold">
-                  {item.dayLabel}
-                </Text>
-                <Text variant="subhead" tone="secondary">
-                  {Math.round(item.durationSeconds / 60)} {t('minutesShort')} · {item.setCount}{' '}
-                  {t('dashboardSets').toLowerCase()} · {item.totalVolumeKg.toLocaleString('pt-BR')}{' '}
-                  {t('kilogramsShort')}
-                </Text>
-              </Card>
-            </Pressable>
+            <View style={styles.item}>
+              <HistoryRow
+                session={item}
+                onPress={() => router.push({ pathname: '/session/[id]', params: { id: item.id } })}
+              />
+            </View>
           )}
         />
       )}
@@ -106,5 +76,5 @@ export function HistoryScreen() {
 const styles = StyleSheet.create({
   header: { padding: layout.pageInset },
   list: { paddingHorizontal: layout.pageInset, paddingBottom: spacing.huge },
-  item: { paddingBottom: spacing.lg },
+  item: { paddingBottom: spacing.md },
 });

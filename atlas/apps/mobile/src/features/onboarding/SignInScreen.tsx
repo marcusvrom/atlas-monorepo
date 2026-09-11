@@ -1,14 +1,15 @@
 import { useRouter } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
-import { spacing } from '@atlas/design-tokens';
+import { layout, spacing } from '@atlas/design-tokens';
 import {
   Button,
+  CoverImage,
   ErrorState,
-  GradientSurface,
   LoadingState,
   Screen,
   Text,
 } from '../../design/components';
+import { CoverScrim } from '../../design/media';
 import { t } from '../../i18n';
 import { useMe, useSaveOnboarding } from './hooks';
 export function SignInScreen() {
@@ -34,14 +35,19 @@ export function SignInScreen() {
   return (
     <Screen>
       <View style={styles.content}>
-        <GradientSurface name="slate" radius="xxl" level="lg" style={styles.hero}>
-          <Text tone="onAccent" variant="display" weight="bold">
-            {t('signInTitle')}
-          </Text>
-          <Text tone="onAccent" variant="subhead">
-            {t('signInMock')}
-          </Text>
-        </GradientSurface>
+        {/* Mesma semente da última página de boas-vindas: a tela de entrada
+            continua a capa que o usuário acabou de ver, em vez de cortar. */}
+        <CoverImage seed="onboarding-coach" glyph="rings" radius="xxl" style={styles.hero}>
+          <CoverScrim />
+          <View style={styles.heroBody}>
+            <Text tone="onAccent" variant="display" weight="bold">
+              {t('signInTitle')}
+            </Text>
+            <Text tone="onAccent" variant="subhead">
+              {t('signInMock')}
+            </Text>
+          </View>
+        </CoverImage>
         {me.isPending ? (
           <LoadingState />
         ) : me.isError ? (
@@ -60,5 +66,6 @@ export function SignInScreen() {
 }
 const styles = StyleSheet.create({
   content: { flex: 1, padding: spacing.xl, gap: spacing.lg, justifyContent: 'center' },
-  hero: { gap: spacing.sm, alignItems: 'flex-start' },
+  hero: { height: layout.coverHero },
+  heroBody: { flex: 1, justifyContent: 'flex-end', padding: spacing.lg, gap: spacing.xs },
 });

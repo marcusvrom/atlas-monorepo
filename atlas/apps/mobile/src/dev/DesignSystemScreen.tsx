@@ -1,28 +1,35 @@
 import { useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
-import { spacing } from '@atlas/design-tokens';
+import { layout, spacing } from '@atlas/design-tokens';
 import {
   Badge,
   Button,
   Card,
+  Carousel,
   Chip,
+  CoverCard,
   Divider,
   EmptyState,
   ErrorState,
   Input,
   ListRow,
   LoadingState,
+  MetaChip,
+  MetaChipRow,
   MetricTile,
+  PersonAvatar,
   NumericStepper,
   ProgressRing,
   Screen,
+  SectionHeader,
   SegmentedControl,
   Sheet,
   Sparkline,
   Text,
   showToast,
 } from '../design/components';
+import { coverGlyphs } from '../design/media';
 import { t } from '../i18n';
 export function DesignSystemScreen() {
   const router = useRouter();
@@ -91,6 +98,49 @@ export function DesignSystemScreen() {
           delta={t('dsMetricDelta')}
           deltaTone="success"
         />
+        {/* ATL-UI-013 — as peças de capa também entram na vitrine: é aqui que
+            se confere contraste do texto sobre a arte e o recorte em cada
+            tamanho, antes de a mudança chegar às telas. */}
+        <SectionHeader title={t('dsCover')} actionLabel={t('seeAll')} onAction={announce} />
+        <CoverCard
+          seed="design-system-cover"
+          height={layout.coverHero}
+          showPlay
+          eyebrow={t('dsCoverEyebrow')}
+          title={t('dsCoverTitle')}
+          subtitle={t('dsCoverSubtitle')}
+          meta={
+            <MetaChipRow>
+              <MetaChip onCover icon="clock" label={t('dsMetricValue') + ' ' + t('minutesShort')} />
+              <MetaChip onCover icon="target" label={t('dsBadge')} />
+            </MetaChipRow>
+          }
+          onPress={announce}
+        />
+        <SectionHeader title={t('dsGlyphs')} />
+        <Carousel itemWidth={layout.carouselItem} label={t('dsCoverRail')}>
+          {coverGlyphs.map((glyph) => (
+            <CoverCard
+              key={glyph}
+              seed={'glyph-' + glyph}
+              glyph={glyph}
+              height={layout.coverCard}
+              style={styles.railCard}
+              title={glyph}
+              onPress={announce}
+            />
+          ))}
+        </Carousel>
+        <Card>
+          <View style={styles.row}>
+            <PersonAvatar id="ds-person" name={t('dsPersonName')} />
+            <Text weight="semibold">{t('dsPerson')}</Text>
+          </View>
+          <MetaChipRow>
+            <MetaChip icon="clock" label={t('dsMetricValue')} />
+            <MetaChip icon="flame" label={t('dsMeta')} />
+          </MetaChipRow>
+        </Card>
         <ProgressRing value={0.6} label={t('dsProgress')} />
         <Sparkline values={sample} label={t('dsProgress')} emptyLabel={t('dsEmpty')} />
         <Sparkline values={empty} label={t('dsProgress')} emptyLabel={t('dsEmpty')} />
@@ -117,5 +167,6 @@ const empty: number[] = [];
 const styles = StyleSheet.create({
   content: { padding: spacing.xl, paddingBottom: spacing.huge, gap: spacing.lg },
   group: { gap: spacing.md },
-  row: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
+  row: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: spacing.sm },
+  railCard: { width: layout.carouselItem },
 });

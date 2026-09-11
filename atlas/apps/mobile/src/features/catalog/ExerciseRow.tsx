@@ -1,10 +1,20 @@
 import type { ExerciseSummary } from '@atlas/contracts';
 import { useMemo } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
-import { layout, radius, spacing, opacity } from '@atlas/design-tokens';
-import { Icon, Text } from '../../design/components';
+import { layout, spacing, opacity } from '@atlas/design-tokens';
+import { CoverImage, Icon, MetaChip, MetaChipRow, Text } from '../../design/components';
 import { useTheme } from '../../design/theme-provider';
 import { equipmentLabel, difficultyLabel } from './labels';
+
+/**
+ * Linha do catálogo.
+ *
+ * A miniatura cinza com um ícone virou capa gerada, e os dois textos soltos
+ * viraram chips. A troca não é cosmética: com 300+ exercícios, o que torna a
+ * lista navegável é o par cor + forma, que o olho filtra antes de ler; os
+ * chips deixam equipamento e nível comparáveis entre linhas em vez de
+ * exigirem leitura linha a linha.
+ */
 export function ExerciseRow({
   exercise,
   onPress,
@@ -20,23 +30,17 @@ export function ExerciseRow({
           flexDirection: 'row',
           alignItems: 'center',
           gap: spacing.lg,
-          paddingVertical: spacing.lg,
+          paddingVertical: spacing.md,
           borderBottomColor: colors.border,
           borderBottomWidth: spacing.xxs / 2,
         },
-        thumbnail: {
-          width: layout.thumbnail,
-          height: layout.thumbnail,
-          borderRadius: radius.lg,
-          backgroundColor: colors.surface,
-          alignItems: 'center',
-          justifyContent: 'center',
-        },
-        copy: { flex: 1, gap: spacing.xs },
+        thumbnail: { width: layout.coverRow, height: layout.coverRow },
+        copy: { flex: 1, gap: spacing.sm },
         pressed: { opacity: opacity.pressed },
       }),
     [colors],
   );
+
   return (
     <Pressable
       accessibilityRole="button"
@@ -44,17 +48,20 @@ export function ExerciseRow({
       onPress={onPress}
       style={({ pressed }) => [styles.row, pressed && styles.pressed]}
     >
-      <View style={styles.thumbnail}>
-        <Icon name="dumbbell" color={colors.brand} />
-      </View>
+      <CoverImage
+        seed={exercise.id}
+        uri={exercise.thumbnailUrl}
+        glyph="dumbbell"
+        style={styles.thumbnail}
+      />
       <View style={styles.copy}>
-        <Text weight="semibold">{exercise.name}</Text>
-        <Text tone="secondary" variant="footnote">
-          {equipmentLabel(exercise.equipment)}
+        <Text weight="semibold" numberOfLines={2}>
+          {exercise.name}
         </Text>
-        <Text tone="secondary" variant="footnote">
-          {difficultyLabel(exercise.difficulty)}
-        </Text>
+        <MetaChipRow>
+          <MetaChip label={equipmentLabel(exercise.equipment)} />
+          <MetaChip icon="target" label={difficultyLabel(exercise.difficulty)} />
+        </MetaChipRow>
       </View>
       <Icon name="arrow" />
     </Pressable>

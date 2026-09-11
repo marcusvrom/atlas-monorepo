@@ -25,14 +25,28 @@ export function DashboardOverview({
   const current = summary.current,
     previous = summary.previous;
   const weekSessions = calendarWeek(sessions, now).reduce((n, d) => n + d.sessions.length, 0);
+  /**
+   * O delta cabe em uma linha: quatro tiles repetindo "em relação ao período
+   * anterior" gastavam três linhas cada e empurravam o número — que é o dado —
+   * para fora da primeira dobra. A frase completa aparece **uma vez**, como
+   * legenda do bloco, e cada tile carrega só a variação.
+   */
   const delta = (value: number, prior: number) => {
     const change = percentageChange(value, prior);
     return change === null
       ? t('dashboardNoComparison')
       : (change > 0 ? '+' : '') +
           change.toLocaleString('pt-BR', { maximumFractionDigits: 0 }) +
-          '% ' +
-          t('dashboardCompared');
+          '%';
+  };
+  const deltaTone = (value: number, prior: number) => {
+    const change = percentageChange(value, prior);
+    if (change === null) return 'secondary' as const;
+    return change > 0
+      ? ('success' as const)
+      : change < 0
+        ? ('warning' as const)
+        : ('secondary' as const);
   };
   return (
     <View style={styles.content}>
@@ -58,7 +72,9 @@ export function DashboardOverview({
             label={t('dashboardSessions')}
             value={String(current.sessions)}
             delta={delta(current.sessions, previous.sessions)}
+            deltaTone={deltaTone(current.sessions, previous.sessions)}
             accent="activity"
+            style={styles.fill}
           />
         </View>
         <View style={styles.tile}>
@@ -66,7 +82,9 @@ export function DashboardOverview({
             label={t('dashboardMinutes')}
             value={current.minutes.toLocaleString('pt-BR')}
             delta={delta(current.minutes, previous.minutes)}
+            deltaTone={deltaTone(current.minutes, previous.minutes)}
             accent="primary"
+            style={styles.fill}
           />
         </View>
         <View style={styles.tile}>
@@ -74,7 +92,9 @@ export function DashboardOverview({
             label={t('dashboardVolume')}
             value={current.volume.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}
             delta={delta(current.volume, previous.volume)}
+            deltaTone={deltaTone(current.volume, previous.volume)}
             accent="strength"
+            style={styles.fill}
           />
         </View>
         <View style={styles.tile}>
@@ -82,10 +102,15 @@ export function DashboardOverview({
             label={t('dashboardSets')}
             value={String(current.sets)}
             delta={delta(current.sets, previous.sets)}
+            deltaTone={deltaTone(current.sets, previous.sets)}
             accent="energy"
+            style={styles.fill}
           />
         </View>
       </View>
+      <Text variant="caption" tone="tertiary">
+        {t('dashboardComparedShort')}
+      </Text>
       <InlineMetric value={current.activeDays + ' / ' + days} label={t('dashboardActiveDays')} />
       <Text variant="footnote" tone="secondary">
         {t('dashboardCompareHint')}
@@ -96,6 +121,7 @@ export function DashboardOverview({
 const styles = StyleSheet.create({
   content: { gap: spacing.lg },
   hero: { gap: spacing.md, padding: spacing.xl },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.md },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'stretch', gap: spacing.md },
   tile: { flexBasis: '45%', flexGrow: 1, minWidth: spacing.huge * 2 },
+  fill: { flex: 1 },
 });

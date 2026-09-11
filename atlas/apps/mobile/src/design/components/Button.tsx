@@ -64,7 +64,7 @@ export function Button({
         accessibilityState={{ disabled: blocked, busy }}
         disabled={blocked}
         onPressIn={() => {
-          if (!reduced) scale.set(withSpring(0.97, motion.spring.snappy));
+          if (!reduced) scale.set(withSpring(motion.pressScale, motion.spring.snappy));
         }}
         onPressOut={() => {
           scale.set(reduced ? 1 : withSpring(1, motion.spring.snappy));

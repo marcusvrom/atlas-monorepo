@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import {
   gradients,
@@ -25,6 +25,7 @@ export function MetricTile({
   deltaTone = 'secondary',
   accent,
   progress,
+  style,
 }: {
   label: string;
   value: string;
@@ -32,6 +33,9 @@ export function MetricTile({
   deltaTone?: 'success' | 'warning' | 'danger' | 'secondary';
   accent?: ProgressAccent;
   progress?: number;
+  /** Repassado ao `Card` — usado por grades, para os tiles de uma mesma linha
+   *  terminarem na mesma altura mesmo com rótulos de tamanhos diferentes. */
+  style?: StyleProp<ViewStyle>;
 }) {
   const { colors } = useTheme();
   const gradient = accent ? gradients[progressAccent[accent]] : null;
@@ -65,7 +69,7 @@ export function MetricTile({
   );
 
   return (
-    <Card>
+    <Card style={style}>
       <View style={styles.content}>
         <View style={styles.labelRow}>
           {accent ? <View style={styles.dot} /> : null}

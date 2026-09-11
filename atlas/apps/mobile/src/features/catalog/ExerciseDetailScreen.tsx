@@ -3,21 +3,24 @@ import { ExerciseId } from '@atlas/contracts';
 import { FlashList } from '@shopify/flash-list';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
-import { spacing } from '@atlas/design-tokens';
+import { layout, spacing } from '@atlas/design-tokens';
 import { AnatomicalModel } from '../../components/AnatomicalModel';
 import {
-  Badge,
   Button,
   Card,
+  CoverImage,
   EmptyState,
   ErrorState,
-  GradientSurface,
+  IconButton,
   LoadingState,
+  MetaChip,
+  MetaChipRow,
   Screen,
   SegmentedControl,
   Sparkline,
   Text,
 } from '../../design/components';
+import { CoverScrim } from '../../design/media';
 import { t } from '../../i18n';
 import { useExercise, useExerciseProgression, useMuscleGroups } from './hooks';
 import { equipmentLabel, difficultyLabel } from './labels';
@@ -85,27 +88,34 @@ export function ExerciseDetailScreen() {
         contentContainerStyle={styles.content}
         ListHeaderComponent={
           <View style={styles.group}>
-            <Button label={t('back')} variant="ghost" onPress={() => router.back()} />
-            <GradientSurface name="slate" radius="xxl" level="lg" style={styles.hero}>
-              <Text tone="onAccent" variant="title1" weight="bold">
-                {detail.name}
-              </Text>
-              <View style={styles.heroMeta}>
-                <Text tone="onAccent" variant="subhead">
-                  {equipmentLabel(detail.equipment)}
-                </Text>
-                <Badge
-                  label={difficultyLabel(detail.difficulty)}
-                  tone={
-                    detail.difficulty === 'beginner'
-                      ? 'success'
-                      : detail.difficulty === 'intermediate'
-                        ? 'warning'
-                        : 'danger'
-                  }
-                />
+            {/*
+              Hero de capa em vez do bloco de gradiente da rodada anterior: o
+              exercício passa a ter uma imagem de identidade, e o botão de voltar
+              flutua sobre ela — o padrão de tela de detalhe das referências.
+            */}
+            <View style={styles.heroWrap}>
+              <CoverImage
+                seed={detail.id}
+                uri={detail.thumbnailUrl}
+                glyph="dumbbell"
+                radius="xxl"
+                style={styles.hero}
+              >
+                <CoverScrim />
+                <View style={styles.heroBody}>
+                  <Text tone="onAccent" variant="title1" weight="bold">
+                    {detail.name}
+                  </Text>
+                  <MetaChipRow>
+                    <MetaChip onCover icon="dumbbell" label={equipmentLabel(detail.equipment)} />
+                    <MetaChip onCover icon="target" label={difficultyLabel(detail.difficulty)} />
+                  </MetaChipRow>
+                </View>
+              </CoverImage>
+              <View style={styles.heroBack}>
+                <IconButton icon="back" label={t('back')} onPress={() => router.back()} />
               </View>
-            </GradientSurface>
+            </View>
             {exercise.isError ? (
               <ErrorState message={t('catalogError')} onRetry={() => void exercise.refetch()} />
             ) : null}
@@ -176,7 +186,9 @@ export function ExerciseDetailScreen() {
 const styles = StyleSheet.create({
   content: { padding: spacing.lg, paddingBottom: spacing.huge },
   group: { gap: spacing.lg },
-  hero: { gap: spacing.sm },
-  heroMeta: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  heroWrap: { justifyContent: 'flex-start' },
+  hero: { height: layout.coverHero },
+  heroBody: { flex: 1, justifyContent: 'flex-end', padding: spacing.lg, gap: spacing.sm },
+  heroBack: { position: 'absolute', top: spacing.md, left: spacing.md },
   instruction: { paddingVertical: spacing.md, gap: spacing.xs },
 });

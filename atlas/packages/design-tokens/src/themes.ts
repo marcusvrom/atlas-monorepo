@@ -9,6 +9,13 @@ export interface ThemeColors {
   depthBlobB: string;
   /** Terceiro blob (matiz fria) para uma aurora com mais profundidade. */
   depthBlobC: string;
+  /**
+   * ATL-UI-013 — tinta diagonal do fundo. Uma faixa de cor no canto superior,
+   * na direção da luz do resto do app, que tira o fundo do "chapado" sem
+   * reintroduzir os pontos de luz recusados em 10/09. Termina transparente na
+   * mesma matiz, senão a transição serrilha contra o gradiente base.
+   */
+  backgroundWash: readonly [string, string];
 
   anatomyNeutral: string;
   anatomyOutline: string;
@@ -41,6 +48,7 @@ export const darkTheme: ThemeColors = {
   depthBlobA: 'rgba(91,140,255,0.14)',
   depthBlobB: 'rgba(62,207,142,0.07)',
   depthBlobC: 'rgba(138,107,255,0.08)',
+  backgroundWash: ['rgba(113,64,217,0.22)', 'rgba(113,64,217,0)'],
 
   anatomyNeutral: palette.ink400,
   anatomyOutline: palette.ink200,
@@ -69,6 +77,7 @@ export const lightTheme: ThemeColors = {
   depthBlobA: 'rgba(91,140,255,0.08)',
   depthBlobB: 'rgba(62,207,142,0.04)',
   depthBlobC: 'rgba(138,107,255,0.05)',
+  backgroundWash: ['rgba(167,139,250,0.20)', 'rgba(167,139,250,0)'],
 
   anatomyNeutral: palette.ink700,
   anatomyOutline: palette.ink900,

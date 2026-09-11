@@ -15,6 +15,9 @@ import {
   ErrorState,
   Input,
   LoadingState,
+  MetaChip,
+  MetaChipRow,
+  PersonAvatar,
   Screen,
   Sheet,
   Text,
@@ -78,19 +81,27 @@ export function MarketplaceScreen() {
           renderItem={({ item }) => (
             <View style={styles.item}>
               <Card>
+                {/* Retrato + nome + nota numa linha só: é a primeira coisa que
+                    o usuário compara entre profissionais, e antes disso estava
+                    espalhado por três blocos de texto. */}
                 <View style={styles.cardHead}>
-                  <Text variant="title3" weight="bold" style={styles.cardName}>
-                    {item.displayName}
-                  </Text>
+                  <PersonAvatar id={item.id} name={item.displayName} uri={item.avatarUrl} />
+                  <View style={styles.cardName}>
+                    <Text variant="title3" weight="bold" numberOfLines={1}>
+                      {item.displayName}
+                    </Text>
+                    <Text tone="brand" weight="semibold" variant="footnote">
+                      {item.credentialLabel}
+                    </Text>
+                  </View>
                   <Badge label={`★ ${item.rating.toLocaleString('pt-BR')}`} tone="warning" />
                 </View>
-                <Text tone="brand" weight="bold" variant="subhead">
-                  {item.credentialLabel}
-                </Text>
                 <Text>{item.headline}</Text>
-                <Text tone="secondary" variant="subhead">
-                  {t(item.modality)} · {item.city} · {item.reviewCount} {t('reviews')}
-                </Text>
+                <MetaChipRow>
+                  <MetaChip icon="person" label={t(item.modality)} />
+                  <MetaChip icon="target" label={item.city} />
+                  <MetaChip icon="check" label={item.reviewCount + ' ' + t('reviews')} />
+                </MetaChipRow>
                 <Text weight="bold">
                   {item.monthlyPriceBrl.toLocaleString('pt-BR', {
                     style: 'currency',
@@ -164,5 +175,5 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     gap: spacing.sm,
   },
-  cardName: { flex: 1 },
+  cardName: { flex: 1, gap: spacing.xxs },
 });
