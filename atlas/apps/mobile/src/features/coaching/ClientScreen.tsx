@@ -1,4 +1,4 @@
-import { formatWeight } from '../../lib/format-weight';
+import { formatBodyMeasurement, formatDate, formatPercentage } from '../../lib/format';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { UserId } from '@atlas/contracts';
 import { FlashList } from '@shopify/flash-list';
@@ -47,18 +47,14 @@ export function ClientScreen() {
       ? (detail.sessions?.map((session) => ({
           id: session.id,
           label: t('recentSessions'),
-          text: session.dayLabel + ' · ' + new Date(session.startedAt).toLocaleDateString('pt-BR'),
+          text: session.dayLabel + ' · ' + formatDate(session.startedAt),
         })) ?? [])
       : []),
     ...(scope.measurements
       ? (detail.measurements?.map((entry) => ({
           id: entry.id,
           label: t('clientMeasurements'),
-          text:
-            new Date(entry.takenAt).toLocaleDateString('pt-BR') +
-            ' · ' +
-            formatWeight(entry.weightKg) +
-            ' kg',
+          text: formatDate(entry.takenAt) + ' · ' + formatBodyMeasurement(entry.weightKg) + ' kg',
         })) ?? [])
       : []),
   ];
@@ -83,7 +79,7 @@ export function ClientScreen() {
               <View style={styles.metrics}>
                 <MetricTile
                   label={t('adherenceTitle')}
-                  value={Math.round(detail.overview.adherence30d * 100) + '%'}
+                  value={formatPercentage(detail.overview.adherence30d)}
                   accent="activity"
                 />
                 <MetricTile
@@ -97,12 +93,12 @@ export function ClientScreen() {
               <View style={styles.metrics}>
                 <MetricTile
                   label={t('clientMeasurementChange')}
-                  value={formatWeight(detail.overview.weightDelta30dKg) + ' kg'}
+                  value={formatBodyMeasurement(detail.overview.weightDelta30dKg) + ' kg'}
                   accent="strength"
                 />
                 <MetricTile
                   label={t('leanMassLabel')}
-                  value={formatWeight(detail.overview.leanMassDelta30dKg) + ' kg'}
+                  value={formatBodyMeasurement(detail.overview.leanMassDelta30dKg) + ' kg'}
                   accent="primary"
                 />
               </View>

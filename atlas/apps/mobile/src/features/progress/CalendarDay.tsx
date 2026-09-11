@@ -4,6 +4,7 @@ import { spacing, radius, glass } from '@atlas/design-tokens';
 import { Text, Icon } from '../../design/components';
 import { useTheme } from '../../design/theme-provider';
 import type { calendarWeek } from './dashboard-math';
+import { formatDate, formatWeekdayAbbrev } from '../../lib/format';
 import { t } from '../../i18n';
 export function CalendarDay({
   day,
@@ -35,16 +36,12 @@ export function CalendarDay({
       style={styles.root}
       accessibilityRole="button"
       accessibilityLabel={
-        day.date.toLocaleDateString('pt-BR') +
-        ', ' +
-        day.sessions.length +
-        ' ' +
-        t('dashboardSessions')
+        formatDate(day.date) + ', ' + day.sessions.length + ' ' + t('dashboardSessions')
       }
       onPress={onPress}
     >
       <Text variant="caption" tone="secondary">
-        {day.date.toLocaleDateString('pt-BR', { weekday: 'short' }).replace('.', '').toUpperCase()}
+        {formatWeekdayAbbrev(day.date)}
       </Text>
       <Text weight="bold">{day.date.getDate()}</Text>
       {day.sessions.length ? (

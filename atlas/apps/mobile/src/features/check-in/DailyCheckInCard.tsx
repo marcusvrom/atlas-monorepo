@@ -4,6 +4,7 @@ import { useCheckIns } from '../../data/queries/check-ins';
 import { useMe } from '../../data/queries/identity';
 import { useCurrentDay } from '../../lib/use-current-day';
 import { localDayKey } from '../progress/dashboard-math';
+import { formatFullDate } from '../../lib/format';
 import { t } from '../../i18n';
 export function DailyCheckInCard() {
   const now = useCurrentDay(),
@@ -23,7 +24,7 @@ export function DailyCheckInCard() {
   return (
     <Card>
       <Text variant="footnote" tone="brand" weight="bold">
-        {now.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}
+        {formatFullDate(now)}
       </Text>
       <Text variant="title2" weight="bold">
         {t('dailyTitle')}

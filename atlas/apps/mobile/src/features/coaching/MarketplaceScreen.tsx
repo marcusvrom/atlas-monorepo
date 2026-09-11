@@ -22,6 +22,7 @@ import {
   Sheet,
   Text,
 } from '../../design/components';
+import { formatCount, formatCurrency, formatEffort } from '../../lib/format';
 import { t } from '../../i18n';
 import { useDebouncedSearch } from '../catalog/use-debounced-search';
 import { useProfessionalPages } from './hooks';
@@ -94,19 +95,19 @@ export function MarketplaceScreen() {
                       {item.credentialLabel}
                     </Text>
                   </View>
-                  <Badge label={`★ ${item.rating.toLocaleString('pt-BR')}`} tone="warning" />
+                  <Badge label={`★ ${formatEffort(item.rating)}`} tone="warning" />
                 </View>
                 <Text>{item.headline}</Text>
                 <MetaChipRow>
                   <MetaChip icon="person" label={t(item.modality)} />
                   <MetaChip icon="target" label={item.city} />
-                  <MetaChip icon="check" label={item.reviewCount + ' ' + t('reviews')} />
+                  <MetaChip
+                    icon="check"
+                    label={formatCount(item.reviewCount) + ' ' + t('reviews')}
+                  />
                 </MetaChipRow>
                 <Text weight="bold">
-                  {item.monthlyPriceBrl.toLocaleString('pt-BR', {
-                    style: 'currency',
-                    currency: 'BRL',
-                  })}{' '}
+                  {formatCurrency(item.monthlyPriceBrl)}{' '}
                   <Text tone="secondary">/ {t('month')}</Text>
                 </Text>
                 <Button

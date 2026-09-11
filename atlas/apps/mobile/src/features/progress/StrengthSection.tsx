@@ -11,6 +11,7 @@ import {
 import { ExercisePicker } from '../plans/ExercisePicker';
 import type { ExerciseId } from '@atlas/contracts';
 import { acuteChronicWorkloadRatio } from '@atlas/domain';
+import { formatRatio } from '../../lib/format';
 import { t } from '../../i18n';
 import { useExerciseProgression } from './hooks';
 import { useDashboardSessions } from '../../data/queries/dashboard';
@@ -41,7 +42,7 @@ export function StrengthSection() {
         <ErrorState message={t('progressError')} onRetry={() => void history.refetch()} />
       ) : (
         <Text>
-          {t('acwrLabel')}: {ratio?.toLocaleString('pt-BR') ?? t('insufficientHistory')}
+          {t('acwrLabel')}: {ratio === null ? t('insufficientHistory') : formatRatio(ratio)}
         </Text>
       )}
       <Button label={t('chooseExercise')} onPress={() => setOpen(true)} />

@@ -7,6 +7,7 @@ import { useRouter } from 'expo-router';
 import { Card, Text, IconButton, Sheet, EmptyState, Button } from '../../design/components';
 import { calendarWeek } from './dashboard-math';
 import { CalendarDay } from './CalendarDay';
+import { formatDate, formatDateRange, formatDuration } from '../../lib/format';
 import { t } from '../../i18n';
 export function WeekCalendar({ sessions, now }: { sessions: SessionSummary[]; now: Date }) {
   const [offset, setOffset] = useState(0),
@@ -22,9 +23,7 @@ export function WeekCalendar({ sessions, now }: { sessions: SessionSummary[]; no
             {t('dashboardCalendar')}
           </Text>
           <Text tone="secondary" variant="footnote">
-            {week[0]!.date.toLocaleDateString('pt-BR', { day: 'numeric', month: 'short' }) +
-              ' — ' +
-              week[6]!.date.toLocaleDateString('pt-BR', { day: 'numeric', month: 'short' })}
+            {formatDateRange(week[0]!.date, week[6]!.date)}
           </Text>
         </View>
         <IconButton
@@ -54,7 +53,7 @@ export function WeekCalendar({ sessions, now }: { sessions: SessionSummary[]; no
       </Text>
       <Sheet
         visible={!!day}
-        title={day?.date.toLocaleDateString('pt-BR') ?? t('dashboardDate')}
+        title={day ? formatDate(day.date) : t('dashboardDate')}
         onClose={() => setSelected(null)}
       >
         <View style={styles.details}>
@@ -75,13 +74,7 @@ export function WeekCalendar({ sessions, now }: { sessions: SessionSummary[]; no
             renderItem={({ item }) => (
               <Button
                 variant="ghost"
-                label={
-                  item.dayLabel +
-                  ' · ' +
-                  Math.round(item.durationSeconds / 60) +
-                  ' ' +
-                  t('minutesShort')
-                }
+                label={item.dayLabel + ' · ' + formatDuration(item.durationSeconds)}
                 onPress={() => {
                   setSelected(null);
                   router.push({ pathname: '/session/[id]', params: { id: item.id } });

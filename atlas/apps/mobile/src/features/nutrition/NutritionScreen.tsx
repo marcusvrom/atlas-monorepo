@@ -5,8 +5,8 @@ import { layout, spacing } from '@atlas/design-tokens';
 import {
   Button,
   Card,
-  CoverImage,
   ErrorState,
+  HeroArtwork,
   IconButton,
   LoadingState,
   MetaChip,
@@ -16,8 +16,14 @@ import {
   SectionHeader,
   Text,
 } from '../../design/components';
-import { CoverScrim } from '../../design/media';
 import { useDailyTargets } from '../../data/queries/nutrition';
+import {
+  ABSENT,
+  formatCalorieAdjustment,
+  formatCalories,
+  formatMacroGrams,
+  formatPercentage,
+} from '../../lib/format';
 import { t } from '../../i18n';
 import { HydrationCard } from './HydrationCard';
 
@@ -48,8 +54,8 @@ const MISSING_LABEL: Record<DailyTargets['missingInputs'][number], Parameters<ty
 
 /** Quanto o macro representa das calorias — o que um gráfico de pizza diria. */
 function macroShare(macroKcal: number, totalKcal: number): string {
-  if (totalKcal <= 0) return '—';
-  return Math.round((macroKcal / totalKcal) * 100) + '% ' + t('nutritionOfCalories');
+  if (totalKcal <= 0) return ABSENT;
+  return formatPercentage(macroKcal / totalKcal) + ' ' + t('nutritionOfCalories');
 }
 
 export function NutritionScreen() {
@@ -60,14 +66,13 @@ export function NutritionScreen() {
     <Screen>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
         <View>
-          <CoverImage seed="nutrition-targets" glyph="flame" radius="xxl" style={styles.hero}>
-            <CoverScrim />
+          <HeroArtwork context="nutrition-targets" style={styles.hero}>
             <View style={styles.heroBody}>
               <Text tone="onAccent" variant="caption" weight="bold">
                 {t('nutritionSubtitle').toUpperCase()}
               </Text>
               <Text tone="onAccent" variant="display" weight="bold">
-                {targets.data ? Math.round(targets.data.targetKcal).toLocaleString('pt-BR') : '—'}{' '}
+                {targets.data ? formatCalories(targets.data.targetKcal) : ABSENT}{' '}
                 {t('nutritionKcal')}
               </Text>
               {targets.data ? (
@@ -75,25 +80,19 @@ export function NutritionScreen() {
                   <MetaChip
                     onCover
                     icon="bolt"
-                    label={
-                      t('nutritionBasal') +
-                      ' ' +
-                      Math.round(targets.data.basalKcal).toLocaleString('pt-BR')
-                    }
+                    label={t('nutritionBasal') + ' ' + formatCalories(targets.data.basalKcal)}
                   />
                   <MetaChip
                     onCover
                     icon="target"
                     label={
-                      t('nutritionMaintenance') +
-                      ' ' +
-                      Math.round(targets.data.maintenanceKcal).toLocaleString('pt-BR')
+                      t('nutritionMaintenance') + ' ' + formatCalories(targets.data.maintenanceKcal)
                     }
                   />
                 </MetaChipRow>
               ) : null}
             </View>
-          </CoverImage>
+          </HeroArtwork>
           <View style={styles.heroBack}>
             <IconButton icon="back" label={t('back')} onPress={() => router.back()} />
           </View>
@@ -129,9 +128,7 @@ export function NutritionScreen() {
                   <MetricTile
                     label={t('nutritionProtein')}
                     value={
-                      Math.round(targets.data.macros.proteinG).toLocaleString('pt-BR') +
-                      ' ' +
-                      t('nutritionGrams')
+                      formatMacroGrams(targets.data.macros.proteinG) + ' ' + t('nutritionGrams')
                     }
                     delta={macroShare(
                       targets.data.macros.proteinG * 4,
@@ -144,11 +141,7 @@ export function NutritionScreen() {
                 <View style={styles.tile}>
                   <MetricTile
                     label={t('nutritionCarbs')}
-                    value={
-                      Math.round(targets.data.macros.carbsG).toLocaleString('pt-BR') +
-                      ' ' +
-                      t('nutritionGrams')
-                    }
+                    value={formatMacroGrams(targets.data.macros.carbsG) + ' ' + t('nutritionGrams')}
                     delta={macroShare(
                       targets.data.macros.carbsG * 4,
                       targets.data.macros.energyFromMacrosKcal,
@@ -160,11 +153,7 @@ export function NutritionScreen() {
                 <View style={styles.tile}>
                   <MetricTile
                     label={t('nutritionFat')}
-                    value={
-                      Math.round(targets.data.macros.fatG).toLocaleString('pt-BR') +
-                      ' ' +
-                      t('nutritionGrams')
-                    }
+                    value={formatMacroGrams(targets.data.macros.fatG) + ' ' + t('nutritionGrams')}
                     delta={macroShare(
                       targets.data.macros.fatG * 9,
                       targets.data.macros.energyFromMacrosKcal,
@@ -177,8 +166,7 @@ export function NutritionScreen() {
                   <MetricTile
                     label={t('nutritionGoalAdjustment')}
                     value={
-                      (targets.data.goalAdjustmentKcal > 0 ? '+' : '') +
-                      targets.data.goalAdjustmentKcal.toLocaleString('pt-BR') +
+                      formatCalorieAdjustment(targets.data.goalAdjustmentKcal) +
                       ' ' +
                       t('nutritionKcal')
                     }
@@ -195,7 +183,7 @@ export function NutritionScreen() {
                 <Text variant="footnote" tone="warning">
                   {t('nutritionMacroMismatch').replace(
                     '{kcal}',
-                    Math.round(targets.data.macros.energyFromMacrosKcal).toLocaleString('pt-BR'),
+                    formatCalories(targets.data.macros.energyFromMacrosKcal),
                   )}
                 </Text>
               ) : null}

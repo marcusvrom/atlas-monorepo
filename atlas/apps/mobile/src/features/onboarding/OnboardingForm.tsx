@@ -1,4 +1,4 @@
-import { formatWeight } from '../../lib/format-weight';
+import { formatBodyMeasurement, formatDate } from '../../lib/format';
 import { useMemo, useState } from 'react';
 import {
   CurrentGoal,
@@ -175,10 +175,10 @@ export function OnboardingForm({ initial }: { initial: OnboardingDraft }) {
                     ? t('guardrailRate')
                     : t('guardrailTime')}
                 {violation.suggestion?.targetWeightKg != null
-                  ? ` ${t('targetWeight')}: ${formatWeight(violation.suggestion.targetWeightKg)}`
+                  ? ` ${t('targetWeight')}: ${formatBodyMeasurement(violation.suggestion.targetWeightKg)}`
                   : ''}
                 {violation.suggestion?.targetDateIso
-                  ? ` ${t('targetDate')}: ${new Date(violation.suggestion.targetDateIso).toLocaleDateString('pt-BR')}`
+                  ? ` ${t('targetDate')}: ${formatDate(violation.suggestion.targetDateIso)}`
                   : ''}
               </Text>
             ))}

@@ -4,6 +4,7 @@ import { ScrollView, StyleSheet, View } from 'react-native';
 import { spacing } from '@atlas/design-tokens';
 import { Card, Text, InlineMetric } from '../../design/components';
 import { shiftDay, localDayKey } from '../progress/dashboard-math';
+import { ABSENT, formatDayMonth, formatEffort } from '../../lib/format';
 import { t } from '../../i18n';
 export function CheckInHistory({
   entries,
@@ -17,11 +18,8 @@ export function CheckInHistory({
   const completed = entries.filter((e) => e.status === 'completed');
   const average = (field: 'sleepHours' | 'energy' | 'painLevel') => {
     const values = completed.map((e) => e[field]).filter((v): v is number => v !== null);
-    return values.length
-      ? (values.reduce((n, v) => n + v, 0) / values.length).toLocaleString('pt-BR', {
-          maximumFractionDigits: 1,
-        })
-      : '—';
+    if (!values.length) return ABSENT;
+    return formatEffort(values.reduce((n, v) => n + v, 0) / values.length);
   };
   return (
     <Card>
@@ -53,15 +51,15 @@ export function CheckInHistory({
           return (
             <View key={key} style={styles.day}>
               <Text variant="caption" tone="secondary">
-                {date.toLocaleDateString('pt-BR', { day: 'numeric', month: 'numeric' })}
+                {formatDayMonth(date)}
               </Text>
               <Text weight="bold" tone={entry?.status === 'completed' ? 'success' : 'secondary'}>
-                {entry?.sleepHours?.toLocaleString('pt-BR') ?? '—'} {t('checkInHoursUnit')}
+                {formatEffort(entry?.sleepHours)} {t('checkInHoursUnit')}
               </Text>
               <Text variant="caption" tone="secondary">
                 {entry
                   ? t(entry.status === 'completed' ? 'checkInCompleted' : 'checkInDraftStatus')
-                  : '—'}
+                  : ABSENT}
               </Text>
             </View>
           );

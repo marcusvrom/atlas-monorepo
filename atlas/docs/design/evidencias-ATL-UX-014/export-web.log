@@ -1,0 +1,36 @@
+React Compiler enabled
+Expo Autolinking module resolution enabled
+Starting Metro Bundler
+
+warning: Bundler cache is empty, rebuilding (this may take a minute)
+Web Bundled 27527ms node_modules/.pnpm/expo-router@57.0.20_fd88cafe175387d301bd08f2733e94cd/node_modules/expo-router/entry.js (1926 modules)
+
+› Assets (23):
+../../node_modules/.pnpm/expo-router@57.0.20_fd88cafe175387d301bd08f2733e94cd/node_modules/expo-router/assets/arrow_down.017bc6ba3fc25503e5eb5e53826d48a8.png (9.5KB)
+../../node_modules/.pnpm/expo-router@57.0.20_fd88cafe175387d301bd08f2733e94cd/node_modules/expo-router/assets/error.d1ea1496f9057eb392d5bbf3732a61b7.png (469B)
+../../node_modules/.pnpm/expo-router@57.0.20_fd88cafe175387d301bd08f2733e94cd/node_modules/expo-router/assets/file.19eeb73b9593a38f8e9f418337fc7d10.png (138B)
+../../node_modules/.pnpm/expo-router@57.0.20_fd88cafe175387d301bd08f2733e94cd/node_modules/expo-router/assets/forward.d8b800c443b8972542883e0b9de2bdc6.png (188B)
+../../node_modules/.pnpm/expo-router@57.0.20_fd88cafe175387d301bd08f2733e94cd/node_modules/expo-router/assets/pkg.ab19f4cbc543357183a20571f68380a3.png (364B)
+../../node_modules/.pnpm/expo-router@57.0.20_fd88cafe175387d301bd08f2733e94cd/node_modules/expo-router/assets/react-navigation/elements/back-icon-mask.0a328cd9c1afd0afe8e3b1ec5165b1b4.png (653B)
+../../node_modules/.pnpm/expo-router@57.0.20_fd88cafe175387d301bd08f2733e94cd/node_modules/expo-router/assets/react-navigation/elements/back-icon.35ba0eaec5a4f5ed12ca16fabeae451d.png (207B)
+../../node_modules/.pnpm/expo-router@57.0.20_fd88cafe175387d301bd08f2733e94cd/node_modules/expo-router/assets/react-navigation/elements/clear-icon.c94f6478e7ae0cdd9f15de1fcb9e5e55.png (4 variations | 425B)
+../../node_modules/.pnpm/expo-router@57.0.20_fd88cafe175387d301bd08f2733e94cd/node_modules/expo-router/assets/react-navigation/elements/close-icon.808e1b1b9b53114ec2838071a7e6daa7.png (4 variations | 235B)
+../../node_modules/.pnpm/expo-router@57.0.20_fd88cafe175387d301bd08f2733e94cd/node_modules/expo-router/assets/react-navigation/elements/search-icon.286d67d3f74808a60a78d3ebf1a5fb57.png (928B)
+../../node_modules/.pnpm/expo-router@57.0.20_fd88cafe175387d301bd08f2733e94cd/node_modules/expo-router/assets/sitemap.412dd9275b6b48ad28f5e3d81bb1f626.png (465B)
+../../node_modules/.pnpm/expo-router@57.0.20_fd88cafe175387d301bd08f2733e94cd/node_modules/expo-router/assets/unmatched.20e71bdf79e3a97bf55fd9e164041578.png (4.8KB)
+../../node_modules/.pnpm/expo-sqlite@57.0.2_patch_hash=573fbbc8d9e29247d53fcd0a007604efc922c2779cccce8211573f9dc_19f12fb91467ebcc163ff0bb9b2db153/node_modules/expo-sqlite/web/wa-sqlite/wa-sqlite.7ca566fbbc2ec2a172c5aefa63a20f4b.wasm (621KB)
+assets/marketing/home-workout.8899d2e59fffa7800144c5f07bad6dc9.webp (50KB)
+assets/marketing/onboarding-coach.61d7dd412754e22cfaa655ebd3c6aaea.webp (71KB)
+assets/marketing/onboarding-progress.a0315afb765d87ed578b267ab6eb9011.webp (70KB)
+assets/marketing/onboarding-train.7e0214c4cb55421eacadb049e27a87f1.webp (77KB)
+
+› web bundles (3):
+_expo/static/css/native-tabs.module-347b371292b74b7a5e8f52941dab1648.css (2.5KB)
+_expo/static/js/web/entry-3f6cc5a80409fa353361de22c842e72d.js (3.8MB)
+_expo/static/js/web/worker-ce5a66006e32d5fd1c29a9c874dd637f.js (133KB)
+
+› Files (2):
+index.html (1.4KB)
+metadata.json (49B)
+
+Exported: /tmp/claude-0/-home-user-atlas-monorepo/ac5aade6-a18c-5aaa-bd64-553dfa4a015a/scratchpad/web-export

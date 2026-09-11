@@ -32,4 +32,4 @@ export { CoverCard } from './CoverCard';
 export { Carousel } from './Carousel';
 export { MetaChip, MetaChipRow } from './MetaChip';
 export { SectionHeader } from './SectionHeader';
-export { CoverArt, CoverImage, CoverScrim, PersonAvatar } from '../media';
+export { CoverArt, CoverImage, CoverScrim, HeroArtwork, PersonAvatar } from '../media';

@@ -42,6 +42,7 @@ export function PlansScreen() {
           ListFooterComponent={plans.isFetchingNextPage ? <LoadingState lines={1} /> : null}
           ListEmptyComponent={
             <EmptyState
+              artwork="empty-plan"
               title={t('planEmptyTitle')}
               description={t('planEmptyDescription')}
               actionLabel={t('newPlan')}

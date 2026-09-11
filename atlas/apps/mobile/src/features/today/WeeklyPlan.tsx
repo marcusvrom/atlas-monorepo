@@ -13,6 +13,7 @@ import {
   MetaChipRow,
   SectionHeader,
 } from '../../design/components';
+import { formatCount, formatWeekdayName } from '../../lib/format';
 import { t } from '../../i18n';
 
 /**
@@ -22,16 +23,19 @@ import { t } from '../../i18n';
  * "Push" é sempre o mesmo roxo e o "Legs" sempre o mesmo azul, em qualquer
  * tela que mostre aquele dia. É a mesma ideia das grades coloridas das
  * referências, só que a cor sai do dado em vez de ser escolhida à mão.
+ *
+ * O trilho **se esconde** quando a ficha tem um único dia: naquele caso ele
+ * repetiria, card por card, o mesmo treino que o hero e a lista de exercícios
+ * de hoje já mostram — três blocos seguidos dizendo a mesma coisa era a
+ * principal fonte de densidade inútil da home.
  */
 export function WeeklyPlan({ planId }: { planId: WorkoutPlanId }) {
   const plan = usePlan(planId),
     router = useRouter();
 
-  const weekday = (slot: number) =>
-    new Date(2026, 0, 4 + slot)
-      .toLocaleDateString('pt-BR', { weekday: 'short' })
-      .replace('.', '')
-      .toUpperCase();
+  // Sai inteiro, cabeçalho incluído: deixar o título de seção sobre um trilho
+  // vazio é pior do que não ter a seção.
+  if (plan.data && plan.data.days.length === 1) return null;
 
   return (
     <View style={styles.root}>
@@ -64,19 +68,19 @@ export function WeeklyPlan({ planId }: { planId: WorkoutPlanId }) {
               glyph="barbell"
               height={layout.coverCard}
               style={styles.card}
-              eyebrow={day.slot === null ? t('dashboardUnscheduled') : weekday(day.slot)}
+              eyebrow={day.slot === null ? t('dashboardUnscheduled') : formatWeekdayName(day.slot)}
               title={day.label}
               meta={
                 <MetaChipRow>
                   <MetaChip
                     onCover
                     icon="clock"
-                    label={day.estimatedMinutes + ' ' + t('minutesShort')}
+                    label={formatCount(day.estimatedMinutes) + ' ' + t('minutesShort')}
                   />
                   <MetaChip
                     onCover
                     icon="layers"
-                    label={day.exercises.length + ' ' + t('planExercises')}
+                    label={formatCount(day.exercises.length) + ' ' + t('planExercises')}
                   />
                 </MetaChipRow>
               }

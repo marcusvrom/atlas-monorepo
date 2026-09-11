@@ -16,6 +16,7 @@ import {
 } from '@atlas/design-tokens';
 import { useAccessibilityPreferences } from '../accessibility';
 import { useTheme } from '../theme-provider';
+import { formatCount } from '../../lib/format';
 import { Text } from './Text';
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
@@ -103,7 +104,7 @@ export function ProgressRing({
         {/* O valor acompanha o diâmetro: fixo em `title1`, ele encostava no
             traço nos anéis pequenos (os de card) e sobrava nos grandes. */}
         <Text variant={size >= spacing.huge * 2 ? 'title1' : 'title3'} weight="bold">
-          {Math.round(progress * 100).toLocaleString('pt-BR')}
+          {formatCount(Math.round(progress * 100))}
           {'%'}
         </Text>
       </View>

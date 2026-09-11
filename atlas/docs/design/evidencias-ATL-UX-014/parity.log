@@ -1,0 +1,11 @@
+
+> atlas-platform@0.1.0 check:parity /home/user/atlas-monorepo/atlas
+> node scripts/check-adapter-parity.mjs && node scripts/check-contract-parity.mjs && node scripts/check-tour-coverage.mjs
+
+Paridade OK — 9 ports verificados nos dois adapters.
+Contrato OK — 23 endpoints com adapter correspondente.
+(node:13598) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///home/user/atlas-monorepo/atlas/apps/mobile/src/features/onboarding/feature-tour.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /home/user/atlas-monorepo/atlas/apps/mobile/package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+Onboarding OK — 29 rotas, 13 features registradas (10 no tour de primeiro acesso).

@@ -1,4 +1,4 @@
-import { formatWeight } from '../../lib/format-weight';
+import { formatWeight } from '../../lib/format';
 import { useMemo, useReducer } from 'react';
 import { StyleSheet, View } from 'react-native';
 import * as Haptics from 'expo-haptics';

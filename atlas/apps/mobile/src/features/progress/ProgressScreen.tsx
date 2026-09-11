@@ -63,6 +63,7 @@ export function ProgressScreen() {
             />
             {!sessions.data.some((s) => s.status === 'completed') ? (
               <EmptyState
+                artwork="progress-highlight"
                 title={t('dashboardEmpty')}
                 description={t('dashboardEmptyBody')}
                 actionLabel={t('plans')}

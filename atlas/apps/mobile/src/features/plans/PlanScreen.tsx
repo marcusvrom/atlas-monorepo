@@ -17,6 +17,7 @@ import {
   Text,
 } from '../../design/components';
 import { CoverScrim } from '../../design/media';
+import { formatCount } from '../../lib/format';
 import { t } from '../../i18n';
 import { usePlan, usePlanActions } from './hooks';
 export function PlanScreen() {
@@ -135,12 +136,12 @@ export function PlanScreen() {
                   <MetaChip
                     onCover
                     icon="layers"
-                    label={item.exercises.length + ' ' + t('planExercises')}
+                    label={formatCount(item.exercises.length) + ' ' + t('planExercises')}
                   />
                   <MetaChip
                     onCover
                     icon="clock"
-                    label={item.estimatedMinutes + ' ' + t('minutesShort')}
+                    label={formatCount(item.estimatedMinutes) + ' ' + t('minutesShort')}
                   />
                 </MetaChipRow>
               }

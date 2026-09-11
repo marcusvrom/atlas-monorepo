@@ -3,16 +3,14 @@ import { StyleSheet, View } from 'react-native';
 import { layout, spacing } from '@atlas/design-tokens';
 import {
   Button,
-  CoverImage,
   ErrorState,
+  HeroArtwork,
   LoadingState,
   Screen,
   Text,
 } from '../../design/components';
-import { CoverScrim } from '../../design/media';
 import { t } from '../../i18n';
 import { useMe, useSaveOnboarding } from './hooks';
-import coachImage from '../../../assets/marketing/onboarding-coach.webp';
 export function SignInScreen() {
   const router = useRouter();
   const me = useMe();
@@ -38,16 +36,10 @@ export function SignInScreen() {
   return (
     <Screen>
       <View style={styles.content}>
-        {/* Mesma semente da última página de boas-vindas: a tela de entrada
-            continua a capa que o usuário acabou de ver, em vez de cortar. */}
-        <CoverImage
-          seed="onboarding-coach"
-          asset={coachImage}
-          glyph="rings"
-          radius="xxl"
-          style={styles.hero}
-        >
-          <CoverScrim />
+        {/* O contexto `sign-in` reaproveita deliberadamente a arte da última
+            página de boas-vindas: a entrada continua a capa que o usuário
+            acabou de ver, em vez de cortar para outra. Ver `artwork.ts`. */}
+        <HeroArtwork context="sign-in" style={styles.hero}>
           <View style={styles.heroBody}>
             <Text tone="onAccent" variant="display" weight="bold">
               {t('signInTitle')}
@@ -56,7 +48,7 @@ export function SignInScreen() {
               {t('signInMock')}
             </Text>
           </View>
-        </CoverImage>
+        </HeroArtwork>
         {me.isPending ? (
           <LoadingState />
         ) : me.isError ? (

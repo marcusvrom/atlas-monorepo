@@ -9,6 +9,7 @@ import {
   Text,
 } from '../../design/components';
 import { useHydrationDay, useLogWater, localDay } from '../../data/queries/nutrition';
+import { formatHydration } from '../../lib/format';
 import { t } from '../../i18n';
 import { newId } from '../../lib/id';
 
@@ -61,10 +62,10 @@ export function HydrationCard() {
             />
             <View style={styles.meta}>
               <Text variant="title2" weight="bold">
-                {day.data.consumedMl.toLocaleString('pt-BR')}
+                {formatHydration(day.data.consumedMl)}
                 <Text variant="subhead" tone="secondary">
                   {' '}
-                  {t('hydrationOf')} {day.data.targetMl.toLocaleString('pt-BR')} {t('milliliters')}
+                  {t('hydrationOf')} {formatHydration(day.data.targetMl)}
                 </Text>
               </Text>
               {day.data.consumedMl >= day.data.targetMl && day.data.targetMl > 0 ? (

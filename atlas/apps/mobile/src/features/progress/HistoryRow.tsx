@@ -1,4 +1,9 @@
-import { formatWeight } from '../../lib/format-weight';
+import {
+  formatCount,
+  formatDuration,
+  formatWeekdayDate,
+  formatWorkoutVolumeCompact,
+} from '../../lib/format';
 import type { SessionSummary } from '@atlas/contracts';
 import { useMemo } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
@@ -50,11 +55,7 @@ export function HistoryRow({ session, onPress }: { session: SessionSummary; onPr
     [colors],
   );
 
-  const date = new Date(session.startedAt).toLocaleDateString('pt-BR', {
-    weekday: 'short',
-    day: 'numeric',
-    month: 'short',
-  });
+  const date = formatWeekdayDate(session.startedAt);
 
   return (
     <Pressable
@@ -85,14 +86,11 @@ export function HistoryRow({ session, onPress }: { session: SessionSummary; onPr
           {session.dayLabel}
         </Text>
         <MetaChipRow>
-          <MetaChip
-            icon="clock"
-            label={Math.round(session.durationSeconds / 60) + ' ' + t('minutesShort')}
-          />
-          <MetaChip icon="layers" label={session.setCount + ' ' + t('setsShort')} />
+          <MetaChip icon="clock" label={formatDuration(session.durationSeconds)} />
+          <MetaChip icon="layers" label={formatCount(session.setCount) + ' ' + t('setsShort')} />
           <MetaChip
             icon="bolt"
-            label={formatWeight(session.totalVolumeKg) + ' ' + t('kilogramsShort')}
+            label={formatWorkoutVolumeCompact(session.totalVolumeKg) + ' ' + t('kilogramsShort')}
           />
         </MetaChipRow>
       </View>

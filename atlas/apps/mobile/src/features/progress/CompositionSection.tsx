@@ -18,7 +18,7 @@ export function CompositionSection({ days = 90 }: { days?: 7 | 30 | 90 }) {
       ) : weight.isError ? (
         <ErrorState message={t('progressError')} onRetry={() => void weight.refetch()} />
       ) : weight.data.points.length ? (
-        <MetricChart series={weight.data} label={t('weight')} />
+        <MetricChart series={weight.data} label={t('metricBodyWeight')} />
       ) : (
         <EmptyState
           title={t('measurementEmpty')}

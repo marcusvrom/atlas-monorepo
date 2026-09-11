@@ -1,4 +1,3 @@
-import { formatWeight } from '../../lib/format-weight';
 import { StyleSheet, View } from 'react-native';
 import type { SessionSummary } from '@atlas/contracts';
 import { spacing } from '@atlas/design-tokens';
@@ -9,6 +8,12 @@ import {
   ProgressBar,
   Text,
 } from '../../design/components';
+import {
+  formatCount,
+  formatDurationMinutes,
+  formatPercentageChange,
+  formatWorkoutVolumeCompact,
+} from '../../lib/format';
 import { t } from '../../i18n';
 import { summarizePeriod, percentageChange, calendarWeek } from './dashboard-math';
 export function DashboardOverview({
@@ -34,11 +39,18 @@ export function DashboardOverview({
    */
   const delta = (value: number, prior: number) => {
     const change = percentageChange(value, prior);
-    return change === null
-      ? t('dashboardNoComparison')
-      : (change > 0 ? '+' : '') +
-          change.toLocaleString('pt-BR', { maximumFractionDigits: 0 }) +
-          '%';
+    if (change === null) return t('dashboardNoComparison');
+    // O sinal vem do formatador e a palavra vem daqui: cor sozinha não pode
+    // dizer se a variação é alta ou queda (WCAG 1.4.1).
+    const rounded = Math.round(change);
+    const direction = t(
+      rounded > 0
+        ? 'dashboardComparedUp'
+        : rounded < 0
+          ? 'dashboardComparedDown'
+          : 'dashboardComparedFlat',
+    );
+    return formatPercentageChange(change) + ' ' + direction;
   };
   const deltaTone = (value: number, prior: number) => {
     const change = percentageChange(value, prior);
@@ -58,7 +70,11 @@ export function DashboardOverview({
         <Text tone="onAccent" variant="title1" weight="bold">
           {weeklyTarget === null
             ? t('dashboardNoTarget')
-            : weekSessions + ' / ' + weeklyTarget + ' ' + t('dashboardSessions').toLowerCase()}
+            : formatCount(weekSessions) +
+              ' / ' +
+              formatCount(weeklyTarget) +
+              ' ' +
+              t('dashboardSessions').toLowerCase()}
         </Text>
         {weeklyTarget !== null ? (
           <ProgressBar value={weekSessions / weeklyTarget} label={t('dashboardGoal')} />
@@ -71,7 +87,7 @@ export function DashboardOverview({
         <View style={styles.tile}>
           <MetricTile
             label={t('dashboardSessions')}
-            value={String(current.sessions)}
+            value={formatCount(current.sessions)}
             delta={delta(current.sessions, previous.sessions)}
             deltaTone={deltaTone(current.sessions, previous.sessions)}
             accent="activity"
@@ -81,7 +97,7 @@ export function DashboardOverview({
         <View style={styles.tile}>
           <MetricTile
             label={t('dashboardMinutes')}
-            value={current.minutes.toLocaleString('pt-BR')}
+            value={formatDurationMinutes(current.minutes)}
             delta={delta(current.minutes, previous.minutes)}
             deltaTone={deltaTone(current.minutes, previous.minutes)}
             accent="primary"
@@ -91,7 +107,7 @@ export function DashboardOverview({
         <View style={styles.tile}>
           <MetricTile
             label={t('dashboardVolume')}
-            value={formatWeight(current.volume)}
+            value={formatWorkoutVolumeCompact(current.volume)}
             delta={delta(current.volume, previous.volume)}
             deltaTone={deltaTone(current.volume, previous.volume)}
             accent="strength"
@@ -101,7 +117,7 @@ export function DashboardOverview({
         <View style={styles.tile}>
           <MetricTile
             label={t('dashboardSets')}
-            value={String(current.sets)}
+            value={formatCount(current.sets)}
             delta={delta(current.sets, previous.sets)}
             deltaTone={deltaTone(current.sets, previous.sets)}
             accent="energy"
@@ -112,7 +128,10 @@ export function DashboardOverview({
       <Text variant="caption" tone="tertiary">
         {t('dashboardComparedShort')}
       </Text>
-      <InlineMetric value={current.activeDays + ' / ' + days} label={t('dashboardActiveDays')} />
+      <InlineMetric
+        value={formatCount(current.activeDays) + ' / ' + formatCount(days)}
+        label={t('dashboardActiveDays')}
+      />
       <Text variant="footnote" tone="secondary">
         {t('dashboardCompareHint')}
       </Text>

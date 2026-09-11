@@ -1,9 +1,13 @@
-import { formatWeight } from '../../lib/format-weight';
 import { StyleSheet, View } from 'react-native';
 import type { TrainingSession } from '@atlas/contracts';
 import { layout, spacing } from '@atlas/design-tokens';
-import { Button, CoverImage, MetricTile, Text } from '../../design/components';
-import { CoverScrim } from '../../design/media';
+import { Button, HeroArtwork, MetricTile, Text } from '../../design/components';
+import {
+  formatCount,
+  formatDuration,
+  formatWorkoutVolume,
+  formatWorkoutVolumeCompact,
+} from '../../lib/format';
 import { plural, t } from '../../i18n';
 import { sessionRecords } from './session-summary';
 import { useSessionQueue } from './hooks';
@@ -20,43 +24,50 @@ export function SessionSummary({
   const delta = previous ? session.totalVolumeKg - previous.totalVolumeKg : null;
   return (
     <View style={styles.root}>
-      {/* Hero de conclusão: momento de celebração, destaque total. A capa é
-          semeada pela própria sessão, então cada treino concluído tem a sua —
-          duas sessões seguidas não se parecem, e a tela não vira um carimbo. */}
-      <CoverImage seed={session.id} glyph="trophy" radius="xxl" style={styles.hero}>
-        <CoverScrim />
+      {/* Hero de conclusão: momento de celebração, destaque total. O contexto
+          `workout-completed` é o mesmo que a home usa logo depois do treino, o
+          que faz as duas telas rimarem em vez de parecerem produtos diferentes. */}
+      <HeroArtwork context="workout-completed" style={styles.hero}>
         <View style={styles.heroBody}>
           <Text tone="onAccent" variant="footnote" weight="semibold">
             {t('sessionFinished')}
           </Text>
           <Text tone="onAccent" variant="display" weight="bold">
-            {formatWeight(session.totalVolumeKg)} kg
+            {formatWorkoutVolume(session.totalVolumeKg)} {t('kilogramsShort')}
           </Text>
           <Text tone="onAccent" variant="subhead">
             {t('sessionVolume')}
           </Text>
         </View>
-      </CoverImage>
+      </HeroArtwork>
       <View style={styles.metrics}>
         <MetricTile
           label={t('sessionDuration')}
-          value={Math.round(session.durationSeconds / 60) + ' min'}
+          value={formatDuration(session.durationSeconds)}
           accent="activity"
         />
         <MetricTile
           label={t('sessionRecords')}
-          value={String(sessionRecords(session, previous).length)}
+          value={formatCount(sessionRecords(session, previous).length)}
           accent="strength"
         />
         <MetricTile
           label={t('sessionComparison')}
-          value={delta === null ? t('sessionFirstHistory') : formatWeight(delta) + ' kg'}
+          value={
+            delta === null
+              ? t('sessionFirstHistory')
+              : (delta > 0 ? '+' : delta < 0 ? '−' : '') +
+                formatWorkoutVolumeCompact(Math.abs(delta)) +
+                ' ' +
+                t('kilogramsShort')
+          }
           accent="energy"
         />
       </View>
       {queue.pending ? (
         <Text accessibilityLiveRegion="polite">
-          {queue.pending} {plural(queue.pending, 'sessionPendingOne', 'sessionPending')}
+          {formatCount(queue.pending)}{' '}
+          {plural(queue.pending, 'sessionPendingOne', 'sessionPending')}
         </Text>
       ) : null}
       <Button label={t('sessionExit')} onPress={onClose} />

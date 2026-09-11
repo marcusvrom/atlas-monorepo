@@ -3,6 +3,7 @@ import { StyleSheet, View } from 'react-native';
 import { spacing } from '@atlas/design-tokens';
 import { Text, ProgressBar } from '../../design/components';
 import { localDayKey, shiftDay } from '../progress/dashboard-math';
+import { ABSENT, formatDayMonth } from '../../lib/format';
 import { t } from '../../i18n';
 export function CheckInTrend({
   entries,
@@ -25,7 +26,7 @@ export function CheckInTrend({
         return (
           <View key={key} style={styles.row}>
             <Text variant="caption" tone="secondary" style={styles.date}>
-              {date.toLocaleDateString('pt-BR', { day: 'numeric', month: 'numeric' })}
+              {formatDayMonth(date)}
             </Text>
             <View style={styles.bar}>
               <ProgressBar
@@ -34,7 +35,7 @@ export function CheckInTrend({
               />
             </View>
             <Text variant="caption" style={styles.value}>
-              {value === null ? '—' : String(value) + '/' + max}
+              {value === null ? ABSENT : String(value) + '/' + max}
             </Text>
           </View>
         );

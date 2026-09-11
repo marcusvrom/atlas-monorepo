@@ -319,7 +319,16 @@ export const cover = {
   onCoverSurface: 'rgba(11,9,18,0.55)',
   onCoverBorder: 'rgba(249,246,255,0.30)',
 
-  scrim: ['rgba(11,9,18,0)', 'rgba(11,9,18,0.18)', 'rgba(11,9,18,0.94)'],
+  /**
+   * A parada do meio subiu de 0,18 para 0,30 nesta rodada. Medindo o pixel mais
+   * claro que a arte consegue produzir (tom claro da paleta sob o foco radial e
+   * a banda), o texto `onAccent` ficava em 4,37:1 sobre ele — abaixo de AA, e
+   * justamente na faixa onde a tampa do card cai quando o título ocupa duas
+   * linhas. Com 0,30 o pior caso vai a 5,5:1. O topo continua intocado, então a
+   * capa não escureceu como imagem; o que mudou é o meio, que é onde texto
+   * começa a existir. Ver `contrast.test.ts`.
+   */
+  scrim: ['rgba(11,9,18,0)', 'rgba(11,9,18,0.30)', 'rgba(11,9,18,0.94)'],
   /**
    * Posições das três paradas. A última é quase opaca **na cor do fundo do
    * tema escuro**: é isso que faz a capa se dissolver na página em vez de

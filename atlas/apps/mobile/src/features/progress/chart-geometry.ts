@@ -85,3 +85,29 @@ export function metricGeometry(series: MetricSeries): MetricPlot {
   const head = points.findLast((point) => point.smoothY !== null) ?? null;
   return { points, path, area, head, box: BOX };
 }
+
+/**
+ * Faixas de toque do gráfico, em porcentagem da largura.
+ *
+ * Cada faixa cobre a região horizontal **mais próxima** do seu ponto: os cortes
+ * ficam no meio do caminho entre pontos vizinhos, e as pontas se estendem até a
+ * borda. É o que faz o toque acertar o que o dedo mirou mesmo quando os pontos
+ * estão irregulares no tempo — dividir a largura em colunas iguais parece certo
+ * até a série ter um buraco de três semanas, e aí o toque seleciona o vizinho.
+ *
+ * Sai em porcentagem, e não em unidades do viewBox, porque quem recebe é um
+ * `<Pressable>` do RN posicionado sobre o SVG, que escala com a tela.
+ */
+export function touchBands(points: readonly MetricPlotPoint[]): { left: number; width: number }[] {
+  if (!points.length) return [];
+  const toPercent = (x: number) => (x / BOX.width) * 100;
+  if (points.length === 1) return [{ left: 0, width: 100 }];
+
+  return points.map((point, index) => {
+    const previous = points[index - 1];
+    const next = points[index + 1];
+    const start = previous ? toPercent((previous.x + point.x) / 2) : 0;
+    const end = next ? toPercent((point.x + next.x) / 2) : 100;
+    return { left: start, width: Math.max(0, end - start) };
+  });
+}

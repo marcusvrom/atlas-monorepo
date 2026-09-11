@@ -3,12 +3,9 @@ import { useRouter } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 import { glass, layout, radius, spacing } from '@atlas/design-tokens';
 import { Button, Screen, Text } from '../../design/components';
-import { CoverImage, type CoverGlyph } from '../../design/media';
+import { HeroArtwork, type ArtworkContext } from '../../design/media';
 import { useTheme } from '../../design/theme-provider';
 import { t } from '../../i18n';
-import trainImage from '../../../assets/marketing/onboarding-train.webp';
-import progressImage from '../../../assets/marketing/onboarding-progress.webp';
-import coachImage from '../../../assets/marketing/onboarding-coach.webp';
 
 /**
  * Boas-vindas.
@@ -19,37 +16,18 @@ import coachImage from '../../../assets/marketing/onboarding-coach.webp';
  * está executando, e a mesma informação cabe em três pontos, que é o que as
  * referências usam.
  *
- * Cada página tem sua própria semente, então trocar de página troca a cor da
- * capa inteira: é o que dá sensação de avanço sem animação de transição.
+ * Cada página tem seu próprio contexto editorial, então trocar de página troca
+ * a capa inteira: é o que dá sensação de avanço sem animação de transição. A
+ * página diz o momento; qual arquivo o representa é decisão de `artwork.ts`.
  */
 const PAGES = [
-  {
-    title: 'welcomeTitle',
-    body: 'welcomeBody',
-    seed: 'onboarding-train',
-    glyph: 'dumbbell',
-    asset: trainImage,
-  },
-  {
-    title: 'welcomeProgressTitle',
-    body: 'welcomeProgressBody',
-    seed: 'onboarding-progress',
-    glyph: 'pulse',
-    asset: progressImage,
-  },
-  {
-    title: 'welcomeCoachTitle',
-    body: 'welcomeCoachBody',
-    seed: 'onboarding-coach',
-    glyph: 'rings',
-    asset: coachImage,
-  },
+  { title: 'welcomeTitle', body: 'welcomeBody', context: 'onboarding-training' },
+  { title: 'welcomeProgressTitle', body: 'welcomeProgressBody', context: 'onboarding-progress' },
+  { title: 'welcomeCoachTitle', body: 'welcomeCoachBody', context: 'onboarding-coach' },
 ] as const satisfies readonly {
   title: Parameters<typeof t>[0];
   body: Parameters<typeof t>[0];
-  seed: string;
-  glyph: CoverGlyph;
-  asset: number;
+  context: ArtworkContext;
 }[];
 
 export function WelcomeScreen() {
@@ -87,19 +65,12 @@ export function WelcomeScreen() {
   return (
     <Screen edges={['bottom']}>
       <View style={styles.root}>
-        <CoverImage
-          seed={current.seed}
-          glyph={current.glyph}
-          asset={current.asset}
-          scrim
-          radius="none"
-          style={styles.cover}
-        />
+        <HeroArtwork context={current.context} radius="none" style={styles.cover} />
         <View style={styles.body}>
           <View style={styles.dots} accessibilityRole="progressbar">
             {PAGES.map((item, index) => (
               <View
-                key={item.seed}
+                key={item.context}
                 style={[styles.dot, index === page && styles.dotActive]}
                 accessibilityElementsHidden
               />

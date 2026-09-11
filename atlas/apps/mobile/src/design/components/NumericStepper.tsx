@@ -1,4 +1,4 @@
-import { formatWeight } from '../../lib/format-weight';
+import { formatCount, formatWeight } from '../../lib/format';
 import { useMemo } from 'react';
 import { Platform, Pressable, StyleSheet, View } from 'react-native';
 import * as Haptics from 'expo-haptics';
@@ -123,7 +123,7 @@ export function NumericStepper({
         </Pressable>
         <View style={styles.value}>
           <Text variant="title2" weight="bold">
-            {unit === t('unitKg') ? formatWeight(value) : value.toLocaleString('pt-BR')}
+            {unit === t('unitKg') ? formatWeight(value) : formatCount(value)}
           </Text>
           {unit ? (
             <Text variant="footnote" tone="tertiary">

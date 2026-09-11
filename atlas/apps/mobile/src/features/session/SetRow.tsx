@@ -1,4 +1,4 @@
-import { formatWeight } from '../../lib/format-weight';
+import { formatCount, formatWeight } from '../../lib/format';
 import { useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import type { PerformedSet } from '@atlas/contracts';
@@ -60,7 +60,7 @@ export function SetRow({
   const load = set.weightKg === null ? null : formatWeight(set.weightKg) + ' kg';
   const effort =
     set.reps !== null
-      ? set.reps + ' ' + t('repsShort')
+      ? formatCount(set.reps) + ' ' + t('repsShort')
       : (set.durationSeconds ?? 0) + ' ' + t('secondsShort');
 
   return (

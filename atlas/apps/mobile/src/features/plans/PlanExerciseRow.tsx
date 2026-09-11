@@ -1,6 +1,6 @@
 import { useAccessibilityPreferences } from '../../design/accessibility';
 import { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Alert, StyleSheet, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { scheduleOnRN } from 'react-native-worklets';
@@ -99,7 +99,20 @@ export function PlanExerciseRow({
               variant="ghost"
               onPress={() => onMove(index + 1)}
             />
-            <Button label={t('remove')} variant="danger" onPress={onRemove} />
+            {/* Confirmação só aqui, e não na remoção de uma série: perder um
+                exercício leva junto toda a prescrição montada, enquanto uma
+                série é uma linha que se refaz num toque. Pedir confirmação nas
+                duas ensinaria o usuário a confirmar sem ler. */}
+            <Button
+              label={t('remove')}
+              variant="danger"
+              onPress={() =>
+                Alert.alert(t('planRemoveExercise'), t('confirmRemoveExercise'), [
+                  { text: t('stay'), style: 'cancel' },
+                  { text: t('remove'), style: 'destructive', onPress: onRemove },
+                ])
+              }
+            />
           </View>
         </Card>
       </Animated.View>

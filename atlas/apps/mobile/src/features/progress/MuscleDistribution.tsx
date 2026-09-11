@@ -1,4 +1,4 @@
-import { formatWeight } from '../../lib/format-weight';
+import { formatPercentage, formatWorkoutVolume } from '../../lib/format';
 import type { MuscleVolume } from '@atlas/contracts';
 import { useState } from 'react';
 import { StyleSheet, View, Pressable } from 'react-native';
@@ -67,7 +67,7 @@ export function MuscleDistribution({ days }: { days: 7 | 30 | 90 }) {
         {selected ? (
           <View style={styles.details}>
             <Text variant="display" weight="bold">
-              {formatWeight(selected.weightedVolumeKg)} {t('kilogramsShort')}
+              {formatWorkoutVolume(selected.weightedVolumeKg)} {t('kilogramsShort')}
             </Text>
             <Text>
               {selected.effectiveSets}{' '}
@@ -79,7 +79,7 @@ export function MuscleDistribution({ days }: { days: 7 | 30 | 90 }) {
             </Text>
             <Text tone="secondary">{t('muscleEffectiveHint')}</Text>
             <Text tone="secondary">{t('muscleRelative')}</Text>
-            <Text weight="bold">{Math.round(selected.intensity * 100)}%</Text>
+            <Text weight="bold">{formatPercentage(selected.intensity)}</Text>
           </View>
         ) : null}
       </Sheet>
