@@ -157,6 +157,13 @@ export function ProfileScreen() {
           variant="ghost"
           onPress={() => router.push('/nutrition')}
         />
+        {/* ATL-ONB-002: rever o tour é uma entrada permanente, não um easter
+            egg. Quem pulou no primeiro acesso precisa de um caminho de volta. */}
+        <Button
+          label={t('tourReplay')}
+          variant="ghost"
+          onPress={() => router.push('/(auth)/tour')}
+        />
         <Button label={t('plansCompare')} variant="ghost" onPress={() => router.push('/paywall')} />
       </ScrollView>
     </Screen>

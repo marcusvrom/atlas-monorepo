@@ -166,20 +166,20 @@ export function buildSeedData(random: () => number): SeedData {
     email: 'demo@atlas.app',
     avatar: {
       photoUri: null,
-      // Ids do catálogo em apps/mobile/src/features/avatar/avatar-assets.ts.
-      // Antes eram de outra numeração ('hair-short-02'), o que fazia todo item
-      // cair no fallback de índice 0 e nada aparecer selecionado no editor.
-      base: 'base-1',
-      skinTone: 'skinTone-3',
-      hair: 'hair-1',
-      face: 'face-2',
+      // Modelo gratuito masculino, ids do catálogo em
+      // apps/mobile/src/features/avatar/avatar-presets.ts. O usuário demo
+      // começa com um avatar que o plano Free realmente permite.
+      base: 'base-2',
+      skinTone: 'skinTone-2',
+      hair: 'hair-0',
+      face: 'face-3',
       outfit: 'outfit-0',
       accessory: null,
       frame: null,
-      background: 'background-2',
-      hairColor: null,
-      outfitColor: null,
-      backgroundColor: null,
+      background: 'background-0',
+      hairColor: '#2B2119',
+      outfitColor: '#4CC9F0',
+      backgroundColor: '#2F4C86',
     },
     roles: ['athlete'],
     // ATL-NUT-001 — entradas da estimativa metabólica.

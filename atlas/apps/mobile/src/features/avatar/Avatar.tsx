@@ -6,28 +6,33 @@ import type { AvatarConfig } from '@atlas/contracts';
 import { motion, palette, spacing } from '@atlas/design-tokens';
 import { t } from '../../i18n';
 import {
-  accessoryPaths,
+  EAR,
+  EYE,
+  HEAD_PATH,
+  NECK_PATH,
+  NECK_SHADOW_PATH,
+  accessories,
   avatarColors,
   avatarFaces,
   basePaths,
   colorFor,
-  hairPaths,
+  hairStyles,
   itemIndex,
-  outfitPaths,
+  outfits,
+  shade,
   skinColors,
 } from './avatar-assets';
 
 /**
- * Retrato do próprio usuário.
+ * ATL-AVT-003 — retrato do próprio usuário.
  *
- * Foto quando existe; senão, a montagem vetorial. Toda decisão de cor e forma
- * vem de `avatar-assets.ts` — este componente só desenha. Era aqui que moravam
- * os números mágicos do rosto (`face === 1 ? 3 : 2`) e a cor derivada do índice
- * da peça; ambos viraram dado.
+ * Foto quando existe; senão, a montagem vetorial. Toda decisão de forma e cor
+ * vem de `avatar-parts.ts` / `avatar-assets.ts` — este componente só desenha,
+ * na ordem certa.
  *
- * `decorative` desliga o rótulo de acessibilidade: quando o avatar aparece
- * dentro de um botão que já se anuncia ("Editar avatar"), repetir "Seu avatar"
- * faz o leitor de tela ler a mesma coisa duas vezes.
+ * A ordem importa, e é ela que faz o cabelo longo funcionar: mechas de trás,
+ * ombros, pescoço, orelhas, cabeça, cabelo da frente, rosto, roupa, acessório.
+ * Qualquer peça fora dessa sequência aparece atravessando o rosto.
  */
 export function Avatar({
   config,
@@ -36,6 +41,7 @@ export function Avatar({
 }: {
   config: AvatarConfig;
   size?: number;
+  /** Desliga o rótulo de a11y quando o pai já se anuncia (botão "Editar avatar"). */
   decorative?: boolean;
 }) {
   const frameColor = config.frame ? avatarColors[itemIndex(config, 'frame')] : undefined;
@@ -82,39 +88,102 @@ export function Avatar({
     );
   }
 
-  const skin = skinColors[itemIndex(config, 'skinTone')];
+  const skin = skinColors[itemIndex(config, 'skinTone')]!;
+  const hair = colorFor(config, 'hair');
+  const cloth = colorFor(config, 'outfit');
   const face = avatarFaces[itemIndex(config, 'face')] ?? avatarFaces[0]!;
-  const accessory = config.accessory ? accessoryPaths[itemIndex(config, 'accessory')] : null;
+  const style = hairStyles[itemIndex(config, 'hair')] ?? hairStyles[0]!;
+  const outfit = outfits[itemIndex(config, 'outfit')] ?? outfits[0]!;
+  const accessory = config.accessory ? accessories[itemIndex(config, 'accessory')] : null;
+  const accessoryColor = accessory
+    ? accessory.paint === 'hair'
+      ? hair
+      : accessory.paint === 'outfit'
+        ? cloth
+        : shade(skin, 0.4)
+    : undefined;
 
   return (
     <Svg viewBox="0 0 128 128" width={size} height={size} {...svgA11y}>
       <Circle cx="64" cy="64" r="62" fill={colorFor(config, 'background')} />
-      <G>
-        <Path d={basePaths[itemIndex(config, 'base')]} fill={skin} />
-        {/* Pescoço */}
-        <Path d="M 55 68 L 73 68 L 76 86 Q 64 96 52 86 Z" fill={skin} />
-        <Ellipse cx="64" cy="49" rx="24" ry="31" fill={skin} />
-        <Path d={hairPaths[itemIndex(config, 'hair')]} fill={colorFor(config, 'hair')} />
-        <Ellipse cx="54" cy="51" rx={face.eyeRx} ry={face.eyeRy} fill={palette.ink100} />
-        <Ellipse cx="74" cy="51" rx={face.eyeRx} ry={face.eyeRy} fill={palette.ink100} />
+
+      {/* Mechas atrás da cabeça — cabelo longo só existe por causa desta camada. */}
+      {style.behind.map((d) => (
+        <Path key={d} d={d} fill={hair} />
+      ))}
+
+      <Path d={basePaths[itemIndex(config, 'base')]} fill={skin} />
+      <Path d={NECK_PATH} fill={skin} />
+      {/* Sombra sob o queixo: sem ela a cabeça parece colada no tronco. */}
+      <Path d={NECK_SHADOW_PATH} fill={shade(skin)} />
+
+      <Ellipse cx={EAR.left} cy={EAR.y} rx={EAR.rx} ry={EAR.ry} fill={skin} />
+      <Ellipse cx={EAR.right} cy={EAR.y} rx={EAR.rx} ry={EAR.ry} fill={skin} />
+      <Path d={HEAD_PATH} fill={skin} />
+
+      {style.front.map((d) => (
+        <Path key={d} d={d} fill={hair} />
+      ))}
+
+      {/* Sobrancelha desenhada uma vez e espelhada: assimetria lê como bug. */}
+      <Path
+        d={face.brow}
+        stroke={shade(hair, 0.9)}
+        strokeWidth="2"
+        strokeLinecap="round"
+        fill="none"
+      />
+      <G transform="translate(128,0) scale(-1,1)">
         <Path
-          d={face.mouth}
-          stroke={palette.ink200}
+          d={face.brow}
+          stroke={shade(hair, 0.9)}
           strokeWidth="2"
           strokeLinecap="round"
-          fill={face.mouthFilled ? palette.white : 'none'}
+          fill="none"
         />
-        <Path
-          d={outfitPaths[itemIndex(config, 'outfit')]}
-          fill={colorFor(config, 'outfit')}
-          stroke={colorFor(config, 'outfit')}
-          strokeWidth="2"
-          strokeLinejoin="round"
-        />
-        {accessory ? (
-          <Path d={accessory} fill="none" stroke={palette.ink900} strokeWidth="2" />
-        ) : null}
       </G>
+
+      <Ellipse cx={EYE.left} cy={EYE.y} rx={face.eyeRx} ry={face.eyeRy} fill={palette.ink100} />
+      <Ellipse cx={EYE.right} cy={EYE.y} rx={face.eyeRx} ry={face.eyeRy} fill={palette.ink100} />
+      {/* O brilho é o que separa um olho de um ponto preto. */}
+      <Circle cx={EYE.left + 1} cy={EYE.y - 1} r="0.9" fill={palette.white} />
+      <Circle cx={EYE.right + 1} cy={EYE.y - 1} r="0.9" fill={palette.white} />
+
+      <Path
+        d="M 64 55 q 3 4 -1.5 5"
+        stroke={shade(skin, 0.8)}
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        fill="none"
+      />
+      <Path
+        d={face.mouth}
+        stroke={shade(skin, 0.55)}
+        strokeWidth="2"
+        strokeLinecap="round"
+        fill={face.mouthFilled ? palette.white : 'none'}
+      />
+
+      {outfit.inner ? <Path d={outfit.inner} fill={shade(cloth, 0.6)} /> : null}
+      {outfit.paths.map((d) => (
+        <Path key={d} d={d} fill={cloth} />
+      ))}
+      {outfit.neckline ? <Path d={outfit.neckline} fill={skin} /> : null}
+
+      {accessory
+        ? accessory.paths.map((d) => (
+            <Path
+              key={d}
+              d={d}
+              fill={accessory.paint === 'stroke' ? 'none' : accessoryColor}
+              stroke={accessory.paint === 'stroke' ? accessoryColor : 'none'}
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          ))
+        : null}
+
       {frameColor ? (
         <Circle cx="64" cy="64" r="61" fill="none" stroke={frameColor} strokeWidth="4" />
       ) : null}

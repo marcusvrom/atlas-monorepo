@@ -22,16 +22,17 @@ export type CoverGlyph =
   | 'flame'
   | 'rings'
   | 'trophy'
+  | 'bolt'
   /** Sem glifo: para capas que já têm um foco próprio por cima (o avatar do
    *  perfil, por exemplo), onde qualquer desenho de fundo vira ruído. */
   | 'none';
 
 /**
- * Rodízio do sorteio. Note que `trophy` fica **de fora**: é um glifo de uso
- * dirigido (paywall, conquista) e cairia fora de contexto num exercício
- * qualquer que tirasse esse índice. Glifo disponível e glifo sorteável são
- * coisas diferentes — acrescentar aqui muda a cara de todas as capas
- * automáticas do app, então a lista cresce com intenção, não por inércia.
+ * Rodízio do sorteio. Note que `trophy`, `bolt` e `none` ficam **de fora**: são
+ * glifos de uso dirigido (paywall, sincronização, retrato) e cairiam fora de
+ * contexto num exercício qualquer que tirasse esse índice. Glifo disponível e
+ * glifo sorteável são coisas diferentes — acrescentar aqui muda a cara de todas
+ * as capas automáticas do app, então a lista cresce com intenção, não inércia.
  */
 export const coverGlyphs: readonly CoverGlyph[] = [
   'dumbbell',
@@ -143,6 +144,7 @@ export const coverGlyphPaths: Record<CoverGlyph, readonly string[]> = {
   pulse: ['M4 26h8l4-11 6 23 5-15 4 6h11'],
   flame: ['M24 6c6 8 12 11 12 20a12 12 0 0 1-24 0c0-5 3-8 6-11 0 4 2 6 4 7 2-5 2-11 2-16Z'],
   rings: ['M40 24a16 16 0 1 1-32 0 16 16 0 0 1 32 0', 'M33 24a9 9 0 1 1-18 0 9 9 0 0 1 18 0'],
+  bolt: ['M26 5 12 27h11l-2 16 15-22H25l1-16Z'],
   trophy: [
     'M15 9h18v9a9 9 0 0 1-18 0V9Z',
     'M15 12h-5v2.5a6 6 0 0 0 6 6M33 12h5v2.5a6 6 0 0 1-6 6',

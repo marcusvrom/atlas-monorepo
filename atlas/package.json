@@ -18,6 +18,7 @@
     "clean": "turbo run clean && rm -rf node_modules",
     "format:check": "prettier --check apps/mobile package.json eslint.config.cjs .prettierrc.json packages/api-client/src/index.ts packages/api-client/src/contract.test.ts packages/api-client/src/mock-runtime.test.ts packages/api-client/src/ports/index.ts",
     "test:unit": "vitest run",
+    "check:parity": "node scripts/check-adapter-parity.mjs && node scripts/check-contract-parity.mjs && node scripts/check-tour-coverage.mjs",
     "test:e2e": "pnpm --filter @atlas/mobile test"
   },
   "devDependencies": {

@@ -1,0 +1,58 @@
+id: ATL-ONB-002
+stage: mock-first
+title: Onboarding e tour de features com cobertura obrigatória
+authorization: Pedido do usuário em 11/09/2026 — "monte um onboarding que apresente
+  toda feature do app, além de uma SPEC que faça a adição de cada uma das novas
+  features para que o onboarding e tutorial do usuário em um primeiro acesso seja
+  feito de maneira adequada".
+references:
+  - docs/specs/14-onboarding-e-tour.md
+  - docs/specs/13-mapa-de-navegacao.md
+  - docs/agent/AGENTS.md
+scope:
+  - apps/mobile/src/features/onboarding
+  - apps/mobile/src/data/tour-storage.ts
+  - apps/mobile/app/(auth)/tour.tsx
+  - scripts/check-tour-coverage.mjs
+  - docs/specs/14-onboarding-e-tour.md
+
+goal: >
+  Toda feature do produto é apresentada ao usuário no primeiro acesso, e
+  adicionar uma feature nova sem apresentá-la passa a quebrar o build. O
+  problema não é a tela de onboarding — é a ausência de um mecanismo que
+  garanta que ela continue correta depois da próxima feature.
+
+acceptance_criteria:
+  - Registro único de features em feature-tour.ts, consumido pelo tour e pelo gate de CI.
+  - Cada feature declara id estável, chaves i18n existentes, glifo desenhável, entitlement e rotas cobertas.
+  - scripts/check-tour-coverage.mjs falha quando uma rota de usuário não tem cobertura nem dispensa justificada.
+  - O gate também falha com feature apontando para rota inexistente e com dispensa órfã.
+  - Onboarding (coleta de dados) e tour (apresentação) são telas separadas, nessa ordem.
+  - O tour é pulável em qualquer página, e pular marca como visto.
+  - Perfil oferece entrada permanente para rever o tour.
+  - Persistência do "já viu" é local e versionada; falha de storage não impede a entrada no app.
+  - Feature paga exibe selo Pro na página do tour.
+  - Tour de primeiro acesso entre 6 e 12 páginas, com teste falhando nos dois extremos.
+  - feature-tour.test.ts cobre ids únicos, i18n, glifos, rota duplicada, dispensa justificada e tamanho.
+
+out_of_scope:
+  - Coach marks/spotlight sobre elementos reais da interface.
+  - Onboarding segmentado por papel (atleta x profissional).
+  - Analytics de conclusão e abandono do tour.
+  - Tradução para outros idiomas além de pt-BR.
+
+risks:
+  - id: sem-medicao
+    description: >
+      Sem analytics não há como saber se o tour é concluído ou abandonado, nem
+      se as features apresentadas passam a ser usadas. As regras desta spec são
+      desenho de produto fundamentado, não resultado medido.
+    mitigation: Instrumentar conclusão e abandono antes de otimizar o conteúdo.
+  - id: dispensa-como-escape
+    description: >
+      TOUR_EXEMPT_ROUTES pode virar o caminho fácil para não registrar features.
+    mitigation: R4 da spec 14; revisão deve barrar dispensa sem justificativa real.
+  - id: tour-inflado
+    description: >
+      Cada feature nova empurra o tour para mais uma página até ninguém terminar.
+    mitigation: Limite de 12 páginas com teste; excedente vira stage contextual.

@@ -99,7 +99,9 @@ export function OnboardingForm({ initial }: { initial: OnboardingDraft }) {
       {
         onSuccess: () => {
           setStep(next);
-          if (next === 'complete') router.replace('/(tabs)');
+          // ATL-ONB-002: o onboarding coleta dados; o tour apresenta o app.
+          // São coisas diferentes e ficam em telas diferentes.
+          if (next === 'complete') router.replace('/(auth)/tour');
         },
       },
     );
